@@ -20,6 +20,13 @@ const ListPage = async () => {
     where: {
       owner,
     },
+    include: {
+      ratings: {
+        select: {
+          rating: true,
+        },
+      },
+    },
   });
   // console.log(stuff);
   return (
@@ -34,6 +41,7 @@ const ListPage = async () => {
                   <th>Name</th>
                   <th>Quantity</th>
                   <th>Condition</th>
+                  <th>Avg Rating</th>
                   <th>Actions</th>
                 </tr>
               </thead>

@@ -23,10 +23,11 @@ enum Role {
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  email    String @unique
+  id       Int      @id @default(autoincrement())
+  email    String   @unique
   password String
-  role     Role   @default(USER)
+  role     Role     @default(USER)
+  ratings  Rating[]
 }
 
 enum Condition {
@@ -42,4 +43,18 @@ model Stuff {
   quantity  Int
   condition Condition @default(good)
   owner     String
+  ratings   Rating[]
+}
+
+model Rating {
+  id        Int      @id @default(autoincrement())
+  rating    Int      // 1-5 stars
+  comment   String?  // Optional review comment
+  stuffId   Int
+  stuff     Stuff    @relation(fields: [stuffId], references: [id], onDelete: Cascade)
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([stuffId, userId]) // A user can only rate a stuff item once
 }

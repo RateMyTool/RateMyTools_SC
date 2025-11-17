@@ -92,3 +92,31 @@ export async function changePassword(credentials: { email: string; password: str
     },
   });
 }
+
+/**
+ * Adds or updates a rating for a stuff item.
+ * @param rating, an object with the following properties: rating, comment, stuffId, userId.
+ */
+export async function addRating(rating: { rating: number; comment: string; stuffId: number; userId: number }) {
+  // console.log(`addRating data: ${JSON.stringify(rating, null, 2)}`);
+  await prisma.rating.upsert({
+    where: {
+      stuffId_userId: {
+        stuffId: rating.stuffId,
+        userId: rating.userId,
+      },
+    },
+    update: {
+      rating: rating.rating,
+      comment: rating.comment || '',
+    },
+    create: {
+      rating: rating.rating,
+      comment: rating.comment || '',
+      stuffId: rating.stuffId,
+      userId: rating.userId,
+    },
+  });
+  // After adding/updating rating, redirect to the list page
+  redirect('/list');
+}
