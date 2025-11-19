@@ -27,7 +27,6 @@ export default function RootLayout({
           <NavBar />
           <AuthModalHost />
           {children}
-          <Footer />
         </Providers>
       </body>
     </html>

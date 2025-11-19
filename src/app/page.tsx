@@ -1,3 +1,11 @@
+"use client";
+import TopMenu from '@/components/TopMenu';
+import MiddleMenu from '@/components/MiddleMenu';
+import FooterMenu from '@/components/FooterMenu';
+import { useState } from 'react';
+
+export default function Home() {
+  const [title, setTitle] = useState("TOOLS");
 import Link from 'next/link';
 import AuthLinks from '@/components/AuthLinks';
 import { Search } from 'lucide-react';
@@ -78,27 +86,11 @@ export default function Home() {
             Enter your school to get started
           </h1>
 
-          {/* Search Bar */}
-          <div className="w-full max-w-3xl mb-8 px-4">
-            <div className="relative">
-              <Search className="absolute left-6 top-1/2 transform -translate-y-1/2 text-gray-400 w-6 h-6" />
-              <input
-                type="text"
-                placeholder="Your school"
-                className="w-full pl-16 pr-6 py-5 rounded-full text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 shadow-lg"
-              />
-            </div>
-          </div>
-
-          {/* Alternative Link */}
-          <Link
-            href="/tools"
-            className="text-white underline text-lg hover:text-gray-200 transition"
-          >
-            I'd like to look up a tool by name
-          </Link>
-        </div>
-      </div>
-    </div>
+  return (
+    <main>
+      <TopMenu title={title} />
+      <MiddleMenu setTitle={setTitle} title={title} />
+      <FooterMenu />
+    </main>
   );
 }
