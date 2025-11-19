@@ -1,11 +1,13 @@
 /* eslint-disable react/jsx-indent, @typescript-eslint/indent */
 
-'use client';
+"use client";
 
+import React, { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 import { Container, Nav, Navbar, NavDropdown } from 'react-bootstrap';
 import { BoxArrowRight, Lock, PersonFill, PersonPlusFill } from 'react-bootstrap-icons';
+import AuthModal from '@/components/AuthModal';
 
 const NavBar: React.FC = () => {
   const { data: session } = useSession();
@@ -13,6 +15,8 @@ const NavBar: React.FC = () => {
   const userWithRole = session?.user as { email: string; randomKey: string };
   const role = userWithRole?.randomKey;
   const pathName = usePathname();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [initialMode, setInitialMode] = useState<'login' | 'signup'>('login');
   return (
     <Navbar bg="light" expand="lg">
       <Container>
@@ -51,16 +55,35 @@ const NavBar: React.FC = () => {
                 </NavDropdown.Item>
               </NavDropdown>
             ) : (
-              <NavDropdown id="login-dropdown" title="Login">
-                <NavDropdown.Item id="login-dropdown-sign-in" href="/auth/signin">
-                  <PersonFill />
-                  Sign in
-                </NavDropdown.Item>
-                <NavDropdown.Item id="login-dropdown-sign-up" href="/auth/signup">
-                  <PersonPlusFill />
-                  Sign up
-                </NavDropdown.Item>
-              </NavDropdown>
+              <>
+                <NavDropdown id="login-dropdown" title="Login">
+                    <NavDropdown.Item
+                      as="button"
+                      id="login-dropdown-sign-in"
+                      onClick={(e: React.MouseEvent) => {
+                        e.preventDefault();
+                        setInitialMode('login');
+                        setShowAuthModal(true);
+                      }}
+                    >
+                    <PersonFill />
+                    Sign in
+                  </NavDropdown.Item>
+                  <NavDropdown.Item
+                    as="button"
+                    id="login-dropdown-sign-up"
+                    onClick={(e: React.MouseEvent) => {
+                      e.preventDefault();
+                      setInitialMode('signup');
+                      setShowAuthModal(true);
+                    }}
+                  >
+                    <PersonPlusFill />
+                    Sign up
+                  </NavDropdown.Item>
+                </NavDropdown>
+                <AuthModal show={showAuthModal} onClose={() => setShowAuthModal(false)} initialMode={initialMode} />
+              </>
             )}
           </Nav>
         </Navbar.Collapse>
