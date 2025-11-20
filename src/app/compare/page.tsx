@@ -88,10 +88,10 @@ const ComparePage = () => {
         /* Display the header */
         <main className={mainPage}>
             {/* Top bar with our search term school */}
-            <Container id="compare-page-school" fluid-className="py-3">
+            <Container id="compare-page-school">
                 <div className="d-flex flex-row">
                     <div className="me-2">
-                        <h2>For Institution: </h2>
+                        <h2>For College: </h2>
                     </div>
                     <div>
                         <h2 className="text-success">
@@ -119,7 +119,7 @@ const ComparePage = () => {
                                 var num: number = 0;
                                 getTools.forEach(x => {
                                     rows.push((
-                                        <option value={num.toString()}>{x.name}</option> 
+                                        <option key={num} value={num.toString()}>{x.name}</option> 
                                     ))
                                     num++;
                                 });
