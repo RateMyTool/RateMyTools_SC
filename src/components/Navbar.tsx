@@ -2,12 +2,11 @@
 
 "use client";
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useSession } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 import { Container, Nav, Navbar, NavDropdown } from 'react-bootstrap';
 import { BoxArrowRight, Lock, PersonFill, PersonPlusFill } from 'react-bootstrap-icons';
-import AuthModal from '@/components/AuthModal';
 
 const NavBar: React.FC = () => {
   const { data: session } = useSession();
@@ -15,8 +14,10 @@ const NavBar: React.FC = () => {
   const userWithRole = session?.user as { email: string; randomKey: string };
   const role = userWithRole?.randomKey;
   const pathName = usePathname();
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [initialMode, setInitialMode] = useState<'login' | 'signup'>('login');
+  // Dispatch a global event to open the top-level auth modal
+  const openAuthModal = (mode: 'login' | 'signup') => {
+    window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: { mode } }));
+  };
   return (
     <Navbar bg="light" expand="lg">
       <Container>
@@ -61,28 +62,26 @@ const NavBar: React.FC = () => {
                       as="button"
                       id="login-dropdown-sign-in"
                       onClick={(e: React.MouseEvent) => {
-                        e.preventDefault();
-                        setInitialMode('login');
-                        setShowAuthModal(true);
-                      }}
+                          e.preventDefault();
+                          openAuthModal('login');
+                        }}
                     >
                     <PersonFill />
-                    Sign in
+                    Sign in (pop up)
                   </NavDropdown.Item>
                   <NavDropdown.Item
                     as="button"
                     id="login-dropdown-sign-up"
                     onClick={(e: React.MouseEvent) => {
                       e.preventDefault();
-                      setInitialMode('signup');
-                      setShowAuthModal(true);
+                      openAuthModal('signup');
                     }}
                   >
                     <PersonPlusFill />
-                    Sign up
+                    Sign up (pop up)
                   </NavDropdown.Item>
                 </NavDropdown>
-                <AuthModal show={showAuthModal} onClose={() => setShowAuthModal(false)} initialMode={initialMode} />
+                {/* AuthModal is hosted at the app root (AuthModalHost) and listens for the `open-auth-modal` event */}
               </>
             )}
           </Nav>

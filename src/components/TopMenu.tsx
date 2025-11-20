@@ -21,22 +21,27 @@ const TopMenu = ({ title }: TopMenuProps) => {
         </div>
 
         <div className="flex items-center space-x-4">
-          <span className="font-medium px-4 text-black"><strong>
-            <a 
-            href="#"
-            className="text-black hover:underline no-underline"
+          <span className="font-medium px-4 text-black">
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: { mode: 'login' } }));
+              }}
+              className="text-black hover:underline no-underline bg-transparent border-0 p-0"
             >
-            Log In
-            </a>
-            </strong>
-            </span>
+              <strong>Log In</strong>
+            </button>
+          </span>
           <span className="bg-black text-white text-xl font-normal px-3 py-2 rounded">
-            <a
-            href="#"
-            className="text-white hover:underline no-underline"
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: { mode: 'signup' } }));
+              }}
+              className="text-white hover:underline no-underline bg-transparent border-0 p-0"
             >
-            <strong>Sign Up</strong>
-            </a>
+              <strong>Sign Up</strong>
+            </button>
           </span>
         </div>
       </div>
