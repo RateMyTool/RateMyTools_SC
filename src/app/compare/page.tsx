@@ -256,7 +256,7 @@ const ShowToolTags = (theTool: RatedToolSummary, scale: number) => {
 }
 const DisplayTag = (text: string) => {
     // PLACEHOLDER FOR MOCKUP
-    return (
+    return ( 
         <Col className="m-0">
             <Button className={tagClass}>
                 {text}
@@ -268,7 +268,7 @@ const DisplayTag = (text: string) => {
 const ShowDesciption = (theTool: RatedToolSummary, scale: number) => {
     // PLACEHOLDER FOR MOCKUP
     return (
-        <Container id="compare-page-desc"  className={"align-left text-left " + panelInternal} fluid-className="py-3">
+        <Container id="compare-page-desc"  className={"align-left text-left " + panelInternal}>
             <h5 className="align-left text-left">
                 Summary:
             </h5>
@@ -282,7 +282,7 @@ const ShowDesciption = (theTool: RatedToolSummary, scale: number) => {
 const ShowTopReview = (theTool: RatedToolSummary) => {
     // PLACEHOLDER FOR MOCKUP
     return (
-        <Container id="compare-page-PopReview"  className={"align-left text-left " + panelInternal} fluid-className="py-3">
+        <Container id="compare-page-PopReview"  className={"align-left text-left " + panelInternal}>
             <h5 className="align-left text-left">
                 Popular Review:
             </h5>
@@ -329,7 +329,7 @@ const ComparePageList = (selected: RatedToolSummary, theList: RatedToolSummary[]
     return (
         <Container id="compare-page-list" fluid-className="py-3">
             <Container id="compare-page-list-element" fluid-className="py-3">
-                <Container className="bg-light" id="ratedTool-bar-top" fluid-className="py-3">
+                <Container className="bg-light" id="ratedTool-bar-top">
                     <Row className="align-middle text-center">
                         <Col>
                             <b>
@@ -367,7 +367,7 @@ const displayToolRowIfNeeded = (tool: RatedToolSummary, scale: number, className
     const starRatingFull: number = tool.rating;
     return (
         /* We make sure our given data yields any ratings, otherwise we ignore. */
-        <Container className={className} id="ratedTool-bar" fluid-className="py-3">
+        <Container className={className} id="ratedTool-bar">
             <Row className="align-middle text-center">
                 <Col xs={2}>
                     <b>
