@@ -1,11 +1,31 @@
 
 import React from "react";
-import { Col, Container, Row, Image, DropdownMenu, DropdownItem, Dropdown, DropdownToggle } from "react-bootstrap";
+import { Col, Container, Row, Image, DropdownMenu, DropdownItem, Dropdown, DropdownToggle, Button } from "react-bootstrap";
 import StarFull from '@/Icon_StarFull.png';
 import StarHalf from '@/Icon_StarHalf.png';
 import StarNone from '@/Icon_StarNone.png';
 //import { useSession } from 'next-auth/react';
 
+
+const mainPage = 'bg-body-tertiary text-black';
+
+const borderPage ='rounded-2 px-1 py-3 my-3 ';
+const borderPanel ='rounded-3 px-3 py-3 ';
+
+const selectorBorder = borderPage + 'border border-black bg-black text-white text-start hover:opacity-90 flex items-left text-lg font-medium gap-4';
+const countBorder = borderPage + 'border border-primary bg-primary-subtle text-black text-start hover:opacity-90 flex items-left text-lg font-medium gap-4';
+const compressedText = 'text-black text-start flex items-left text-lg font-medium gap-4';
+
+const selectedText = 'text-primary';
+const panelClassMain = borderPanel + ' mx-0 bg-white text-black flex items-center text-lg font-medium gap-0';
+const panelClassSelected = panelClassMain + ' border border-primary';
+const panelClass = panelClassMain + ' mx-3 border border-dark-subtle';
+const panelClassEnd = panelClassMain + ' border border-dark-subtle';
+
+const panelInternalTitle = 'mx-0 mb-2 text-black text-lg font-medium';
+const panelInternal = 'mx-0 my-2 text-black text-lg font-medium';
+const ratingBorderFilled = borderPanel + 'border border-white bg-body-secondary text-black text-start text-lg font-medium gap-4';
+const tagClass = 'm-0 border border-white-subtle bg-dark-subtle text-black hover:opacity-95 text-center rounded-3 px-2 py-1 text-lg font-small gap-1';
 
 /* This is sent from the server for each tool */
 class RatedToolSummary
@@ -14,13 +34,15 @@ class RatedToolSummary
 	desc: string;
 	icon: string;
 	rating: number;
+	numRatings: number;
 	tags: string[];
 	bestReview: Rating = null!;
-    constructor(nameIn: string, ratingIn: number, tagsIn: string[], descIn: string, iconIn: string = null!)
+    constructor(nameIn: string, ratingIn: number, numRatingsIn: number, tagsIn: string[], descIn: string, iconIn: string = null!)
     {
         this.name = nameIn;
         this.icon = iconIn;
         this.rating = ratingIn;
+        this.numRatings = numRatingsIn;
         this.tags = tagsIn;
         this.desc = descIn;
     }
@@ -45,14 +67,12 @@ const ComparePage = () => {
     const getSchool: string = "UH Manoa";
 
     getTools = [];
-    getTools.push(new RatedToolSummary("SelectedTool", 10, ["Fast"], "a default tool used by all"));
-    getTools.push(new RatedToolSummary("barry", 10, ["Fast", "Simple UI", "Free"], "Industry standard"));
-    getTools.push(new RatedToolSummary("loadPls", 6, ["Cloud Support", "Paid$"], "A slow and laggy tool"));
-    getTools.push(new RatedToolSummary("nullrefWannaBee", 0, ["Fast", "Free with Ads"], "An awful tool"));
-    getTools.push(new RatedToolSummary("theWhuat", 4, ["Fast", "Paid$$$"], "A confusing tool"));
-    getTools.push(new RatedToolSummary("TestRun", 7, ["Fast", "Paid$"], "An experimental tool"));
-
-    
+    getTools.push(new RatedToolSummary("SelectedTool", 10, 51, ["Fast"], "a default tool used by all"));
+    getTools.push(new RatedToolSummary("barry", 10, 1367, ["Fast", "Simple", "Free"], "Industry standard"));
+    getTools.push(new RatedToolSummary("loadPls", 6, 473, ["Cloud", "Paid$"], "A slow and laggy tool"));
+    getTools.push(new RatedToolSummary("nullrefWannaBee", 0, 342, ["Fast", "Ads"], "An awful tool"));
+    getTools.push(new RatedToolSummary("theWhuat", 4, 168, ["Fast", "Paid$$$"], "A confusing tool"));
+    getTools.push(new RatedToolSummary("TestRun", 7, 21, ["Fast", "Paid$"], "An experimental tool"));
 
     selectedTool = getTools[0];
     
@@ -66,35 +86,33 @@ const ComparePage = () => {
     
     return (
         /* Display the header */
-        <main>
+        <main className={mainPage}>
             {/* Top bar with our search term school */}
             <Container id="compare-page-school" fluid-className="py-3">
-                <Row className="align-left text-left">
-                    <Col xs={4}>
+                <div className="d-flex flex-row">
+                    <div className="me-2">
                         <h2>For Institution: </h2>
-                    </Col>
-                    <Col className="d-flex flex-column justify-content-left">
-                        <h2>
+                    </div>
+                    <div>
+                        <h2 className="text-success">
                             {/* Place the name of the college we are filtering by here */}
                             { getSchool }
                         </h2>
-                    </Col>
-                    <Col className="d-flex flex-column justify-content-left">
-                    </Col>
-                </Row>
-                <Row className="align-left text-left">
-                    <h1>Compare Tools</h1>
+                    </div>
+                </div>
+                <Row className="align-left text-left mt-2">
+                    <h1><b>Compare Tools</b></h1>
                     <p>Compare a tool against others based on matching tags</p>
                 </Row>
-                <Row className="align-left text-left">
-                    <Col xs={3} className="d-flex flex-column justify-content-left">
-                        Select a tool to compare:
+                <Row className={selectorBorder}>
+                    <Col xs={3}>
+                        <b>Select a tool to compare:</b>
                     </Col>
-                    <Col className="d-flex flex-column justify-content-center">
+                    <Col className="d-flex flex-column">
                         <select 
                             //value= {getTools.indexOf(selectedTool)}
                             //onChange= {x => SetRelated(x.target.value) } 
-                            className="d-flex flex-column justify-content-center"
+                            className="d-flex flex-column"
                         > 
                             {(() => {
                                 const rows: React.JSX.Element[] = [];
@@ -121,39 +139,45 @@ const ComparePage = () => {
 const ComparePagePanels = (selected: RatedToolSummary, theList: RatedToolSummary[]) => {
     // PLACEHOLDER FOR MOCKUP
     var scale: number = 32;
+    const ending: RatedToolSummary = theList[theList.length - 1];
 
     return (
-        <Container id="compare-page-panel" fluid-className="py-3">
-            <Row className="align-right text-right">
-                <Col xs="2">Comparing</Col>
-                <Col xs="2"><b>{selected.name}</b></Col>
-                <Col xs="1">with</Col>
-                <Col xs="1">{theList.length}</Col>
-                <Col xs="5">competing tools with similar tags</Col>
+        <Container id="compare-page-panel">
+            <Row className={countBorder}>
+                <div className="d-flex flex-row gap-1">
+                    <div className={compressedText}>Comparing</div>
+                    <div className={compressedText}><b>{selected.name}</b></div>
+                    <div className={compressedText}>with</div>
+                    <div className={compressedText}>{theList.length}</div>
+                    <div className={compressedText}> other closely matching tools</div>
+                    <div className="flex" />
+                </div>
             </Row>
             <Row>
-                { ComparePagePanel(selectedTool, scale, "bg-dark")}
+                { ComparePagePanel(selectedTool, scale, selectedText, panelClassSelected)}
                 {/* For each rating, we call ComparePagePanel() to display a row for the tool */}
                 {(() => {
                     const rows: React.JSX.Element[] = [];
+                    const end: RatedToolSummary = theList[theList.length - 1];
                     theList.forEach(x => 
                         {
-                            if (selected != x)
-                                rows.push(ComparePagePanel(x, scale, "bg-light"))
+                            if (selected != x && end != x )
+                                rows.push(ComparePagePanel(x, scale, "", panelClass))
                         }
                     );
                     return rows;
                 })()}
+                { ComparePagePanel(ending, scale, "", panelClassEnd)}
             </Row>
         </Container>
     )
 }
-const ComparePagePanel = (theTool: RatedToolSummary, scale: number, className: string) => {
+const ComparePagePanel = (theTool: RatedToolSummary, scale: number, classNameTitle: string, classNameBack: string) => {
     // PLACEHOLDER FOR MOCKUP
     return (
-        <Col>
-            {ShowToolTag(theTool)}
-            {ShowToolRatingBIG(theTool, scale)}
+        <Col className={classNameBack}>
+            {ShowToolName(theTool, classNameTitle)}
+            {ShowToolStarRatingBIG(theTool, scale)}
             {ShowToolTags(theTool, scale)}
             {ShowDesciption(theTool, scale)}
             {ShowTopReview(theTool)}
@@ -161,10 +185,10 @@ const ComparePagePanel = (theTool: RatedToolSummary, scale: number, className: s
     )
 }
 
-const ShowToolTag = (theTool: RatedToolSummary) => {
+const ShowToolName = (theTool: RatedToolSummary, classNameTitle: string) => {
     // PLACEHOLDER FOR MOCKUP
     return (
-        <Container id="compare-page-panel" fluid-className="py-3">
+        <Container id="compare-page-panel" className={panelInternalTitle}>
             <Row>
                 { (() => {
                     if (theTool.icon != null)
@@ -177,46 +201,55 @@ const ShowToolTag = (theTool: RatedToolSummary) => {
                     }
                 })()}
                 <Col>
-                    <h3>
-                        {theTool.name}
-                    </h3>
+                    <b>
+                        <h3 className={classNameTitle}>
+                            {theTool.name}
+                        </h3>
+                    </b>
                     Development Tool
                 </Col>
-            </Row>
+            </Row> 
         </Container>
     )
 }
-const ShowToolRatingBIG = (theTool: RatedToolSummary, scale: number) => {
+const ShowToolStarRatingBIG = (theTool: RatedToolSummary, scale: number) => {
     // PLACEHOLDER FOR MOCKUP
     return (
-        <Container id="compare-page-ratingxl"  className="bg-light align-middle text-center" fluid-className="py-3">
-            <h2 className="align-middle text-center">
-                {(() => {
-                    return (theTool.rating / 2).toPrecision(2);
-                })() }
-            </h2>
-            <Container id="compare-page-ratingxl"  className="bg-light align-right text-right" fluid-className="py-3">
-                {displayToolRating(theTool.rating, scale)}
-            </Container>
-            <p>
-                Based on X ratings
-            </p>
+        <Container id="compare-page-ratingxl" className={ratingBorderFilled}>
+            <Row>
+                <Col xs={4}>
+                    <h2 className="align-middle text-center">
+                        {(() => {
+                            return (theTool.rating / 2).toPrecision(2);
+                        })() }
+                    </h2>
+                </Col>
+                <Col>
+                    {ShowToolStarRating(theTool.rating, scale)}
+                </Col>
+            </Row>
+            <div className="d-flex flex-center flex-row gap-1">
+                <div className={compressedText}>Based on</div>
+                <div className={compressedText}><b>{theTool.numRatings}</b></div>
+                <div className={compressedText}>ratings</div>
+            </div>
         </Container>
     )
 }
 const ShowToolTags = (theTool: RatedToolSummary, scale: number) => {
     // PLACEHOLDER FOR MOCKUP
     return (
-        <Container id="compare-page-tags"  className="align-left text-left" fluid-className="py-3">
+        <Container id="compare-page-tags"  className={"align-left text-left " + panelInternal}>
             <h5 className="align-left text-left">
                 Tags:
             </h5>
-            <Row className="align-middle text-center">
+            <Row className="align-left items-left">
                 {(() => {
                     const rows: React.JSX.Element[] = [];
                     theTool.tags.forEach(x => rows.push(DisplayTag(x)));
                     return rows;
                 })()}
+                <Col className="align-left text-center ms-5"></Col>
             </Row>
         </Container>
     )
@@ -224,10 +257,10 @@ const ShowToolTags = (theTool: RatedToolSummary, scale: number) => {
 const DisplayTag = (text: string) => {
     // PLACEHOLDER FOR MOCKUP
     return (
-        <Col className="bg-light align-middle text-center">
-            <p>
+        <Col className="m-0">
+            <Button className={tagClass}>
                 {text}
-            </p>
+            </Button>
         </Col>
     )
 }
@@ -235,7 +268,7 @@ const DisplayTag = (text: string) => {
 const ShowDesciption = (theTool: RatedToolSummary, scale: number) => {
     // PLACEHOLDER FOR MOCKUP
     return (
-        <Container id="compare-page-desc"  className="align-left text-left" fluid-className="py-3">
+        <Container id="compare-page-desc"  className={"align-left text-left " + panelInternal} fluid-className="py-3">
             <h5 className="align-left text-left">
                 Summary:
             </h5>
@@ -249,7 +282,7 @@ const ShowDesciption = (theTool: RatedToolSummary, scale: number) => {
 const ShowTopReview = (theTool: RatedToolSummary) => {
     // PLACEHOLDER FOR MOCKUP
     return (
-        <Container id="compare-page-PopReview"  className="align-left text-left" fluid-className="py-3">
+        <Container id="compare-page-PopReview"  className={"align-left text-left " + panelInternal} fluid-className="py-3">
             <h5 className="align-left text-left">
                 Popular Review:
             </h5>
@@ -264,14 +297,14 @@ const ShowTopReview = (theTool: RatedToolSummary) => {
                 }
                 else
                 {
-                   return ShowRating(theTool.bestReview);
+                   return ShowTextRating(theTool.bestReview);
                 }
             })()}
         </Container>
     )
 }
 
-const ShowRating = (theRating: Rating) => {
+const ShowTextRating = (theRating: Rating) => {
     // INCOMPLETE
     return (
         <p>
@@ -336,15 +369,15 @@ const displayToolRowIfNeeded = (tool: RatedToolSummary, scale: number, className
         /* We make sure our given data yields any ratings, otherwise we ignore. */
         <Container className={className} id="ratedTool-bar" fluid-className="py-3">
             <Row className="align-middle text-center">
-                <Col>
+                <Col xs={2}>
                     <b>
                         {/* Place the name of the tool here */}
                         { tool.name }
                     </b>
                 </Col>
-                <Col xs={5} className="d-flex flex-column justify-content-right">
+                <Col xs={5} className="d-flex flex-row items-left">
                     {/* Display the rating of the tool here */}
-                    { displayToolRating(tool.rating, scale) }
+                    { ShowToolStarRating(tool.rating, scale) }
                 </Col>
             </Row>
         </Container>
@@ -353,25 +386,25 @@ const displayToolRowIfNeeded = (tool: RatedToolSummary, scale: number, className
 
 /* Hand this a RatedTool and it will display a star rating for it on the UI. 
      Note: Make star icon for no star, half-star and fullStar*/
-const displayToolRating = (starFullState: number, scale: number) => {
+const ShowToolStarRating = (starFullState: number, scale: number) => {
 
     return (
         /* We make sure our given data yields any ratings, otherwise we ignore. */
         <Container id="ratedTool-Stars" className="align-middle text-center" fluid="sm">
-            <Row>
-                <Col xs={1} className="align-middle text-center">
+            <Row xs={5}>
+                <Col xs={1} className="align-middle text-center mx-1">
                     { displayToolStar(clampForStar(starFullState, 0), scale) }
                 </Col>
-                <Col xs={1} className="align-middle text-center">
+                <Col xs={1} className="align-middle text-center mx-1">
                     { displayToolStar(clampForStar(starFullState, 2), scale) }
                 </Col>
-                <Col xs={1} className="align-middle text-center">
+                <Col xs={1} className="align-middle text-center mx-1">
                     { displayToolStar(clampForStar(starFullState, 4), scale) }
                 </Col>
-                <Col xs={1} className="align-middle text-center">
+                <Col xs={1} className="align-middle text-center mx-1">
                     { displayToolStar(clampForStar(starFullState, 6), scale) }
                 </Col>
-                <Col xs={1} className="align-middle text-center">
+                <Col xs={1} className="align-middle text-center mx-1">
                     { displayToolStar(clampForStar(starFullState, 8), scale) }
                 </Col>
             </Row>
@@ -398,15 +431,15 @@ const displayToolStar = (starState: number, scale: number) => {
 
 const starNone = (scale: number) =>
 (
-    <img src={StarNone.src} width={scale} height={scale} alt="o" />
+    <img className="mx-2" src={StarNone.src} width={scale} height={scale} alt="o" />
 )
 const starHalf = (scale: number) =>
 (
-    <img src={StarHalf.src} width={scale} height={scale} alt="*" />
+    <img className="mx-2" src={StarHalf.src} width={scale} height={scale} alt="*" />
 )
 const starFull = (scale: number) =>
 (
-    <img src={StarFull.src} width={scale} height={scale} alt="#" />
+    <img className="mx-2" src={StarFull.src} width={scale} height={scale} alt="#" />
 )
 
 
