@@ -34,7 +34,7 @@ const AuthModal: React.FC<Props> = ({ show, onClose, initialMode = 'login' }) =>
     if (show && autoFocusRef) {
       autoFocusRef.focus();
     }
-  }, [initialMode, show]);
+  }, [initialMode, show, autoFocusRef]);
 
   const handleSignIn = async (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -113,7 +113,15 @@ const AuthModal: React.FC<Props> = ({ show, onClose, initialMode = 'login' }) =>
 
             <Form.Group className="mb-3">
               <Form.Label>Email</Form.Label>
-              <Form.Control ref={(el) => el && setAutoFocusRef(el)} type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <Form.Control 
+                ref={(el) => {
+                  if (el) setAutoFocusRef(el);
+                }} 
+                type="email" 
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)} 
+                required 
+              />
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Password</Form.Label>
@@ -147,7 +155,15 @@ const AuthModal: React.FC<Props> = ({ show, onClose, initialMode = 'login' }) =>
 
             <Form.Group className="mb-3">
               <Form.Label>Email</Form.Label>
-              <Form.Control ref={(el) => el && setAutoFocusRef(el)} type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <Form.Control 
+                ref={(el) => {
+                  if (el) setAutoFocusRef(el);
+                }} 
+                type="email" 
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)} 
+                required 
+              />
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Password</Form.Label>
