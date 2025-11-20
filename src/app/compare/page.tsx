@@ -18,19 +18,12 @@ class RatedToolSummary
     }
 }
 
-
-
-/* Displays a list of tools, ordered from top to bottom in order of rating */
-/*  We may need to restrict the number of rows displayed based on database size.
-    Perhaps poll for the best 25 then if the user scrolls down we send more over to the client. */
 const ComparePage = () => {
-    // PLACEHOLDER FOR MOCKUP
-    const getSchool: string = "UH Manoa";
-    var selectedTool: RatedToolSummary;
-    var getTools: RatedToolSummary[] = [];
-    var scale: number = 32;
-
      // PLACEHOLDER
+
+    var selectedTool: RatedToolSummary = new RatedToolSummary("SelectedTool", 10);
+
+    var getTools: RatedToolSummary[] = [];
     getTools.push(new RatedToolSummary("barry", 10));
     getTools.push(new RatedToolSummary("loadPls", 6));
     getTools.push(new RatedToolSummary("nullrefWannaBee", 0));
@@ -39,6 +32,18 @@ const ComparePage = () => {
 
     getTools.sort(x => x.rating) // Should be done server-side
     
+    return ComparePageList(selectedTool, getTools);
+};
+
+
+/* Displays a list of tools, ordered from top to bottom in order of rating */
+/*  We may need to restrict the number of rows displayed based on database size.
+    Perhaps poll for the best 25 then if the user scrolls down we send more over to the client. */
+const ComparePageList = (selected: RatedToolSummary, theList: RatedToolSummary[]) => {
+    // PLACEHOLDER FOR MOCKUP
+    const getSchool: string = "UH Manoa";
+    var scale: number = 32;
+
     return (
         /* Display the header */
         <main>
@@ -58,31 +63,33 @@ const ComparePage = () => {
                     </Row>
                 </Container>
                 <Row className="align-middle text-center">
-                    <Col xs={8} className="d-flex flex-column justify-content-center">
+                    <Col className="d-flex flex-column justify-content-center">
                         <h1>Compare Tools</h1>
                         <p>Compare your tools here (WIP)</p>
                     </Col>
                 </Row>
-                {/* The list of tools we have found */}
-                <Container className="bg-light" id="compare-page-list-element" fluid-className="py-3">
+                <Container id="compare-page-list-element" fluid-className="py-3">
                     <Container className="bg-light" id="ratedTool-bar-top" fluid-className="py-3">
                         <Row className="align-middle text-center">
-                            <Col xs={4}>
+                            <Col>
                                 <b>
                                     Name
                                 </b>
                             </Col>
-                            <Col xs={8} className="d-flex flex-column justify-content-center">
+                            <Col xs={5} className="d-flex flex-column justify-content-right">
                                 <b>
                                     Rating
                                 </b>
                             </Col>
                         </Row>
                     </Container>
+                    {/* The main tool to compare against */}
+                    { displayToolRowIfNeeded(selected, scale, "") }
+                    {/* The list of tools we have found */}
                     {/* For each rating, we call displayToolRowIfNeeded() to display a row for the tool */}
                     {(() => {
                         const rows: React.JSX.Element[] = [];
-                        getTools.forEach(x => rows.push(displayToolRowIfNeeded(x, scale)));
+                        theList.forEach(x => rows.push(displayToolRowIfNeeded(x, scale, "bg-light")));
                         return rows;
                     })()}
                 </Container>
@@ -97,20 +104,20 @@ const ComparePage = () => {
     We may need to restrict the number of rows displayed based on database size.
     Perhaps poll for the best 25 then if the user scrolls down we send more over to the client. 
     The database should have already pruned those tools that yield no ratings before reaching the client! */
-const displayToolRowIfNeeded = (tool: RatedToolSummary, scale: number) => {
+const displayToolRowIfNeeded = (tool: RatedToolSummary, scale: number, className: string) => {
     const stringName: string = tool.name;
     const starRatingFull: number = tool.rating;
     return (
         /* We make sure our given data yields any ratings, otherwise we ignore. */
-        <Container className="bg-light" id="ratedTool-bar" fluid-className="py-3">
+        <Container className={className} id="ratedTool-bar" fluid-className="py-3">
             <Row className="align-middle text-center">
-                <Col xs={4}>
+                <Col>
                     <b>
                         {/* Place the name of the tool here */}
                         { tool.name }
                     </b>
                 </Col>
-                <Col xs={8} className="d-flex flex-column justify-content-center">
+                <Col xs={5} className="d-flex flex-column justify-content-right">
                     {/* Display the rating of the tool here */}
                     { displayToolRating(tool.rating, scale) }
                 </Col>

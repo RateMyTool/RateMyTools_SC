@@ -2,7 +2,6 @@
 import { compare } from 'bcrypt';
 import { type NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import GoogleProvider from 'next-auth/providers/google';
 import { prisma } from '@/lib/prisma';
 
 const authOptions: NextAuthOptions = {
@@ -44,11 +43,6 @@ const authOptions: NextAuthOptions = {
           randomKey: user.role,
         };
       },
-    }),
-    // Google OAuth provider (optional - requires env vars)
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID || '',
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
     }),
   ],
   pages: {
