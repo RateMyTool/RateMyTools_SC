@@ -13,8 +13,8 @@ const TopMenu = ({ title }: TopMenuProps) => (
         <Image
           src="/RATEMY.png"
           alt="Rate My Tools Logo"
-          width={32}
-          height={32}
+          width={48}
+          height={48}
           className="h-8 w-auto"
         />
         <span className="bg-black text-xl font-formal text-white px-2 py-2 rounded">{title}</span>
