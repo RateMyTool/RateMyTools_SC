@@ -1,6 +1,6 @@
 /* eslint-disable react/jsx-indent, @typescript-eslint/indent */
 
-"use client";
+'use client';
 
 import React from 'react';
 import { useSession } from 'next-auth/react';
@@ -58,15 +58,16 @@ const NavBar: React.FC = () => {
             ) : (
               <>
                 <NavDropdown id="login-dropdown" title="Login">
-                    <NavDropdown.Item
-                      as="button"
-                      id="login-dropdown-sign-in"
-                      onClick={(e: React.MouseEvent) => {
-                          e.preventDefault();
-                          openAuthModal('login');
-                        }}
-                    >
+                  <NavDropdown.Item
+                    as="button"
+                    id="login-dropdown-sign-in"
+                    onClick={(e: React.MouseEvent) => {
+                      e.preventDefault();
+                      openAuthModal('login');
+                    }}
+                  >
                     <PersonFill />
+                    {' '}
                     Sign in (pop up)
                   </NavDropdown.Item>
                   <NavDropdown.Item
@@ -78,6 +79,7 @@ const NavBar: React.FC = () => {
                     }}
                   >
                     <PersonPlusFill />
+                    {' '}
                     Sign up (pop up)
                   </NavDropdown.Item>
                 </NavDropdown>

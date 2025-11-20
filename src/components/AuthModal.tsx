@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { useEffect, useState } from 'react';
 import { Modal, Button, Form, Alert } from 'react-bootstrap';
@@ -9,11 +9,11 @@ type Mode = 'login' | 'signup';
 interface Props {
   show: boolean;
   onClose: () => void;
-  initialMode?: Mode;
+  initialMode: Mode;
 }
 
-const AuthModal: React.FC<Props> = ({ show, onClose, initialMode = 'login' }) => {
-  const [mode, setMode] = useState<Mode>(initialMode);
+const AuthModal: React.FC<Props> = ({ show, onClose, initialMode }) => {
+  const [mode, setMode] = useState<Mode>(initialMode || 'login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -113,23 +113,36 @@ const AuthModal: React.FC<Props> = ({ show, onClose, initialMode = 'login' }) =>
 
             <Form.Group className="mb-3">
               <Form.Label>Email</Form.Label>
-              <Form.Control 
+              <Form.Control
                 ref={(el) => {
                   if (el) setAutoFocusRef(el);
-                }} 
-                type="email" 
-                value={email} 
-                onChange={(e) => setEmail(e.target.value)} 
-                required 
+                }}
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
               />
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Password</Form.Label>
-              <Form.Control type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <Form.Control
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
             </Form.Group>
 
             <div className="mb-3 text-end">
-              <button type="button" className="btn btn-link p-0" onClick={() => (window.location.href = '/auth/change-password')}>Forgot Password?</button>
+              <button
+                type="button"
+                className="btn btn-link p-0"
+                onClick={() => {
+                  window.location.href = '/auth/change-password';
+                }}
+              >
+                Forgot Password?
+              </button>
             </div>
 
             <div className="d-grid gap-2">
@@ -139,7 +152,15 @@ const AuthModal: React.FC<Props> = ({ show, onClose, initialMode = 'login' }) =>
             </div>
 
             <div className="mt-3 text-center">
-              Don't have an account? <button type="button" className="btn btn-link p-0" onClick={() => setMode('signup')}>Sign Up</button>
+              Don&apos;t have an account?
+              {' '}
+              <button
+                type="button"
+                className="btn btn-link p-0"
+                onClick={() => setMode('signup')}
+              >
+                Sign Up
+              </button>
             </div>
           </Form>
         ) : (
@@ -155,23 +176,33 @@ const AuthModal: React.FC<Props> = ({ show, onClose, initialMode = 'login' }) =>
 
             <Form.Group className="mb-3">
               <Form.Label>Email</Form.Label>
-              <Form.Control 
+              <Form.Control
                 ref={(el) => {
                   if (el) setAutoFocusRef(el);
-                }} 
-                type="email" 
-                value={email} 
-                onChange={(e) => setEmail(e.target.value)} 
-                required 
+                }}
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
               />
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Password</Form.Label>
-              <Form.Control type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <Form.Control
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Confirm Password</Form.Label>
-              <Form.Control type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
+              <Form.Control
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
             </Form.Group>
 
             <div className="d-grid gap-2">
@@ -181,7 +212,15 @@ const AuthModal: React.FC<Props> = ({ show, onClose, initialMode = 'login' }) =>
             </div>
 
             <div className="mt-3 text-center">
-              Already have an account? <button type="button" className="btn btn-link p-0" onClick={() => setMode('login')}>Login</button>
+              Already have an account?
+              {' '}
+              <button
+                type="button"
+                className="btn btn-link p-0"
+                onClick={() => setMode('login')}
+              >
+                Login
+              </button>
             </div>
           </Form>
         )}
