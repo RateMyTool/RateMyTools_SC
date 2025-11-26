@@ -4,9 +4,11 @@ import TopMenu from '@/components/TopMenu';
 import MiddleMenu from '@/components/MiddleMenu';
 import FooterMenu from '@/components/FooterMenu';
 import { useState } from 'react';
+import ComparePage from '@/app/compare/page';
 
 export default function Home() {
-  const [title, setTitle] = useState('TOOLS');
+    return ComparePage();
+  //const [title, setTitle] = useState('TOOLS');
 
   /** The Home page. */
   /*
