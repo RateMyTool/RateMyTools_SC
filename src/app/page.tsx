@@ -6,9 +6,17 @@ import FooterMenu from '@/components/FooterMenu';
 import { useState } from 'react';
 import ComparePage from '@/app/compare/page';
 
+  /** The Home page. */
 export default function Home() {
-    return ComparePage();
-  //const [title, setTitle] = useState('TOOLS');
+  const [title, setTitle] = useState('TOOLS');
+  return (
+    <main>
+      <TopMenu title={title} />
+        {ComparePage()}
+      <FooterMenu />
+    </main>
+  );
+}
 
   /** The Home page. */
   /*
@@ -31,4 +39,3 @@ export default function Home() {
       </main>
     )
   };*/
-}

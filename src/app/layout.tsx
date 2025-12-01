@@ -5,6 +5,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import NavBar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import Providers from './providers';
+import AuthLinks from '@/components/AuthLinks';
+import AuthModalHost from '@/components/AuthModalHost';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -23,9 +25,11 @@ export default function RootLayout({
     <html lang="en">
       <body className={classString}>
         <Providers>
-          <NavBar />
           {children}
-          <Footer />
+        {/* <NavBar />
+          {children}
+          <Footer />*/} 
+          
         </Providers>
       </body>
     </html>
