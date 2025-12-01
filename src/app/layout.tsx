@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import Footer from '@/components/Footer';
 import NavBar from '@/components/Navbar';
+import AuthModalHost from '@/components/AuthModalHost';
 import Providers from './providers';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -24,8 +24,8 @@ export default function RootLayout({
       <body className={classString}>
         <Providers>
           <NavBar />
+          <AuthModalHost />
           {children}
-          <Footer />
         </Providers>
       </body>
     </html>
