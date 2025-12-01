@@ -1,228 +1,230 @@
 'use client';
 
-import React, { useState } from 'react';
+/* eslint-disable jsx-a11y/label-has-associated-control */
 
-const availableTags = ['Easy to Use', 'Free', 'Expensive', 'Buggy'];
+import Link from 'next/link';
+import { useMemo, useState } from 'react';
 
-export default function SchoolStuff() {
-  const [school, setSchool] = useState('');
-  const [tool, setTool] = useState('');
-  const [subject, setSubject] = useState('');
-  const [courseNumber, setCourseNumber] = useState('');
-  const [rating, setRating] = useState(0);
-  const [tags, setTags] = useState<string[]>([]);
-  const [allTags, setAllTags] = useState<string[]>(availableTags);
-  const [newTag, setNewTag] = useState('');
-  const [review, setReview] = useState('');
-  // master lists for inputs (allow typing + suggestions)
-  const [allSchools, setAllSchools] = useState<string[]>(['UH Manoa', 'Example University']);
-  const [allTools, setAllTools] = useState<string[]>(['Canvas', 'Brightspace', 'Google Classroom']);
-  const [allSubjects, setAllSubjects] = useState<string[]>(['CS', 'MATH', 'ENG']);
+  type Tool = {
+    id: string
+    name: string
+    category: string
+    rating: number
+    ratingsCount: number
+    description: string
+    tags: string[]
+  };
 
-  function toggleTag(tag: string) {
-    setTags((t) => (t.includes(tag) ? t.filter((x) => x !== tag) : [...t, tag]));
-  }
+  type SchoolStuffProps = {
+    schoolName: string
+    location: string
+  };
 
-  function addTag(tag?: string) {
-    const t = (tag ?? newTag).trim();
-    if (!t) return;
-    // add to master list if missing
-    setAllTags((existing) => (existing.includes(t) ? existing : [...existing, t]));
-    // mark as selected if not already
-    setTags((existing) => (existing.includes(t) ? existing : [...existing, t]));
-    setNewTag('');
-  }
+export default function SchoolStuff({
+  schoolName = 'Massachusetts Institute of Technology', location = 'Cambridge, MA',
+}: SchoolStuffProps) {
+  const [subject, setSubject] = useState('All Subjects');
+  const [crn, setCrn] = useState('');
+  const [sort, setSort] = useState<'Highest Rated' | 'Most Ratings'>('Highest Rated');
 
-  function ensureInList(listSetter: React.Dispatch<React.SetStateAction<string[]>>, value: string) {
-    const v = value.trim();
-    if (!v) return;
-    listSetter((existing) => (existing.includes(v) ? existing : [...existing, v]));
-  }
+  const tools: Tool[] = useMemo(
+    () => [
+      {
+        id: 'vs-code',
+        name: 'VS Code',
+        category: 'Development Tool',
+        rating: 4.5,
+        ratingsCount: 247,
+        description: 'Lightweight editor with debugging, git, and extensions.',
+        tags: ['Documentation', 'Easy', 'Helpful'],
+      },
+      {
+        id: 'github',
+        name: 'GitHub',
+        category: 'Version Control',
+        rating: 4.8,
+        ratingsCount: 312,
+        description: 'Collaboration platform for hosting and reviewing code.',
+        tags: ['Essential', 'Collaboration', 'Standard'],
+      },
+      {
+        id: 'figma',
+        name: 'Figma',
+        category: 'Design Tool',
+        rating: 4.7,
+        ratingsCount: 189,
+        description: 'Interface design and prototyping for teams in real time.',
+        tags: ['Collaborative', 'Intuitive', 'Teams'],
+      },
+      {
+        id: 'slack',
+        name: 'Slack',
+        category: 'Communication',
+        rating: 4.3,
+        ratingsCount: 156,
+        description: 'Messaging platform with channels, search, and integrations.',
+        tags: ['Teams', 'Integrations', 'Notifications'],
+      },
+      {
+        id: 'notion',
+        name: 'Notion',
+        category: 'Productivity',
+        rating: 4.6,
+        ratingsCount: 201,
+        description: 'Workspace for notes, tasks, and lightweight databases.',
+        tags: ['Flexible', 'Templates', 'Databases'],
+      },
+    ],
+    [],
+  );
 
-  function clearForm() {
-    setSchool('');
-    setTool('');
-    setSubject('');
-    setCourseNumber('');
-    setRating(0);
-    setTags([]);
-    setReview('');
-  }
-
-  function submit(e: React.FormEvent) {
-    e.preventDefault();
-    const payload = { school, tool, subject, courseNumber, rating, tags, review };
-    // basic client validation
-    if (!school || !tool || !rating || review.trim().length < 10) {
-      alert('Please provide a school, tool, rating and a longer review (min 10 chars).');
-      return;
+  const sortedTools = useMemo(() => {
+    const list = [...tools];
+    if (sort === 'Highest Rated') {
+      list.sort((a, b) => b.rating - a.rating);
+    } else {
+      list.sort((a, b) => b.ratingsCount - a.ratingsCount);
     }
-
-    fetch('/api/reviews', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    })
-      .then(async (res) => {
-        if (!res.ok) {
-          const body = await res.json().catch(() => ({}));
-          throw new Error(body?.error || 'Failed to submit review');
-        }
-        return res.json();
-      })
-      .then(() => {
-        alert('Review submitted — thank you!');
-        clearForm();
-      })
-      .catch((err) => {
-        // eslint-disable-next-line no-console
-        console.error(err);
-        alert('Failed to submit review. Please try again later.');
-      });
-  }
+    return list;
+  }, [tools, sort]);
 
   return (
-    <div className="container py-8 d-flex justify-content-center">
-      <div className="card w-75 p-4">
-        <form onSubmit={submit}>
-          <div className="mb-3">
-            <label className="form-label">Your School *</label>
-            <input
-              className="form-control"
-              list="schools"
-              placeholder="Choose or type a school..."
-              value={school}
-              onChange={(e) => setSchool(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  ensureInList(setAllSchools, (e.target as HTMLInputElement).value);
-                }
-              }}
-              onBlur={(e) => ensureInList(setAllSchools, (e.target as HTMLInputElement).value)}
-            />
-            <datalist id="schools">
-              {allSchools.map((s) => (
-                <option key={s} value={s} />
-              ))}
-            </datalist>
-          </div>
-
-          <div className="mb-3">
-            <label className="form-label">Your Tool *</label>
-            <input
-              className="form-control"
-              list="tools"
-              placeholder="Type a tool..."
-              value={tool}
-              onChange={(e) => setTool(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  ensureInList(setAllTools, (e.target as HTMLInputElement).value);
-                }
-              }}
-              onBlur={(e) => ensureInList(setAllTools, (e.target as HTMLInputElement).value)}
-            />
-            <datalist id="tools">
-              {allTools.map((t) => (
-                <option key={t} value={t} />
-              ))}
-            </datalist>
-            <div className="form-text">Don't see your tool? Type it.</div>
-          </div>
-
-          <div className="row">
-            <div className="col-md-6 mb-3">
-              <label className="form-label">Course Subject</label>
-              <input
-                className="form-control"
-                list="subjects"
-                placeholder="Type a subject..."
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    ensureInList(setAllSubjects, (e.target as HTMLInputElement).value);
-                  }
-                }}
-                onBlur={(e) => ensureInList(setAllSubjects, (e.target as HTMLInputElement).value)}
-              />
-              <datalist id="subjects">
-                {allSubjects.map((s) => (
-                  <option key={s} value={s} />
-                ))}
-              </datalist>
+    <div className="min-h-screen bg-gray-50">
+      <div className="mx-auto max-w-7xl px-4 py-6">
+        <div className="grid gap-6 md:grid-cols-12">
+          {/* Left Column */}
+          <aside className="md:col-span-4 space-y-6">
+            <div className="rounded-lg border bg-white p-5 shadow-sm">
+              <h1 className="text-2xl font-semibold mb-1">{schoolName}</h1>
+              <p className="text-sm text-gray-600 mb-4">{location}</p>
+              <div className="grid grid-cols-3 gap-2 text-center">
+                <div className="rounded bg-gray-100 p-2">
+                  <p className="text-xs text-gray-500">Tools</p>
+                  <p className="font-medium">{tools.length}</p>
+                </div>
+                <div className="rounded bg-gray-100 p-2">
+                  <p className="text-xs text-gray-500">Avg Rating</p>
+                  <p className="font-medium">
+                    {(tools.reduce((acc, t) => acc + t.rating, 0) / tools.length).toFixed(2)}
+                  </p>
+                </div>
+                <div className="rounded bg-gray-100 p-2">
+                  <p className="text-xs text-gray-500">Total Reviews</p>
+                  <p className="font-medium">
+                    {tools.reduce((acc, t) => acc + t.ratingsCount, 0)}
+                  </p>
+                </div>
+              </div>
             </div>
-            <div className="col-md-6 mb-3">
-              <label className="form-label">Course Number / CRN</label>
-              <input className="form-control" placeholder="e.g., CS 101 or 12345" value={courseNumber} onChange={(e) => setCourseNumber(e.target.value)} />
+            <div className="rounded-lg border bg-white p-5 shadow-sm">
+              <h2 className="text-lg font-medium mb-4">Filter Tools</h2>
+              <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+                <div>
+                  <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">Subject</label>
+                  <select
+                    id="subject"
+                    value={subject}
+                    onChange={(e) => setSubject(e.target.value)}
+                    className={[
+                      'w-full rounded border-gray-300 focus:border-indigo-500 focus:ring-indigo-500',
+                      'text-sm',
+                    ].join(' ')}
+                  >
+                    <option>All Subjects</option>
+                    <option>Computer Science</option>
+                    <option>Design</option>
+                    <option>Business</option>
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="crn" className="block text-sm font-medium text-gray-700 mb-1">CRN</label>
+                  <input
+                    id="crn"
+                    type="text"
+                    value={crn}
+                    onChange={(e) => setCrn(e.target.value)}
+                    placeholder="e.g. 12345"
+                    className={[
+                      'w-full rounded border-gray-300 focus:border-indigo-500 focus:ring-indigo-500',
+                      'text-sm',
+                    ].join(' ')}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="sort" className="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
+                  <select
+                    id="sort"
+                    value={sort}
+                    onChange={(e) => setSort(e.target.value as 'Highest Rated' | 'Most Ratings')}
+                    className={[
+                      'w-full rounded border-gray-300 focus:border-indigo-500 focus:ring-indigo-500',
+                      'text-sm',
+                    ].join(' ')}
+                  >
+                    <option>Highest Rated</option>
+                    <option>Most Ratings</option>
+                  </select>
+                </div>
+                <div className="pt-2">
+                  <Link
+                    href="/add"
+                    className={[
+                      'inline-flex w-full justify-center rounded bg-indigo-600 px-4 py-2',
+                      'text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none',
+                      'focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
+                    ].join(' ')}
+                  >
+                    Rate a Tool
+                  </Link>
+                </div>
+              </form>
             </div>
-          </div>
-
-          <div className="mb-3">
-            <label className="form-label">Overall Rating *</label>
-            <div>
-              {[1, 2, 3, 4, 5].map((n) => (
-                // eslint-disable-next-line react/no-array-index-key
-                <button
-                  type="button"
-                  key={n}
-                  className={`btn btn-link p-0 me-2 ${n <= rating ? 'text-warning' : 'text-secondary'}`}
-                  onClick={() => setRating(n)}
-                >
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill={n <= rating ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12 .587l3.668 7.431L23.4 9.587l-5.7 5.558L19.335 24 12 19.897 4.665 24l1.635-8.855L.6 9.587l7.732-1.569L12 .587z" />
-                  </svg>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="mb-3">
-            <label className="form-label">Add Tags (type and press Enter or click Add)</label>
-            <div className="d-flex mb-2">
-              <input
-                className="form-control me-2"
-                placeholder="Type a tag and press Enter"
-                value={newTag}
-                onChange={(e) => setNewTag(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    addTag();
-                  }
-                }}
-              />
-              <button type="button" className="btn btn-primary" onClick={() => addTag()}>Add</button>
-            </div>
-
-            <div>
-              {allTags.map((t) => (
-                <button
-                  type="button"
-                  key={t}
-                  onClick={() => toggleTag(t)}
-                  className={`btn btn-sm me-2 mb-2 ${tags.includes(t) ? 'btn-outline-primary' : 'btn-outline-secondary'}`}
-                >
-                  {t}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="mb-3">
-            <label className="form-label">Your Review *</label>
-            <textarea className="form-control" rows={6} value={review} onChange={(e) => setReview(e.target.value)} placeholder="Share your experience with this tool. How did it help you in your coursework? What are its strengths and weaknesses?" />
-            <div className="form-text">Minimum 50 characters</div>
-          </div>
-
-          <div className="d-flex justify-content-between">
-            <button type="button" className="btn btn-outline-secondary" onClick={clearForm}>Cancel</button>
-            <button type="submit" className="btn btn-dark">Submit Rating</button>
-          </div>
-        </form>
+          </aside>
+          {/* Right Column */}
+          <section className="md:col-span-8 space-y-4">
+            {sortedTools.map((tool) => (
+              <div
+                key={tool.id}
+                className="rounded-lg border bg-white p-5 shadow-sm hover:border-indigo-400 transition"
+              >
+                <div className="flex items-start justify-between mb-2">
+                  <div>
+                    <h3 className="text-lg font-semibold">
+                      <Link href={`/tools/${tool.id}`}>{tool.name}</Link>
+                    </h3>
+                    <p className="text-xs uppercase tracking-wide text-gray-500">{tool.category}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-medium">
+                      {tool.rating.toFixed(1)}
+                      {' '}
+                      / 5
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {tool.ratingsCount}
+                      {' '}
+                      ratings
+                    </p>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-700 mb-3">{tool.description}</p>
+                <div className="flex flex-wrap gap-2">
+                  {tool.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="rounded-full bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+            {sortedTools.length === 0 && (
+            <p className="text-sm text-gray-600">No tools match your filters.</p>
+            )}
+          </section>
+        </div>
       </div>
     </div>
   );
