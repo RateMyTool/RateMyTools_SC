@@ -43,3 +43,15 @@ model Stuff {
   condition Condition @default(good)
   owner     String
 }
+
+model Review {
+  id           Int      @id @default(autoincrement())
+  school       String
+  tool         String
+  subject      String?
+  courseNumber String?
+  rating       Int
+  tags         String[]
+  reviewText   String   @map("review")
+  createdAt    DateTime @default(now())
+}

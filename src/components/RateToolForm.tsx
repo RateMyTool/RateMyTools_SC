@@ -52,12 +52,33 @@ export default function RateToolForm() {
   function submit(e: React.FormEvent) {
     e.preventDefault();
     const payload = { school, tool, subject, courseNumber, rating, tags, review };
-    // For now just log the payload; you can replace this with an API call
-    // to persist reviews (e.g., POST /api/reviews)
-    // eslint-disable-next-line no-console
-    console.log('Submitting review', payload);
-    alert('Review submitted (demo)');
-    clearForm();
+    // basic client validation
+    if (!school || !tool || !rating || review.trim().length < 10) {
+      alert('Please provide a school, tool, rating and a longer review (min 10 chars).');
+      return;
+    }
+
+    fetch('/api/reviews', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          throw new Error(body?.error || 'Failed to submit review');
+        }
+        return res.json();
+      })
+      .then(() => {
+        alert('Review submitted — thank you!');
+        clearForm();
+      })
+      .catch((err) => {
+        // eslint-disable-next-line no-console
+        console.error(err);
+        alert('Failed to submit review. Please try again later.');
+      });
   }
 
   return (
