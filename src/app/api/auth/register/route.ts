@@ -1,7 +1,7 @@
 /* eslint-disable import/prefer-default-export */
 import { NextResponse } from 'next/server';
 import { hash } from 'bcrypt';
-import { prisma } from '@/lib/prisma';
+import prisma from '@/lib/prisma';
 
 export async function POST(req: Request) {
   try {

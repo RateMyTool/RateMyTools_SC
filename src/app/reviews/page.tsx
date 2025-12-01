@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma';
+import prisma from '@/lib/prisma';
 
 export const metadata = {
   title: 'Reviews',
@@ -12,6 +12,17 @@ export default async function ReviewsPage() {
   console.log('ENV POSTGRES_PRISMA_URL:', process.env.POSTGRES_PRISMA_URL);
   // eslint-disable-next-line no-console
   console.log('ENV POSTGRES_URL_NON_POOLING:', process.env.POSTGRES_URL_NON_POOLING);
+
+  // Debug: inspect prisma runtime shape
+  // eslint-disable-next-line no-console
+  try { console.log('prisma keys:', Object.keys(prisma || {})); } catch (e) { console.log('prisma inspect error', e); }
+  try {
+    // eslint-disable-next-line no-console
+    console.log('prisma models:', Object.keys((prisma as any)._runtimeDataModel?.model || (prisma as any)._runtimeDataModel?.models || {}));
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.log('prisma models inspect error', e);
+  }
 
   const reviews = await prisma.review.findMany({ orderBy: { createdAt: 'desc' } });
 
