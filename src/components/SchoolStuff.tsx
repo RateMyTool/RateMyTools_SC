@@ -2,8 +2,9 @@
 
 /* eslint-disable jsx-a11y/label-has-associated-control */
 
-import { useMemo, useState, Col } from 'react';
-
+import { useMemo, useState } from 'react';
+import { Container, Row, Col } from 'react-bootstrap';
+import Image from 'next/image';
 
   type Tool = {
     id: string
@@ -89,12 +90,26 @@ export default function SchoolStuff({
   }, [tools, sort]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="mx-auto max-w-7xl px-4 py-6">
-        <div className="grid gap-6 md:grid-cols-12">
+    <div className="min-h-screen bg-gray-50 d-flex">
+      <div className="mx-auto max-w-7xl px-4">
+        <div className="grid gap-4 md:grid-cols-12">
           {/* Left Column */}
           <Col>
-            <h1>wadwa</h1>
+            <Col>
+              <Image
+                src="/uhlogo.png"
+                alt="UH Logo"
+                width={100}
+                height={100}
+                className="mb-4"
+              />
+            </Col>
+            <Col>
+              MIT
+              HAWAII
+              {schoolName}
+              {location}
+            </Col>
           </Col>
         </div>
       </div>
