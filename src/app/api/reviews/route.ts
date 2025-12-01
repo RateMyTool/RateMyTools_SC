@@ -1,8 +1,16 @@
 import { NextResponse } from 'next/server';
+import { getToken } from 'next-auth/jwt';
 import prisma from '@/lib/prisma';
 
 export async function POST(request: Request) {
   try {
+    // Require an authenticated user/token
+    const token = await getToken({ req: request as any, secret: process.env.NEXTAUTH_SECRET });
+    // require a valid token with identifying information
+    if (!token || (!token.sub && !token.id && !token.email)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await request.json();
     const { school, tool, subject, courseNumber, rating, tags, review } = body;
 

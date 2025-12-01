@@ -1,10 +1,13 @@
 "use client";
 
 import React, { useState } from 'react';
+import { useSession } from 'next-auth/react';
 
 const availableTags = ['Easy to Use', 'Free', 'Expensive', 'Buggy'];
 
 export default function RateToolForm() {
+  const { data: session, status } = useSession();
+
   const [school, setSchool] = useState('');
   const [tool, setTool] = useState('');
   const [subject, setSubject] = useState('');
@@ -51,6 +54,11 @@ export default function RateToolForm() {
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (status !== 'authenticated') {
+      // Open the app's auth modal so users can sign in without leaving the page
+      window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: { mode: 'login' } }));
+      return;
+    }
     const payload = { school, tool, subject, courseNumber, rating, tags, review };
     // basic client validation
     if (!school || !tool || !rating || review.trim().length < 10) {
@@ -61,6 +69,7 @@ export default function RateToolForm() {
     fetch('/api/reviews', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
       body: JSON.stringify(payload),
     })
       .then(async (res) => {
@@ -85,6 +94,20 @@ export default function RateToolForm() {
     <div className="container py-8 d-flex justify-content-center">
       <div className="card w-75 p-4">
         <form onSubmit={submit}>
+          {status === 'unauthenticated' && (
+            <div className="alert alert-warning d-flex justify-content-between align-items-center">
+              <div>Please sign in to submit a review.</div>
+              <div>
+                <button
+                  type="button"
+                  className="btn btn-sm btn-primary"
+                  onClick={() => window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: { mode: 'login' } }))}
+                >
+                  Sign in
+                </button>
+              </div>
+            </div>
+          )}
           <div className="mb-3">
             <label className="form-label">Your School *</label>
             <input
@@ -220,7 +243,9 @@ export default function RateToolForm() {
 
           <div className="d-flex justify-content-between">
             <button type="button" className="btn btn-outline-secondary" onClick={clearForm}>Cancel</button>
-            <button type="submit" className="btn btn-dark">Submit Rating</button>
+            <button type="submit" className="btn btn-dark" disabled={status !== 'authenticated'}>
+              {status === 'loading' ? 'Loading…' : status === 'authenticated' ? 'Submit Rating' : 'Sign in to Submit'}
+            </button>
           </div>
         </form>
       </div>
