@@ -75,8 +75,8 @@ export default function ToolPage() {
   const sorted = reviews; // Placeholder for sort logic when select changes
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
-        <div className="container py-4">
+    <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb', paddingTop: '80px' }}>
+      <div className="container py-4">
         <div className="row g-4">
           {/* Left Sidebar - Tool Info */}
           <div className="col-12 col-lg-4">
@@ -239,6 +239,6 @@ export default function ToolPage() {
           </div>
         </div>
       </div>
-  </div>
+    </div>
   );
 }
