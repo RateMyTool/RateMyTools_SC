@@ -53,11 +53,6 @@ const AuthModal: React.FC<Props> = ({ show, onClose, initialMode }) => {
     }
   };
 
-  const handleGoogle = async () => {
-    // This will redirect to the Google sign in flow
-    await signIn('google');
-  };
-
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -102,15 +97,6 @@ const AuthModal: React.FC<Props> = ({ show, onClose, initialMode }) => {
         {error ? <Alert variant="danger">{error}</Alert> : null}
         {mode === 'login' ? (
           <Form onSubmit={handleSignIn}>
-            <div className="d-grid gap-2 mb-3">
-              <Button variant="light" onClick={handleGoogle} className="text-start">
-                <strong>Google</strong>
-                <div className="small">Login with Google</div>
-              </Button>
-            </div>
-
-            <div className="text-center mb-2">Or login with email</div>
-
             <Form.Group className="mb-3">
               <Form.Label>Email</Form.Label>
               <Form.Control
@@ -165,15 +151,6 @@ const AuthModal: React.FC<Props> = ({ show, onClose, initialMode }) => {
           </Form>
         ) : (
           <Form onSubmit={handleSignUp}>
-            <div className="d-grid gap-2 mb-3">
-              <Button variant="light" onClick={handleGoogle} className="text-start">
-                <strong>Google</strong>
-                <div className="small">Sign up with Google</div>
-              </Button>
-            </div>
-
-            <div className="text-center mb-2">Or sign up with email</div>
-
             <Form.Group className="mb-3">
               <Form.Label>Email</Form.Label>
               <Form.Control

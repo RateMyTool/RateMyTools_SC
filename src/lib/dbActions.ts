@@ -3,7 +3,7 @@
 import { Stuff, Condition } from '@prisma/client';
 import { hash } from 'bcrypt';
 import { redirect } from 'next/navigation';
-import { prisma } from './prisma';
+import prisma from './prisma';
 
 /**
  * Adds a new stuff to the database.
