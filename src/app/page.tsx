@@ -12,11 +12,11 @@ export default function Home() {
   return (
     <main>
       <TopMenu title={title} />
-        {ComparePage()}
+      <MiddleMenu title={title} setTitle={setTitle} />
       <FooterMenu />
     </main>
   );
-}
+}//  {ComparePage()}
 
   /** The Home page. */
   /*

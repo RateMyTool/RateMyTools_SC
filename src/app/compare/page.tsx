@@ -1,9 +1,13 @@
 
-import React from "react";
+'use client';
+
+import React, { useState } from "react";
 import { Col, Container, Row, Image, DropdownMenu, DropdownItem, Dropdown, DropdownToggle, Button } from "react-bootstrap";
 import StarFull from '@/Icon_StarFull.png';
 import StarHalf from '@/Icon_StarHalf.png';
 import StarNone from '@/Icon_StarNone.png';
+import TopMenu from "@/components/TopMenu";
+import FooterMenu from "@/components/FooterMenu";
 //import { useSession } from 'next-auth/react';
 
 
@@ -63,6 +67,7 @@ const SetRelated = (toSet: string) =>
 }
 
 const ComparePage = () => {
+    const [title, setTitle] = useState('TOOLS');
      // PLACEHOLDER
     const getSchool: string = "UH Manoa";
 
@@ -87,6 +92,7 @@ const ComparePage = () => {
     return (
         /* Display the header */
         <main className={mainPage}>
+            <TopMenu title={title} />
             {/* Top bar with our search term school */}
             <Container id="compare-page-school">
                 <div className="d-flex flex-row">
@@ -130,6 +136,7 @@ const ComparePage = () => {
                 </Row>
             </Container>
             { ComparePagePanels(selectedTool, shownTools) }
+            <FooterMenu />
         </main>
         /* Display the footer */
     );
