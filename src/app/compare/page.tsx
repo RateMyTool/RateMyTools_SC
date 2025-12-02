@@ -70,6 +70,7 @@ const ComparePage = () => {
     const [title, setTitle] = useState('TOOLS');
      // PLACEHOLDER
     const getSchool: string = "UH Manoa";
+    const layoutList: boolean = false;// List mode is WIP
 
     getTools = [];
     getTools.push(new RatedToolSummary("SelectedTool", 10, 51, ["Fast"], "a default tool used by all"));
@@ -135,7 +136,12 @@ const ComparePage = () => {
                     </Col>
                 </Row>
             </Container>
-            { ComparePagePanels(selectedTool, shownTools) }
+            {(() => {
+                if (layoutList) 
+                    return ComparePageList(selectedTool, shownTools);
+                else
+                    return ComparePagePanels(selectedTool, shownTools);
+            })()}
             <FooterMenu />
         </main>
         /* Display the footer */
