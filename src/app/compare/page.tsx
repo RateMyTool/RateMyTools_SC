@@ -96,6 +96,7 @@ const ComparePage = () => {
     return (
         /* Display the header */
         <main className={mainPage}>
+            <div style={{ height: 112 }} />
             {/* Top bar with our search term school */}
             <Container id="compare-page-school">
                 <div className="d-flex flex-row">
