@@ -17,3 +17,6 @@ export const prisma =
   });
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+
+// Provide a default export as well to avoid binding issues in some runtime bundling scenarios.
+export default prisma;
