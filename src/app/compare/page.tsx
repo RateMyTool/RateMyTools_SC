@@ -20,6 +20,9 @@ const selectorBorder = borderPage + 'border border-black bg-black text-white tex
 const countBorder = borderPage + 'border border-primary bg-primary-subtle text-black text-start hover:opacity-90 flex items-left text-lg font-medium gap-4';
 const compressedText = 'text-black text-start flex items-left text-lg font-medium gap-4';
 
+const selectorText = 'text-black';
+
+
 const selectedText = 'text-primary';
 const panelClassMain = borderPanel + ' mx-0 bg-white text-black flex items-center text-lg font-medium gap-0';
 const panelClassSelected = panelClassMain + ' border border-primary';
@@ -93,7 +96,6 @@ const ComparePage = () => {
     return (
         /* Display the header */
         <main className={mainPage}>
-            <TopMenu title={title} />
             {/* Top bar with our search term school */}
             <Container id="compare-page-school">
                 <div className="d-flex flex-row">
@@ -119,7 +121,7 @@ const ComparePage = () => {
                         <select 
                             //value= {getTools.indexOf(selectedTool)}
                             //onChange= {x => SetRelated(x.target.value) } 
-                            className="d-flex flex-column"
+                            className={"d-flex flex-column " + selectorText}
                         > 
                             {(() => {
                                 const rows: React.JSX.Element[] = [];
@@ -142,7 +144,6 @@ const ComparePage = () => {
                 else
                     return ComparePagePanels(selectedTool, shownTools);
             })()}
-            <FooterMenu />
         </main>
         /* Display the footer */
     );
@@ -166,21 +167,23 @@ const ComparePagePanels = (selected: RatedToolSummary, theList: RatedToolSummary
                     <div className="flex" />
                 </div>
             </Row>
-            <Row>
-                { ComparePagePanel(selectedTool, scale, selectedText, panelClassSelected)}
-                {/* For each rating, we call ComparePagePanel() to display a row for the tool */}
-                {(() => {
-                    const rows: React.JSX.Element[] = [];
-                    const end: RatedToolSummary = theList[theList.length - 1];
-                    theList.forEach(x => 
-                        {
-                            if (selected != x && end != x )
-                                rows.push(ComparePagePanel(x, scale, "", panelClass))
-                        }
-                    );
-                    return rows;
-                })()}
-                { ComparePagePanel(ending, scale, "", panelClassEnd)}
+            <Row  className="">
+                <div className="flex flex-row">
+                    { ComparePagePanel(selectedTool, scale, selectedText, panelClassSelected)}
+                    {/* For each rating, we call ComparePagePanel() to display a row for the tool */}
+                    {(() => {
+                        const rows: React.JSX.Element[] = [];
+                        const end: RatedToolSummary = theList[theList.length - 1];
+                        theList.forEach(x => 
+                            {
+                                if (selected != x && end != x )
+                                    rows.push(ComparePagePanel(x, scale, "", panelClass))
+                            }
+                        );
+                        return rows;
+                    })()}
+                    { ComparePagePanel(ending, scale, "", panelClassEnd)}
+                </div>
             </Row>
         </Container>
     )
@@ -188,7 +191,7 @@ const ComparePagePanels = (selected: RatedToolSummary, theList: RatedToolSummary
 const ComparePagePanel = (theTool: RatedToolSummary, scale: number, classNameTitle: string, classNameBack: string) => {
     // PLACEHOLDER FOR MOCKUP
     return (
-        <Col className={classNameBack}>
+        <Col className={classNameBack + "flex flex-col"}>
             {ShowToolName(theTool, classNameTitle)}
             {ShowToolStarRatingBIG(theTool, scale)}
             {ShowToolTags(theTool, scale)}
@@ -404,22 +407,25 @@ const ShowToolStarRating = (starFullState: number, scale: number) => {
     return (
         /* We make sure our given data yields any ratings, otherwise we ignore. */
         <Container id="ratedTool-Stars" className="align-middle text-center" fluid="sm">
-            <Row xs={5}>
-                <Col xs={1} className="align-middle text-center mx-1">
+            <Row>
+                
+                <div className="flex flex-row">
+                <Col className="align-middle text-center mx-1">
                     { displayToolStar(clampForStar(starFullState, 0), scale) }
                 </Col>
-                <Col xs={1} className="align-middle text-center mx-1">
+                <Col className="align-middle text-center mx-1">
                     { displayToolStar(clampForStar(starFullState, 2), scale) }
                 </Col>
-                <Col xs={1} className="align-middle text-center mx-1">
+                <Col className="align-middle text-center mx-1">
                     { displayToolStar(clampForStar(starFullState, 4), scale) }
                 </Col>
-                <Col xs={1} className="align-middle text-center mx-1">
+                <Col className="align-middle text-center mx-1">
                     { displayToolStar(clampForStar(starFullState, 6), scale) }
                 </Col>
-                <Col xs={1} className="align-middle text-center mx-1">
+                <Col className="align-middle text-center mx-1">
                     { displayToolStar(clampForStar(starFullState, 8), scale) }
                 </Col>
+                </div>
             </Row>
         </Container>
     )

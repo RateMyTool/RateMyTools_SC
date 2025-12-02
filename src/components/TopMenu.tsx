@@ -43,9 +43,12 @@ const TopMenu = ({ title }: TopMenuProps) => {
           >
             View Reviews
           </Link>
-          <span className="text-gray-400 font-semibold text-lg cursor-not-allowed whitespace-nowrap px-5">
+          <Link 
+            href="/compare" 
+            className="text-black hover:text-gray-600 hover:underline font-semibold text-lg no-underline whitespace-nowrap px-5"
+          >
             Compare Tools
-          </span>
+          </Link>
           <span className="text-gray-400 font-semibold text-lg cursor-not-allowed whitespace-nowrap px-5">
             School Page
           </span>
