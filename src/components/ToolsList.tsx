@@ -1,4 +1,7 @@
-import React from 'react';
+'use client';
+
+import React, { useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Star } from 'lucide-react';
 
 const tools = [
@@ -51,7 +54,38 @@ const tools = [
   },
 ];
 
+type SortKey = 'relevance' | 'highest' | 'lowest' | 'most' | 'recent';
+
 export default function ToolsList() {
+  const router = useRouter();
+  const [sortBy, setSortBy] = useState<SortKey>('relevance');
+
+  const sortedTools = useMemo(() => {
+    const list = [...tools];
+
+    switch (sortBy) {
+      case 'highest':
+        list.sort((a, b) => b.rating - a.rating);
+        break;
+      case 'lowest':
+        list.sort((a, b) => a.rating - b.rating);
+        break;
+      case 'most':
+        list.sort((a, b) => b.totalRatings - a.totalRatings);
+        break;
+      case 'recent':
+        // No real dates yet; use id DESC as a stand‑in for "newest".
+        list.sort((a, b) => b.id - a.id);
+        break;
+      case 'relevance':
+      default:
+        // Keep original order for now; could plug in a relevance score later.
+        break;
+    }
+
+    return list;
+  }, [sortBy]);
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6 pb-3">
@@ -59,6 +93,8 @@ export default function ToolsList() {
         <select
           className="px-3 py-2 border rounded"
           style={{ borderColor: '#d1d5db', backgroundColor: 'white' }}
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value as SortKey)}
         >
           <option value="relevance">Most Relevant</option>
           <option value="highest">Highest Rated</option>
@@ -69,7 +105,7 @@ export default function ToolsList() {
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        {tools.map((tool) => (
+        {sortedTools.map((tool) => (
           <div
             key={tool.id}
             className="p-4"
@@ -90,17 +126,39 @@ export default function ToolsList() {
               <div className="flex-1">
                 <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="mb-0.5">{tool.name}</h3>
+                    <button
+                      type="button"
+                      className="mb-0.5 text-left"
+                      onClick={() => router.push(`/tool/${tool.id}`)}
+                      style={{
+                        cursor: 'pointer',
+                        background: 'none',
+                        border: 'none',
+                        padding: 0,
+                        font: 'inherit',
+                        fontSize: '1.25rem',
+                        fontWeight: '600',
+                      }}
+                    >
+                      {tool.name}
+                    </button>
                     <p className="text-sm mb-2" style={{ color: '#6b7280' }}>{tool.category}</p>
                   </div>
-                  <div className="flex items-center gap-1" style={{ color: '#374151' }}>
+                  <button
+                    type="button"
+                    className="flex items-center gap-1"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      router.push(`/tool/${tool.id}/ratings`);
+                    }}
+                    style={{ color: '#374151', cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}
+                  >
                     <Star style={{ width: '16px', height: '16px', fill: '#fbbf24', color: '#fbbf24' }} />
                     <span className="text-sm">
                       {tool.totalRatings}
                       {' '}
-                      ratings
                     </span>
-                  </div>
+                  </button>
                 </div>
 
                 {/* Description */}

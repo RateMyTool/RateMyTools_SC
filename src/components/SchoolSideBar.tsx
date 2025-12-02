@@ -1,7 +1,25 @@
+'use client';
+
 /* eslint-disable jsx-a11y/label-has-associated-control */
+
+import { useState } from 'react';
 import { MapPin, School } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export default function SchoolSideBar() {
+  const router = useRouter();
+  const [subject, setSubject] = useState('all');
+  const [crn, setCrn] = useState('');
+
+  const handleClear = () => {
+    setSubject('all');
+    setCrn('');
+  };
+
+  const handleApply = () => {
+    console.log('Applying filters:', { subject, crn });
+  };
+
   return (
     <aside style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
@@ -49,9 +67,11 @@ export default function SchoolSideBar() {
 
         {/* Rate A Tool Button */}
         <div className="flex justify-center px-4">
+          {/* Routing to Rate page to be implemented */}
           <button
             type="button"
             className="mt-5 mb-4 text-sm font-medium"
+            onClick={() => router.push('/')}
             style={{
               backgroundColor: '#000',
               color: 'white',
@@ -87,6 +107,8 @@ export default function SchoolSideBar() {
             <select
               id="subject"
               className="w-full px-3 py-2 text-sm"
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
               style={{
                 border: '1px solid #d1d5db',
                 borderRadius: '6px',
@@ -110,6 +132,8 @@ export default function SchoolSideBar() {
               type="text"
               placeholder="e.g., 12345"
               className="w-full px-3 py-2 text-sm"
+              value={crn}
+              onChange={(e) => setCrn(e.target.value)}
               style={{
                 border: '1px solid #d1d5db',
                 borderRadius: '6px',
@@ -122,6 +146,7 @@ export default function SchoolSideBar() {
             <button
               type="button"
               className="flex-1 py-2 text-sm font-medium"
+              onClick={handleClear}
               style={{
                 border: '1px solid #d1d5db',
                 borderRadius: '6px',
@@ -134,6 +159,7 @@ export default function SchoolSideBar() {
             <button
               type="button"
               className="flex-1 py-2 text-sm font-medium"
+              onClick={handleApply}
               style={{
                 backgroundColor: '#000',
                 color: 'white',
