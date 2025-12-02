@@ -3,9 +3,6 @@
 
 import React, { useState } from "react";
 import { Col, Container, Row, Image, DropdownMenu, DropdownItem, Dropdown, DropdownToggle, Button } from "react-bootstrap";
-import StarFull from '@/Icon_StarFull.png';
-import StarHalf from '@/Icon_StarHalf.png';
-import StarNone from '@/Icon_StarNone.png';
 import TopMenu from "@/components/TopMenu";
 import FooterMenu from "@/components/FooterMenu";
 //import { useSession } from 'next-auth/react';
@@ -451,15 +448,15 @@ const displayToolStar = (starState: number, scale: number) => {
 
 const starNone = (scale: number) =>
 (
-    <img className="mx-2" src={StarNone.src} width={scale} height={scale} alt="o" />
+    <img className="mx-2" src="/Icon_StarNone.png" width={scale} height={scale} alt="o" />
 )
 const starHalf = (scale: number) =>
 (
-    <img className="mx-2" src={StarHalf.src} width={scale} height={scale} alt="*" />
+    <img className="mx-2" src="/Icon_StarHalf.png" width={scale} height={scale} alt="*" />
 )
 const starFull = (scale: number) =>
 (
-    <img className="mx-2" src={StarFull.src} width={scale} height={scale} alt="#" />
+    <img className="mx-2" src="/Icon_StarFull.png" width={scale} height={scale} alt="#" />
 )
 
 
