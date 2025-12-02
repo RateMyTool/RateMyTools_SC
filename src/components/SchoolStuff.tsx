@@ -5,6 +5,8 @@
 import { useMemo, useState } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import Image from 'next/image';
+import * as Icons from 'react-bootstrap-icons';
+import { Link } from 'react-bootstrap-icons';
 
   type Tool = {
     id: string
@@ -90,27 +92,120 @@ export default function SchoolStuff({
   }, [tools, sort]);
 
   return (
-    <div className="min-h-screen bg-gray-50 d-flex">
-      <div className="mx-auto max-w-7xl px-4">
-        <div className="grid gap-4 md:grid-cols-12">
+    <div className="min-h-screen bg-gray-50">
+      <div className="mx-auto max-w-7xl px-4 py-6">
+        <div className="grid gap-6 md:grid-cols-12">
           {/* Left Column */}
-          <Col>
-            <Col>
-              <Image
-                src="/uhlogo.png"
-                alt="UH Logo"
-                width={100}
-                height={100}
-                className="mb-4"
-              />
-            </Col>
-            <Col>
-              MIT
-              HAWAII
-              {schoolName}
-              {location}
-            </Col>
-          </Col>
+          <aside className="md:col-span-4 space-y-6">
+            <div className="rounded-lg border bg-white p-5 shadow-sm">
+              <div>
+                <Image
+                  src="/uhlogo.png"
+                  alt="UH Logo"
+                  width={100}
+                  height={100}
+                  className="mb-4"
+                />
+              </div>
+              <div className="text-center">
+                MIT {schoolName}
+              </div>
+              <div className="text-center" style={{ color: 'gray' }}>
+                <Icons.GeoAltFill /> HAWAII {location}
+              </div>
+              <div className="grid grid-cols-3 gap-2 text-center mt-4">
+                <div className="rounded bg-gray-100 p-2">
+                  <p className="text-xs text-gray-500">Total Tools</p>
+                  <p className="font-medium">{tools.length}</p>
+                </div>
+                <div className="rounded bg-gray-100 p-2">
+                  <p className="text-xs text-gray-500">Avg. Rating</p>
+                  <p className="font-medium">
+                    {(tools.reduce((acc, t) => acc + t.rating, 0) / tools.length).toFixed(2)}
+                  </p>
+                </div>
+                <div className="rounded bg-gray-100 p-2">
+                  <p className="text-xs text-gray-500">Total Reviews</p>
+                  <p className="font-medium">
+                    {tools.reduce((acc, t) => acc + t.ratingsCount, 0)}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="rounded-lg border bg-white p-5 shadow-sm">
+              <h2 className="text-lg font-medium mb-4">Filters</h2>
+              <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+                <div>
+                  <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">Subject</label>
+                  <select
+                    id="subject"
+                    value={subject}
+                    onChange={(e) => setSubject(e.target.value)}
+                    className={[
+                      'w-full rounded border-gray-300 focus:border-indigo-500 focus:ring-indigo-500',
+                      'text-sm',
+                    ].join(' ')}
+                  >
+                    <option>All</option>
+                    <option>Computer Science</option>
+                    <option>Design</option>
+                    <option>Business</option>
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="crn" className="block text-sm font-medium text-gray-700 mb-1">CRN</label>
+                  <input
+                    id="crn"
+                    type="text"
+                    value={crn}
+                    onChange={(e) => setCrn(e.target.value)}
+                    placeholder="e.g. 12345"
+                    className={[
+                      'w-full rounded border-gray-300 focus:border-indigo-500 focus:ring-indigo-500',
+                      'text-sm',
+                    ].join(' ')}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="sort" className="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
+                  <select
+                    id="sort"
+                    value={sort}
+                    onChange={(e) => setSort(e.target.value as 'Highest Rated' | 'Most Ratings')}
+                    className={[
+                      'w-full rounded border-gray-300 focus:border-indigo-500 focus:ring-indigo-500',
+                      'text-sm',
+                    ].join(' ')}
+                  >
+                    <option>Most Relevant</option>
+                    <option>Highest Rated</option>
+                    <option>Lowest Rated</option>
+                    <option>Most Reviewed</option>
+                    <option>Most Recent</option>
+                  </select>
+                </div>
+                <div className="pt-2">
+                  <a
+                    href="/add"
+                    className={[
+                      'inline-flex w-full justify-center rounded bg-indigo-600 px-4 py-2',
+                      'text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none',
+                      'focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
+                    ].join(' ')}
+                  >
+                    Rate a Tool
+                  </a>
+                </div>
+              </form>
+            </div>
+          </aside>
+          {/* Right Column */}
+          <section className="md:col-span-8">
+            <div className="rounded-lg border bg-white p-5 shadow-sm">
+              <h2 className="text-lg font-medium mb-4">Tools</h2>
+              {/* Content goes here */}
+            </div>
+          </section>
         </div>
       </div>
     </div>
