@@ -5,7 +5,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import NavBar from '@/components/Navbar';
 import TopMenu from '@/components/TopMenu';
 import AuthModalHost from '@/components/AuthModalHost';
-import TopMenu from '@/components/TopMenu';
 import Providers from './providers';
 
 const inter = Inter({ subsets: ['latin'] });
