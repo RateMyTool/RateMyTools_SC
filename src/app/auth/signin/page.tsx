@@ -1,61 +1,69 @@
-'use client';
+"use client";
 
+import { useState } from 'react';
 import { signIn } from 'next-auth/react';
-import { Button, Card, Col, Container, Form, Row } from 'react-bootstrap';
+import Link from 'next/link';
 
-/** The sign in page. */
-const SignIn = () => {
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+export default function SignIn() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const target = e.target as typeof e.target & {
-      email: { value: string };
-      password: { value: string };
-    };
-    const email = target.email.value;
-    const password = target.password.value;
-    const result = await signIn('credentials', {
-      callbackUrl: '/list',
-      email,
-      password,
-    });
-
-    if (result?.error) {
-      console.error('Sign in failed: ', result.error);
+    setError(null);
+    setLoading(true);
+    const res = await signIn('credentials', { redirect: false, email, password });
+    setLoading(false);
+    if (!res) {
+      setError('Sign-in failed (no response)');
+      return;
     }
+    if (res.error) {
+      setError(res.error);
+      return;
+    }
+    // successful -> redirect to home or callbackUrl handled by NextAuth
+    window.location.href = (res as any).url || '/';
   };
 
   return (
-    <main>
-      <Container>
-        <Row className="justify-content-center">
-          <Col xs={5}>
-            <h1 className="text-center">Sign In</h1>
-            <Card>
-              <Card.Body>
-                <Form method="post" onSubmit={handleSubmit}>
-                  <Form.Group controlId="formBasicEmail">
-                    <Form.Label>Email</Form.Label>
-                    <input name="email" type="text" className="form-control" />
-                  </Form.Group>
-                  <Form.Group>
-                    <Form.Label>Password</Form.Label>
-                    <input name="password" type="password" className="form-control" />
-                  </Form.Group>
-                  <Button type="submit" className="mt-3">
-                    Signin
-                  </Button>
-                </Form>
-              </Card.Body>
-              <Card.Footer>
-                Don&apos;t have an account?
-                <a href="/auth/signup">Sign up</a>
-              </Card.Footer>
-            </Card>
-          </Col>
-        </Row>
-      </Container>
-    </main>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="max-w-md w-full p-8 bg-white rounded-lg shadow">
+        <h2 className="text-center text-2xl font-bold mb-4">Sign In</h2>
+        {error && <div className="alert alert-danger">{error}</div>}
+        <form onSubmit={onSubmit} className="space-y-4">
+          <div>
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email address"
+              className="form-control"
+            />
+          </div>
+          <div>
+            <input
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              className="form-control"
+            />
+          </div>
+          <div>
+            <button type="submit" className="btn btn-dark w-100" disabled={loading}>
+              {loading ? 'Signing in…' : 'Sign in'}
+            </button>
+          </div>
+        </form>
+        <div className="text-center mt-3">
+          <Link href="/auth/signup" className="text-blue-600 hover:text-blue-500">Create account</Link>
+        </div>
+      </div>
+    </div>
   );
-};
-
-export default SignIn;
+}

@@ -2,6 +2,7 @@
 
 'use client';
 
+import React from 'react';
 import { useSession } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 import { Container, Nav, Navbar, NavDropdown } from 'react-bootstrap';
@@ -13,10 +14,16 @@ const NavBar: React.FC = () => {
   const userWithRole = session?.user as { email: string; randomKey: string };
   const role = userWithRole?.randomKey;
   const pathName = usePathname();
+  // Dispatch a global event to open the top-level auth modal
+  const openAuthModal = (mode: 'login' | 'signup') => {
+    window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: { mode } }));
+  };
   return (
     <Navbar bg="light" expand="lg">
       <Container>
-        <Navbar.Brand href="/">Next.js Application Template</Navbar.Brand>
+        <Navbar.Brand href="/">
+          <img src="/RATEMY.png" alt="Rate My Tools" style={{ height: '32px' }} />
+        </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto justify-content-start">
@@ -51,16 +58,35 @@ const NavBar: React.FC = () => {
                 </NavDropdown.Item>
               </NavDropdown>
             ) : (
-              <NavDropdown id="login-dropdown" title="Login">
-                <NavDropdown.Item id="login-dropdown-sign-in" href="/auth/signin">
-                  <PersonFill />
-                  Sign in
-                </NavDropdown.Item>
-                <NavDropdown.Item id="login-dropdown-sign-up" href="/auth/signup">
-                  <PersonPlusFill />
-                  Sign up
-                </NavDropdown.Item>
-              </NavDropdown>
+              <>
+                <NavDropdown id="login-dropdown" title="Login">
+                  <NavDropdown.Item
+                    as="button"
+                    id="login-dropdown-sign-in"
+                    onClick={(e: React.MouseEvent) => {
+                      e.preventDefault();
+                      openAuthModal('login');
+                    }}
+                  >
+                    <PersonFill />
+                    {' '}
+                    Sign in (pop up)
+                  </NavDropdown.Item>
+                  <NavDropdown.Item
+                    as="button"
+                    id="login-dropdown-sign-up"
+                    onClick={(e: React.MouseEvent) => {
+                      e.preventDefault();
+                      openAuthModal('signup');
+                    }}
+                  >
+                    <PersonPlusFill />
+                    {' '}
+                    Sign up (pop up)
+                  </NavDropdown.Item>
+                </NavDropdown>
+                {/* AuthModal is hosted at the app root (AuthModalHost) and listens for the `open-auth-modal` event */}
+              </>
             )}
           </Nav>
         </Navbar.Collapse>
