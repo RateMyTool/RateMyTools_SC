@@ -5,6 +5,10 @@ export const metadata = {
   title: 'Review',
 };
 
+// Disable caching
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 type Params = {
   params: {
     id: string;
@@ -18,7 +22,7 @@ export default async function ReviewDetailPage({ params }: Params) {
   if (!review) {
     return (
       <main>
-        <div style={{ height: 112 }} />
+        <div style={{ height: '80px' }} />
         <div className="container py-4">
           <h1 className="mb-3">Review Not Found</h1>
           <p className="text-muted">This review does not exist.</p>
@@ -32,7 +36,7 @@ export default async function ReviewDetailPage({ params }: Params) {
 
   return (
     <main>
-      <div style={{ height: 112 }} />
+      <div style={{ height: '80px' }} />
       <div className="container py-4">
         <h1 className="mb-2">{review.tool} — {review.school}</h1>
         {classLabel && <p className="mb-1"><strong>Class:</strong> {classLabel}</p>}
