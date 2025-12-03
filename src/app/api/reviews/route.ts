@@ -4,10 +4,9 @@ import prisma from '@/lib/prisma';
 
 export async function POST(request: NextRequest) {
   try {
-    // Use getToken with NextRequest - works better in App Router
     const token = await getToken({
       req: request,
-      secret: process.env.NEXTAUTH_SECRET
+      secret: process.env.NEXTAUTH_SECRET,
     });
 
     if (!token || !token.email) {
@@ -15,7 +14,9 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { school, tool, subject, courseNumber, rating, tags, review } = body;
+    const {
+      school, tool, subject, courseNumber, rating, tags, review,
+    } = body;
 
     if (!school || !tool || typeof rating !== 'number' || !review) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -30,6 +31,7 @@ export async function POST(request: NextRequest) {
         rating,
         tags: (tags && Array.isArray(tags) ? tags : []).map(String),
         reviewText: review,
+        userEmail: token.email, // Add this line
       },
     });
 
