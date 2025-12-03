@@ -82,7 +82,7 @@ export default function RateToolForm() {
       .then(() => {
         alert('Review submitted — thank you!');
         clearForm();
-        window.location.href = ʻ/reviewsʻ;
+        window.location.href = '/reviews';
       })
       .catch((err) => {
         // eslint-disable-next-line no-console
