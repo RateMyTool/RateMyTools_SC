@@ -5,12 +5,16 @@ export const metadata = {
   title: 'Reviews',
 };
 
+// Disable caching for this page
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function ReviewsPage() {
   const reviews = await prisma.review.findMany({ orderBy: { createdAt: 'desc' } });
 
   return (
     <main>
-      <div style={{ height: 112 }} />
+      <div style={{ height: '80px' }} />
       <div className="container py-4">
         <h1 className="mb-3">Reviews</h1>
         {reviews.length === 0 ? (
