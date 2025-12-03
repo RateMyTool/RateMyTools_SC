@@ -91,7 +91,7 @@ export default function RateToolForm() {
   }
 
   return (
-    <div className="container py-8 d-flex justify-content-center">
+    <div className="container py-5 d-flex justify-content-center">
       <div className="card w-75 p-4">
         <form onSubmit={submit}>
           {status === 'unauthenticated' && (
