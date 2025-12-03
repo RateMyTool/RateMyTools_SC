@@ -23,5 +23,7 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: npx prisma db push --accept-data-loss
       - name: Build (verify)
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: npm run build
         
