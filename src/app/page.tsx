@@ -4,7 +4,7 @@ import TopMenu from '@/components/TopMenu';
 import MiddleMenu from '@/components/MiddleMenu';
 import FooterMenu from '@/components/FooterMenu';
 import { useState } from 'react';
-import ComparePage from '@/app/compare/page';
+// ComparePage import removed (unused)
 
   /** The Home page. */
 export default function Home() {
@@ -38,4 +38,4 @@ export default function Home() {
         </Container>
       </main>
     )
-  };*/
+  }; */

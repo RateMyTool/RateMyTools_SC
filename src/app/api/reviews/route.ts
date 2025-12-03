@@ -5,9 +5,9 @@ import prisma from '@/lib/prisma';
 export async function POST(request: NextRequest) {
   try {
     // Use getToken with NextRequest - works better in App Router
-    const token = await getToken({ 
+    const token = await getToken({
       req: request,
-      secret: process.env.NEXTAUTH_SECRET 
+      secret: process.env.NEXTAUTH_SECRET
     });
 
     if (!token || !token.email) {

@@ -42,9 +42,8 @@ const AuthModal: React.FC<Props> = ({ show, onClose, initialMode }) => {
     setLoading(true);
     const result = await signIn('credentials', { redirect: false, email, password });
     setLoading(false);
-    // result can be undefined in some cases
-    // @ts-ignore
-    if (result?.ok) {
+  // result can be undefined in some cases
+  if (result?.ok) {
       onClose();
       // reload to update session UI
       window.location.reload();
@@ -71,8 +70,7 @@ const AuthModal: React.FC<Props> = ({ show, onClose, initialMode }) => {
       if (resp.ok) {
         // Auto sign-in after successful registration
         const r = await signIn('credentials', { redirect: false, email, password });
-        // @ts-ignore
-        if (r?.ok) {
+  if (r?.ok) {
           onClose();
           window.location.reload();
         } else {
@@ -82,7 +80,7 @@ const AuthModal: React.FC<Props> = ({ show, onClose, initialMode }) => {
         const body = await resp.json().catch(() => null);
         setError(body?.message || 'Registration failed');
       }
-    } catch (err) {
+  } catch {
       setLoading(false);
       setError('Registration failed');
     }

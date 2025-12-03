@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import NavBar from '@/components/Navbar';
 import TopMenu from '@/components/TopMenu';
 import AuthModalHost from '@/components/AuthModalHost';
 import Providers from './providers';

@@ -24,8 +24,9 @@ export default function SignIn() {
       setError(res.error);
       return;
     }
-    // successful -> redirect to home or callbackUrl handled by NextAuth
-    window.location.href = (res as any).url || '/';
+  // successful -> redirect to home or callbackUrl handled by NextAuth
+  const maybeUrl = (res as unknown as { url?: string }).url;
+  window.location.href = maybeUrl || '/';
   };
 
   return (

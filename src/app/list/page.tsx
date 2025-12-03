@@ -12,7 +12,7 @@ const ListPage = async () => {
   loggedInProtectedPage(
     session as {
       user: { email: string; id: string; randomKey: string };
-      // eslint-disable-next-line @typescript-eslint/comma-dangle
+  // eslint-disable-next-line
     } | null,
   );
   const owner = (session && session.user && session.user.email) || '';

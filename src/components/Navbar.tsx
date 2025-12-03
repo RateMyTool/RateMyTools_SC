@@ -1,8 +1,9 @@
-/* eslint-disable react/jsx-indent, @typescript-eslint/indent */
+/* eslint-disable react/jsx-indent */
 
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { useSession } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 import { Container, Nav, Navbar, NavDropdown } from 'react-bootstrap';
@@ -22,7 +23,7 @@ const NavBar: React.FC = () => {
     <Navbar bg="light" expand="lg">
       <Container>
         <Navbar.Brand href="/">
-          <img src="/RATEMY.png" alt="Rate My Tools" style={{ height: '32px' }} />
+          <Image src="/RATEMY.png" alt="Rate My Tools" width={128} height={32} priority />
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">

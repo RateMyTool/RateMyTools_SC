@@ -3,7 +3,7 @@ import { compare } from 'bcrypt';
 import { type NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
-import prisma from '@/lib/prisma';
+import { prisma } from '@/lib/prisma';
 
 const authOptions: NextAuthOptions = {
   session: {
@@ -73,11 +73,13 @@ const authOptions: NextAuthOptions = {
     jwt: ({ token, user }) => {
       // console.log('JWT Callback', { token, user })
       if (user) {
-        const u = user as unknown as any;
+        const u = user as unknown as Record<string, unknown>;
+        const id = typeof u.id === 'string' || typeof u.id === 'number' ? String(u.id) : undefined;
+        const randomKey = typeof u.randomKey === 'string' ? u.randomKey : undefined;
         return {
           ...token,
-          id: u.id,
-          randomKey: u.randomKey,
+          ...(id ? { id } : {}),
+          ...(randomKey ? { randomKey } : {}),
         };
       }
       return token;

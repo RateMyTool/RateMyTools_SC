@@ -26,12 +26,30 @@ export default async function ReviewsPage() {
               return (
                 <Link key={r.id} href={`/reviews/${r.id}`} className="list-group-item list-group-item-action">
                   <div className="d-flex w-100 justify-content-between">
-                    <h5 className="mb-1">{r.tool} — {r.school}</h5>
+                    <h5 className="mb-1">
+                      {r.tool}
+                      {' '}
+                      —
+                      {' '}
+                      {r.school}
+                    </h5>
                     <small className="text-muted">{new Date(r.createdAt).toLocaleString()}</small>
                   </div>
-                  {classLabel && <div className="mb-1"><strong>Class:</strong> {classLabel}</div>}
+                  {classLabel && (
+                  <div className="mb-1">
+                    <strong>Class:</strong>
+                    {' '}
+                    {classLabel}
+                  </div>
+)}
                   <p className="mb-1 text-truncate">{r.reviewText}</p>
-                  <small className="text-muted">Rating: {r.rating} / 5 — Tags: {r.tags?.join(', ')}</small>
+                  <small className="text-muted">
+                    Rating:
+                    {r.rating}
+                    {' '}
+                    / 5 — Tags:
+                    {r.tags?.join(', ')}
+                  </small>
                 </Link>
               );
             })}

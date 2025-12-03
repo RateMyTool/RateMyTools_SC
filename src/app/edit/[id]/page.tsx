@@ -12,7 +12,7 @@ export default async function EditStuffPage({ params }: { params: { id: string |
   loggedInProtectedPage(
     session as {
       user: { email: string; id: string; randomKey: string };
-      // eslint-disable-next-line @typescript-eslint/comma-dangle
+  // eslint-disable-next-line
     } | null,
   );
   const id = Number(Array.isArray(params?.id) ? params?.id[0] : params?.id);

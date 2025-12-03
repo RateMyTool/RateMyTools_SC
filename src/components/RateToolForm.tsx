@@ -6,7 +6,7 @@ import { useSession } from 'next-auth/react';
 const availableTags = ['Easy to Use', 'Free', 'Expensive', 'Buggy'];
 
 export default function RateToolForm() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
 
   const [school, setSchool] = useState('');
   const [tool, setTool] = useState('');
@@ -153,7 +153,7 @@ export default function RateToolForm() {
                 <option key={t} value={t} />
               ))}
             </datalist>
-            <div className="form-text">Don't see your tool? Type it.</div>
+            <div className="form-text">Don&apos;t see your tool? Type it.</div>
           </div>
 
           <div className="row">
@@ -238,7 +238,7 @@ export default function RateToolForm() {
 
           <div className="mb-3">
             <label className="form-label">Your Review *</label>
-            <textarea className="form-control" rows={6} value={review} onChange={(e) => setReview(e.target.value)} placeholder="Share your experience with this tool. How did it help you in your coursework? What are its strengths and weaknesses?" />
+            <textarea className="form-control" rows={6} value={review} onChange={(e) => setReview(e.target.value)} placeholder="Share your experience and main strengths or weaknesses." />
             <div className="form-text">Minimum 50 characters</div>
           </div>
 
