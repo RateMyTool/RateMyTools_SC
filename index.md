@@ -188,6 +188,9 @@ app/
     signup/
       page.tsx # The Sign Up / Register Page
 
+  compare/
+    page.tsx # The Tool Comparison Page
+
   edit/
     page.tsx # The Edit Stuff Page
 
