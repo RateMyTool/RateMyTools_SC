@@ -6,6 +6,8 @@ import { useState } from 'react';
 import { MapPin, School } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
+import StarSingle from '@/components/StarSingleUI';
+
 export default function SchoolSideBar() {
   const router = useRouter();
   const [subject, setSubject] = useState('all');
@@ -59,7 +61,7 @@ export default function SchoolSideBar() {
               <span className="text-sm" style={{ color: '#2a2c31ff' }}>Avg. Rating</span>
               <span className="text-sm font-medium flex items-center gap-1">
                 4.5
-                <span style={{ color: '#eab308' }}>⭐</span>
+                {StarSingle(0, 1, 16)}
               </span>
             </div>
           </div>

@@ -2,7 +2,8 @@
 
 import React, { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Star } from 'lucide-react';
+
+import StarSingle from '@/components/StarSingleUI';
 
 const tools = [
   {
@@ -153,7 +154,7 @@ export default function ToolsList() {
                     }}
                     style={{ color: '#374151', cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}
                   >
-                    <Star style={{ width: '16px', height: '16px', fill: '#fbbf24', color: '#fbbf24' }} />
+                    {StarSingle(0, 1, 16)}
                     <span className="text-sm">
                       {tool.totalRatings}
                       {' '}
