@@ -17,7 +17,7 @@ title: string;
           <Link href="/" className="flex items-center gap-1 no-underline hover:no-underline">
             <Image
               src="/RATEMY.png"
-              alt="Rate My Tools Logo"
+              alt="Tools Logo"
               width={48}
               height={48}
               className="h-10 w-auto"
