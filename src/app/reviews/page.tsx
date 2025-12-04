@@ -36,19 +36,29 @@ export default async function ReviewsPage() {
                     <small className="text-muted">{new Date(r.createdAt).toLocaleString()}</small>
                   </div>
                   {classLabel && (
-                  <div className="mb-1">
-                    <strong>Class:</strong>
-                    {' '}
-                    {classLabel}
-                  </div>
-)}
+                    <div className="mb-1">
+                      <strong>Class:</strong>
+                      {' '}
+                      {classLabel}
+                    </div>
+                  )}
                   <p className="mb-1 text-truncate">{r.reviewText}</p>
                   <small className="text-muted">
                     Rating:
+                    {' '}
                     {r.rating}
                     {' '}
                     / 5 — Tags:
+                    {' '}
                     {r.tags?.join(', ')}
+                    {r.userEmail && (
+                      <>
+                        {' '}
+                        — By:
+                        {' '}
+                        {r.userEmail}
+                      </>
+                    )}
                   </small>
                 </Link>
               );

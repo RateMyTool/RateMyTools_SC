@@ -51,5 +51,6 @@ model Review {
   rating       Int
   tags         String[]
   reviewText   String   @map("review")
+  userEmail    String?
   createdAt    DateTime @default(now())
 }
