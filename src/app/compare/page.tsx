@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 import React from "react";
-import Image from 'next/image';
-import { Col, Container, Row, Button } from "react-bootstrap";
+import Stars from '@/components/StarsUI';
+import { Col, Container, Row, Button, Image } from "react-bootstrap";
 // import { useSession } from 'next-auth/react';
 
 const mainPage = 'bg-body-tertiary text-black';
@@ -63,12 +63,12 @@ const ComparePage = () => {
     const layoutList: boolean = false;// List mode is WIP
 
     getTools = [];
-    getTools.push(new RatedToolSummary("SelectedTool", 10, 51, ["Fast"], "a default tool used by all"));
-    getTools.push(new RatedToolSummary("barry", 10, 1367, ["Fast", "Simple", "Free"], "Industry standard"));
-    getTools.push(new RatedToolSummary("loadPls", 6, 473, ["Cloud", "Paid$"], "A slow and laggy tool"));
+    getTools.push(new RatedToolSummary("SelectedTool", 5, 51, ["Fast"], "a default tool used by all"));
+    getTools.push(new RatedToolSummary("barry", 5, 1367, ["Fast", "Simple", "Free"], "Industry standard"));
+    getTools.push(new RatedToolSummary("loadPls", 3, 473, ["Cloud", "Paid$"], "A slow and laggy tool"));
     getTools.push(new RatedToolSummary("nullrefWannaBee", 0, 342, ["Fast", "Ads"], "An awful tool"));
-    getTools.push(new RatedToolSummary("theWhuat", 4, 168, ["Fast", "Paid$$$"], "A confusing tool"));
-    getTools.push(new RatedToolSummary("TestRun", 7, 21, ["Fast", "Paid$"], "An experimental tool"));
+    getTools.push(new RatedToolSummary("theWhuat", 2, 168, ["Fast", "Paid$$$"], "A confusing tool"));
+    getTools.push(new RatedToolSummary("TestRun", 3.5, 21, ["Fast", "Paid$"], "An experimental tool"));
 
     selectedTool = getTools[0];
 
@@ -105,30 +105,30 @@ const ComparePage = () => {
             </Col>
             <Col className="d-flex flex-column">
               <select
-                            // value= {getTools.indexOf(selectedTool)}
-                            // onChange= {x => SetRelated(x.target.value) }
+                // value= {getTools.indexOf(selectedTool)}
+                // onChange= {x => SetRelated(x.target.value) }
                 className={`d-flex flex-column ${selectorText}`}
               >
                 {(() => {
-                                const rows: React.JSX.Element[] = [];
-                                let num: number = 0;
-                                getTools.forEach(x => {
-                                    rows.push((
-                                      <option key={num} value={num.toString()}>{x.name}</option>
-                                    ))
-                                    num++;
-                                });
-                                return rows;
-                            })()}
+                    const rows: React.JSX.Element[] = [];
+                    let num: number = 0;
+                    getTools.forEach(x => {
+                        rows.push((
+                          <option key={num} value={num.toString()}>{x.name}</option>
+                        ))
+                        num++;
+                    });
+                    return rows;
+                })()}
               </select>
             </Col>
           </Row>
         </Container>
         {(() => {
-                if (layoutList)
-                    { return ComparePageList(selectedTool, shownTools); }
-                return ComparePagePanels(selectedTool, shownTools);
-            })()}
+            if (layoutList)
+                { return ComparePageList(selectedTool, shownTools); }
+            return ComparePagePanels(selectedTool, shownTools);
+        })()}
       </main>
         /* Display the footer */
     );
@@ -139,167 +139,167 @@ const ComparePagePanels = (selected: RatedToolSummary, theList: RatedToolSummary
     // PLACEHOLDER FOR MOCKUP
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const scale: number = 32;
-    const ending: RatedToolSummary = theList[theList.length - 1];
+  const ending: RatedToolSummary = theList[theList.length - 1];
 
-    return (
-      <Container id="compare-page-panel">
-        <Row className={countBorder}>
-          <div className="d-flex flex-row gap-1">
-            <div className={compressedText}>Comparing</div>
-            <div className={compressedText}><b>{selected.name}</b></div>
-            <div className={compressedText}>with</div>
-            <div className={compressedText}>{theList.length}</div>
-            <div className={compressedText}> other closely matching tools</div>
-            <div className="flex" />
-          </div>
-        </Row>
-        <Row className="">
-          <div className="flex flex-row">
-            { ComparePagePanel(selectedTool, scale, selectedText, panelClassSelected)}
-            {/* For each rating, we call ComparePagePanel() to display a row for the tool */}
-            {(() => {
-                        const rows: React.JSX.Element[] = [];
-                        const end: RatedToolSummary = theList[theList.length - 1];
-                        theList.forEach(x =>
-                            {
-                                if (selected != x && end != x) rows.push(ComparePagePanel(x, scale, "", panelClass))
-                            });
-                        return rows;
-                    })()}
-            { ComparePagePanel(ending, scale, "", panelClassEnd)}
-          </div>
-        </Row>
-      </Container>
-    )
+  return (
+    <Container id="compare-page-panel">
+      <Row className={countBorder}>
+        <div className="d-flex flex-row gap-1">
+          <div className={compressedText}>Comparing</div>
+          <div className={compressedText}><b>{selected.name}</b></div>
+          <div className={compressedText}>with</div>
+          <div className={compressedText}>{theList.length}</div>
+          <div className={compressedText}> other closely matching tools</div>
+          <div className="flex" />
+        </div>
+      </Row>
+      <Row className="">
+        <div className="flex flex-row">
+          { ComparePagePanel(selectedTool, scale, selectedText, panelClassSelected)}
+          {/* For each rating, we call ComparePagePanel() to display a row for the tool */}
+          {(() => {
+              const rows: React.JSX.Element[] = [];
+              const end: RatedToolSummary = theList[theList.length - 1];
+              theList.forEach(x =>
+                  {
+                      if (selected != x && end != x) rows.push(ComparePagePanel(x, scale, "", panelClass))
+                  });
+              return rows;
+          })()}
+          { ComparePagePanel(ending, scale, "", panelClassEnd)}
+        </div>
+      </Row>
+    </Container>
+  )
 }
 const ComparePagePanel = (theTool: RatedToolSummary, scale: number, classNameTitle: string, classNameBack: string) =>
-    // PLACEHOLDER FOR MOCKUP
-     (
-       <Col className={`${classNameBack}flex flex-col`}>
-         {ShowToolName(theTool, classNameTitle)}
-         {ShowToolStarRatingBIG(theTool, scale)}
-         {ShowToolTags(theTool, scale)}
-         {ShowDesciption(theTool, scale)}
-         {ShowTopReview(theTool)}
-       </Col>
-    )
+  // PLACEHOLDER FOR MOCKUP
+  (
+    <Col className={`${classNameBack}flex flex-col`}>
+      {ShowToolName(theTool, classNameTitle)}
+      {ShowToolStarRatingBIG(theTool, scale)}
+      {ShowToolTags(theTool, scale)}
+      {ShowDesciption(theTool, scale)}
+      {ShowTopReview(theTool)}
+    </Col>
+  )
 
 const ShowToolName = (theTool: RatedToolSummary, classNameTitle: string) =>
-    // PLACEHOLDER FOR MOCKUP
-     (
-       <Container id="compare-page-panel" className={panelInternalTitle}>
-         <Row>
-           { (() => {
-                    if (theTool.icon != null)
-                    {
-                        return (
-                          <Col>
-                            {theTool.icon}
-                          </Col>
-                        )
-                    }
-                })()}
-           <Col>
-             <b>
-               <h3 className={classNameTitle}>
-                 {theTool.name}
-               </h3>
-             </b>
-             Development Tool
-           </Col>
-         </Row>
-       </Container>
-    )
+  // PLACEHOLDER FOR MOCKUP
+  (
+    <Container id="compare-page-panel" className={panelInternalTitle}>
+      <Row>
+        { (() => {
+          if (theTool.icon != null)
+          {
+              return (
+                <Col>
+                  {theTool.icon}
+                </Col>
+              )
+          }
+      })()}
+        <Col>
+          <b>
+            <h3 className={classNameTitle}>
+              {theTool.name}
+            </h3>
+          </b>
+          Development Tool
+        </Col>
+      </Row>
+    </Container>
+  )
 
 const ShowToolStarRatingBIG = (theTool: RatedToolSummary, scale: number) =>
-    // PLACEHOLDER FOR MOCKUP
-     (
-       <Container id="compare-page-ratingxl" className={ratingBorderFilled}>
-         <Row>
-           <Col xs={4}>
-             <h2 className="align-middle text-center">
-               {(() => (theTool.rating / 2).toPrecision(2))() }
-             </h2>
-           </Col>
-           <Col>
-             {ShowToolStarRating(theTool.rating, scale)}
-           </Col>
-         </Row>
-         <div className="d-flex flex-center flex-row gap-1">
-           <div className={compressedText}>Based on</div>
-           <div className={compressedText}><b>{theTool.numRatings}</b></div>
-           <div className={compressedText}>ratings</div>
-         </div>
-       </Container>
-    )
+  // PLACEHOLDER FOR MOCKUP
+  (
+    <Container id="compare-page-ratingxl" className={ratingBorderFilled}>
+      <Row>
+        <Col xs={3}>
+          <h2 className="align-middle text-center mx-4">
+            {(() => (theTool.rating).toPrecision(2))() }
+          </h2>
+        </Col>
+        <Col>
+          {Stars(theTool.rating, scale, true, null!)}
+        </Col>
+      </Row>
+      <div className="d-flex flex-center flex-row gap-1">
+        <div className={compressedText}>Based on</div>
+        <div className={compressedText}><b>{theTool.numRatings}</b></div>
+        <div className={compressedText}>ratings</div>
+      </div>
+    </Container>
+  )
 
 const ShowToolTags = (theTool: RatedToolSummary, scale: number) =>
-    // PLACEHOLDER FOR MOCKUP
-     (
-       <Container id="compare-page-tags" className={`align-left text-left ${panelInternal}`}>
-         <h5 className="align-left text-left">
-           Tags:
-         </h5>
-         <Row className="align-left items-left">
-           {(() => {
-                    const rows: React.JSX.Element[] = [];
-                    theTool.tags.forEach(x => rows.push(DisplayTag(x)));
-                    return rows;
-                })()}
-           <Col className="align-left text-center ms-5" />
-         </Row>
-       </Container>
-    )
+  // PLACEHOLDER FOR MOCKUP
+  (
+    <Container id="compare-page-tags" className={`align-left text-left ${panelInternal}`}>
+      <h5 className="align-left text-left">
+        Tags:
+      </h5>
+      <Row className="align-left items-left">
+        {(() => {
+                const rows: React.JSX.Element[] = [];
+                theTool.tags.forEach(x => rows.push(DisplayTag(x)));
+                return rows;
+            })()}
+        <Col className="align-left text-center ms-5" />
+      </Row>
+    </Container>
+  )
 
 const DisplayTag = (text: string) =>
-    // PLACEHOLDER FOR MOCKUP
-     (
-       <Col className="m-0">
-         <Button className={tagClass}>
-           {text}
-         </Button>
-       </Col>
-    )
+  // PLACEHOLDER FOR MOCKUP
+  (
+    <Col className="m-0 align-left">
+      <Button className={tagClass}>
+        {text}
+      </Button>
+    </Col>
+  )
 
 const ShowDesciption = (theTool: RatedToolSummary, scale: number) =>
-    // PLACEHOLDER FOR MOCKUP
-     (
-       <Container id="compare-page-desc" className={`align-left text-left ${panelInternal}`}>
-         <h5 className="align-left text-left">
-           Summary:
-         </h5>
-         <p>
-           {theTool.desc}
-         </p>
-       </Container>
-    )
+  // PLACEHOLDER FOR MOCKUP
+  (
+    <Container id="compare-page-desc" className={`align-left text-left ${panelInternal}`}>
+      <h5 className="align-left text-left">
+        Summary:
+      </h5>
+      <p>
+        {theTool.desc}
+      </p>
+    </Container>
+  )
 
 const ShowTopReview = (theTool: RatedToolSummary) =>
-    // PLACEHOLDER FOR MOCKUP
-     (
-       <Container id="compare-page-PopReview" className={`align-left text-left ${panelInternal}`}>
-         <h5 className="align-left text-left">
-           Popular Review:
-         </h5>
-         {(() => {
-                if (theTool.bestReview == null)
-                {
-                   return (
-                     <p>
-                       No reviews yet.
-                     </p>
-                   )
-                }
+  // PLACEHOLDER FOR MOCKUP
+  (
+    <Container id="compare-page-PopReview" className={`align-left text-left ${panelInternal}`}>
+      <h5 className="align-left text-left">
+        Popular Review:
+      </h5>
+      {(() => {
+        if (theTool.bestReview == null)
+        {
+            return (
+              <p>
+                No reviews yet.
+              </p>
+            )
+        }
 
-                   return ShowTextRating();
-            })()}
-       </Container>
-    )
+            return ShowTextRating();
+    })()}
+    </Container>
+  )
 
 const ShowTextRating = () => (
   // INCOMPLETE
-  <p>yes</p>
-);
+    <p>yes</p>
+  );
 
 /* Displays a list of tools, ordered from top to bottom in order of rating */
 /*  We may need to restrict the number of rows displayed based on database size.
@@ -331,10 +331,10 @@ const ComparePageList = (selected: RatedToolSummary, theList: RatedToolSummary[]
           {/* The list of tools we have found */}
           {/* For each rating, we call displayToolRowIfNeeded() to display a row for the tool */}
           {(() => {
-                    const rows: React.JSX.Element[] = [];
-                    theList.forEach(x => rows.push(displayToolRowIfNeeded(x, scale, "bg-light")));
-                    return rows;
-                })()}
+              const rows: React.JSX.Element[] = [];
+              theList.forEach(x => rows.push(displayToolRowIfNeeded(x, scale, "bg-light")));
+              return rows;
+          })()}
         </Container>
       </Container>
     )
@@ -349,74 +349,25 @@ const displayToolRowIfNeeded = (tool: RatedToolSummary, scale: number, className
   const stringName: string = tool.name;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const starRatingFull: number = tool.rating;
-    return (
-        /* We make sure our given data yields any ratings, otherwise we ignore. */
-      <Container className={className} id="ratedTool-bar">
-        <Row className="align-middle text-center">
-          <Col xs={2}>
-            <b>
-              {/* Place the name of the tool here */}
-              { tool.name }
-            </b>
-          </Col>
-          <Col xs={5} className="d-flex flex-row items-left">
-            {/* Display the rating of the tool here */}
-            { ShowToolStarRating(tool.rating, scale) }
-          </Col>
-        </Row>
-      </Container>
-    )
+  return (
+      /* We make sure our given data yields any ratings, otherwise we ignore. */
+    <Container className={className} id="ratedTool-bar">
+      <Row className="align-middle text-center">
+        <Col xs={2}>
+          <b>
+            {/* Place the name of the tool here */}
+            { tool.name }
+          </b>
+        </Col>
+        <Col xs={5} className="d-flex flex-row items-left">
+          {/* Display the rating of the tool here */}
+          { Stars(tool.rating, scale, true, null!) }
+        </Col>
+      </Row>
+    </Container>
+  )
 }
 
-/* Hand this a RatedTool and it will display a star rating for it on the UI.
-     Note: Make star icon for no star, half-star and fullStar */
-const ShowToolStarRating = (starFullState: number, scale: number) => (
-        /* We make sure our given data yields any ratings, otherwise we ignore. */
-  <Container id="ratedTool-Stars" className="align-middle text-center" fluid="sm">
-    <Row>
-
-      <div className="flex flex-row">
-        <Col className="align-middle text-center mx-1">
-          { displayToolStar(clampForStar(starFullState, 0), scale) }
-        </Col>
-        <Col className="align-middle text-center mx-1">
-          { displayToolStar(clampForStar(starFullState, 2), scale) }
-        </Col>
-        <Col className="align-middle text-center mx-1">
-          { displayToolStar(clampForStar(starFullState, 4), scale) }
-        </Col>
-        <Col className="align-middle text-center mx-1">
-          { displayToolStar(clampForStar(starFullState, 6), scale) }
-        </Col>
-        <Col className="align-middle text-center mx-1">
-          { displayToolStar(clampForStar(starFullState, 8), scale) }
-        </Col>
-      </div>
-    </Row>
-  </Container>
-    )
-const clampForStar = (starFullState: number, rangeStart: number): number => {
-    starFullState -= rangeStart;
-    if (starFullState > 2) starFullState = 2
-    else if (starFullState < 0) starFullState = 0
-    return starFullState
-}
-
-const displayToolStar = (starState: number, scale: number) => {
-    if (starState == 2) return starFull(scale);
-    if (starState == 1) return starHalf(scale);
-    return starNone(scale);
-}
-
-const starNone = (scale: number) => (
-  <Image className="mx-2" src="/Icon_StarNone.png" width={scale} height={scale} alt="o" />
-)
-const starHalf = (scale: number) => (
-  <Image className="mx-2" src="/Icon_StarHalf.png" width={scale} height={scale} alt="*" />
-)
-const starFull = (scale: number) => (
-  <Image className="mx-2" src="/Icon_StarFull.png" width={scale} height={scale} alt="#" />
-)
 
 export default ComparePage;
 
