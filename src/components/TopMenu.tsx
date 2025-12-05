@@ -1,8 +1,9 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
+
+import LogoMain from '@/components/LogoMain';
 
 interface TopMenuProps {
 title: string;
@@ -15,13 +16,7 @@ title: string;
         {/* Left side: Logo */}
         <div className="flex items-center flex-1">
           <Link href="/" className="flex items-center gap-1 no-underline hover:no-underline">
-            <Image
-              src="/RATEMY.png"
-              alt="Rate My Tools Logo"
-              width={48}
-              height={48}
-              className="h-10 w-auto"
-            />
+            <LogoMain />
             <span className="bg-black text-xl font-formal text-white px-4 py-2 rounded whitespace-nowrap">
               {title}
             </span>
