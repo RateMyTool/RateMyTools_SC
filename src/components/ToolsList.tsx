@@ -1,65 +1,45 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 import StarSingle from '@/components/StarSingleUI';
 
-const tools = [
-  {
-    id: 1,
-    name: 'VS Code',
-    category: 'Development Tool',
-    rating: 4.5,
-    totalRatings: 247,
-    description: 'A powerful, lightweight code editor with built-in support for debugging and version control.'
-    + ' A powerful, lightweight code editor with built-in support for debugging and version control.'
-    + ' A powerful, lightweight code editor with built-in support for debugging and version control.',
-    tags: ['Great Documentation', 'Easy to Use', 'Helpful'],
-  },
-  {
-    id: 2,
-    name: 'GitHub',
-    category: 'Version Control',
-    rating: 4.8,
-    totalRatings: 312,
-    description: 'Platform for version control and collaboration. Essential for team projects.',
-    tags: ['Essential', 'Collaboration', 'Industry Standard'],
-  },
-  {
-    id: 3,
-    name: 'Figma',
-    category: 'Design Tool',
-    rating: 4.7,
-    totalRatings: 189,
-    description: 'Collaborative interface design tool with powerful prototyping features.',
-    tags: ['Collaborative', 'Intuitive', 'Great for Teams'],
-  },
-  {
-    id: 4,
-    name: 'Slack',
-    category: 'Communication',
-    rating: 4.3,
-    totalRatings: 156,
-    description: 'Team communication platform for messaging and file sharing.',
-    tags: ['Good for Teams', 'Integrations', 'Notifications'],
-  },
-  {
-    id: 5,
-    name: 'Notion',
-    category: 'Productivity',
-    rating: 4.6,
-    totalRatings: 201,
-    description: 'All-in-one workspace for notes, tasks, wikis, and databases.',
-    tags: ['Versatile', 'Customizable', 'Great for Organization'],
-  },
-];
+interface Tool {
+  name: string;
+  rating: number;
+  totalRatings: number;
+  description: string;
+  tags: string[];
+}
 
 type SortKey = 'relevance' | 'highest' | 'lowest' | 'most' | 'recent';
 
-export default function ToolsList() {
+interface ToolsListProps {
+  school: string;
+}
+
+export default function ToolsList({ school }: ToolsListProps) {
   const router = useRouter();
   const [sortBy, setSortBy] = useState<SortKey>('relevance');
+  const [tools, setTools] = useState<Tool[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTools = async () => {
+      try {
+        const response = await fetch(`/api/school/${encodeURIComponent(school)}/tools`);
+        const data = await response.json();
+        setTools(data.tools || []);
+      } catch (error) {
+        console.error('Error fetching tools:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchTools();
+  }, [school]);
 
   const sortedTools = useMemo(() => {
     const list = [...tools];
@@ -74,23 +54,35 @@ export default function ToolsList() {
       case 'most':
         list.sort((a, b) => b.totalRatings - a.totalRatings);
         break;
-      case 'recent':
-        // No real dates yet; use id DESC as a stand‑in for "newest".
-        list.sort((a, b) => b.id - a.id);
-        break;
       case 'relevance':
       default:
-        // Keep original order for now; could plug in a relevance score later.
         break;
     }
 
     return list;
-  }, [sortBy]);
+  }, [tools, sortBy]);
+
+  if (isLoading) {
+    return <div>Loading tools...</div>;
+  }
+
+  if (tools.length === 0) {
+    return (
+      <div className="p-6 text-center" style={{ backgroundColor: 'white', borderRadius: '8px' }}>
+        <p className="text-gray-600">No tools reviewed for {school} yet.</p>
+        <p className="text-sm text-gray-500 mt-2">Be the first to rate a tool!</p>
+      </div>
+    );
+  }
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6 pb-3">
-        <h3>Popular Tools at MIT</h3>
+        <h3>
+          Popular Tools at
+          {' '}
+          {school}
+        </h3>
         <select
           className="px-3 py-2 border rounded"
           style={{ borderColor: '#d1d5db', backgroundColor: 'white' }}
@@ -101,14 +93,13 @@ export default function ToolsList() {
           <option value="highest">Highest Rated</option>
           <option value="lowest">Lowest Rated</option>
           <option value="most">Most Reviewed</option>
-          <option value="recent">Newest</option>
         </select>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         {sortedTools.map((tool) => (
           <div
-            key={tool.id}
+            key={tool.name}
             className="p-4"
             style={{ backgroundColor: 'white', border: '1px solid #e5e7eb', borderRadius: '12px' }}
           >
@@ -119,7 +110,7 @@ export default function ToolsList() {
                   className="flex items-center justify-center text-white px-4 py-4"
                   style={{ backgroundColor: '#2563eb', borderRadius: '4px', fontSize: '20px', fontWeight: '300' }}
                 >
-                  {tool.rating}
+                  {tool.rating.toFixed(1)}
                 </div>
               </div>
 
@@ -130,7 +121,7 @@ export default function ToolsList() {
                     <button
                       type="button"
                       className="mb-0.5 text-left"
-                      onClick={() => router.push(`/tool/${tool.id}`)}
+                      onClick={() => router.push(`/tool/${encodeURIComponent(tool.name)}`)}
                       style={{
                         cursor: 'pointer',
                         background: 'none',
@@ -143,14 +134,14 @@ export default function ToolsList() {
                     >
                       {tool.name}
                     </button>
-                    <p className="text-sm mb-2" style={{ color: '#6b7280' }}>{tool.category}</p>
+                    <p className="text-sm mb-2" style={{ color: '#6b7280' }}>Educational Tool</p>
                   </div>
                   <button
                     type="button"
                     className="flex items-center gap-1"
                     onClick={(e) => {
                       e.stopPropagation();
-                      router.push(`/tool/${tool.id}/ratings`);
+                      router.push(`/tool/${encodeURIComponent(tool.name)}`);
                     }}
                     style={{ color: '#374151', cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}
                   >
