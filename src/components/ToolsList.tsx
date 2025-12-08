@@ -1,64 +1,37 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Star } from 'lucide-react';
+import useSWR from 'swr';
 
-const tools = [
-  {
-    id: 1,
-    name: 'VS Code',
-    category: 'Development Tool',
-    rating: 4.5,
-    totalRatings: 247,
-    description: 'A powerful, lightweight code editor with built-in support for debugging and version control.'
-    + ' A powerful, lightweight code editor with built-in support for debugging and version control.'
-    + ' A powerful, lightweight code editor with built-in support for debugging and version control.',
-    tags: ['Great Documentation', 'Easy to Use', 'Helpful'],
-  },
-  {
-    id: 2,
-    name: 'GitHub',
-    category: 'Version Control',
-    rating: 4.8,
-    totalRatings: 312,
-    description: 'Platform for version control and collaboration. Essential for team projects.',
-    tags: ['Essential', 'Collaboration', 'Industry Standard'],
-  },
-  {
-    id: 3,
-    name: 'Figma',
-    category: 'Design Tool',
-    rating: 4.7,
-    totalRatings: 189,
-    description: 'Collaborative interface design tool with powerful prototyping features.',
-    tags: ['Collaborative', 'Intuitive', 'Great for Teams'],
-  },
-  {
-    id: 4,
-    name: 'Slack',
-    category: 'Communication',
-    rating: 4.3,
-    totalRatings: 156,
-    description: 'Team communication platform for messaging and file sharing.',
-    tags: ['Good for Teams', 'Integrations', 'Notifications'],
-  },
-  {
-    id: 5,
-    name: 'Notion',
-    category: 'Productivity',
-    rating: 4.6,
-    totalRatings: 201,
-    description: 'All-in-one workspace for notes, tasks, wikis, and databases.',
-    tags: ['Versatile', 'Customizable', 'Great for Organization'],
-  },
-];
+import StarSingle from '@/components/StarSingleUI';
 
 type SortKey = 'relevance' | 'highest' | 'lowest' | 'most' | 'recent';
 
-export default function ToolsList() {
+interface ToolsListProps {
+  school: string;
+}
+
+// Fetch function for SWR
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
+export default function ToolsList({ school }: ToolsListProps) {
   const router = useRouter();
   const [sortBy, setSortBy] = useState<SortKey>('relevance');
+
+  // Use SWR instead of useState + useEffect
+  const { data, error, isLoading } = useSWR(
+    `/api/school/${encodeURIComponent(school)}/tools`,
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      dedupingInterval: 60000, // 1 minute - deduplicate requests
+      focusThrottleInterval: 300000, // 5 minutes - refetch on window focus
+    }
+  );
+
+  const tools = useMemo(() => data?.tools || [], [data?.tools]);
 
   const sortedTools = useMemo(() => {
     const list = [...tools];
@@ -73,23 +46,66 @@ export default function ToolsList() {
       case 'most':
         list.sort((a, b) => b.totalRatings - a.totalRatings);
         break;
-      case 'recent':
-        // No real dates yet; use id DESC as a stand‑in for "newest".
-        list.sort((a, b) => b.id - a.id);
-        break;
       case 'relevance':
       default:
-        // Keep original order for now; could plug in a relevance score later.
         break;
     }
 
     return list;
-  }, [sortBy]);
+  }, [tools, sortBy]);
+
+  const handleToolClick = useCallback((toolName: string) => {
+    router.push(`/tool/${encodeURIComponent(toolName)}`);
+  }, [router]);
+
+  if (isLoading) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        {[...Array(3)].map((_, i) => (
+          <div
+            key={i}
+            className="p-4 animate-pulse"
+            style={{ backgroundColor: 'white', border: '1px solid #e5e7eb', borderRadius: '12px' }}
+          >
+            <div className="flex gap-4">
+              <div style={{ width: 80, height: 80, backgroundColor: '#e5e7eb', borderRadius: '4px' }} />
+              <div style={{ flex: 1 }}>
+                <div style={{ height: 24, backgroundColor: '#e5e7eb', borderRadius: '4px', marginBottom: '8px', width: '60%' }} />
+                <div style={{ height: 16, backgroundColor: '#e5e7eb', borderRadius: '4px', marginBottom: '8px', width: '40%' }} />
+                <div style={{ height: 16, backgroundColor: '#e5e7eb', borderRadius: '4px' }} />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6 text-center" style={{ backgroundColor: 'white', borderRadius: '8px' }}>
+        <p className="text-danger">Failed to load tools. Please try again later.</p>
+      </div>
+    );
+  }
+
+  if (tools.length === 0) {
+    return (
+      <div className="p-6 text-center" style={{ backgroundColor: 'white', borderRadius: '8px' }}>
+        <p className="text-gray-600">No tools reviewed for {school} yet.</p>
+        <p className="text-sm text-gray-500 mt-2">Be the first to rate a tool!</p>
+      </div>
+    );
+  }
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6 pb-3">
-        <h3>Popular Tools at MIT</h3>
+        <h3>
+          Popular Tools at
+          {' '}
+          {school}
+        </h3>
         <select
           className="px-3 py-2 border rounded"
           style={{ borderColor: '#d1d5db', backgroundColor: 'white' }}
@@ -100,14 +116,13 @@ export default function ToolsList() {
           <option value="highest">Highest Rated</option>
           <option value="lowest">Lowest Rated</option>
           <option value="most">Most Reviewed</option>
-          <option value="recent">Newest</option>
         </select>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         {sortedTools.map((tool) => (
           <div
-            key={tool.id}
+            key={tool.name}
             className="p-4"
             style={{ backgroundColor: 'white', border: '1px solid #e5e7eb', borderRadius: '12px' }}
           >
@@ -118,7 +133,7 @@ export default function ToolsList() {
                   className="flex items-center justify-center text-white px-4 py-4"
                   style={{ backgroundColor: '#2563eb', borderRadius: '4px', fontSize: '20px', fontWeight: '300' }}
                 >
-                  {tool.rating}
+                  {tool.rating.toFixed(1)}
                 </div>
               </div>
 
@@ -129,7 +144,7 @@ export default function ToolsList() {
                     <button
                       type="button"
                       className="mb-0.5 text-left"
-                      onClick={() => router.push(`/tool/${tool.id}`)}
+                      onClick={() => handleToolClick(tool.name)}
                       style={{
                         cursor: 'pointer',
                         background: 'none',
@@ -142,18 +157,18 @@ export default function ToolsList() {
                     >
                       {tool.name}
                     </button>
-                    <p className="text-sm mb-2" style={{ color: '#6b7280' }}>{tool.category}</p>
+                    <p className="text-sm mb-2" style={{ color: '#6b7280' }}>Educational Tool</p>
                   </div>
                   <button
                     type="button"
                     className="flex items-center gap-1"
                     onClick={(e) => {
                       e.stopPropagation();
-                      router.push(`/tool/${tool.id}/ratings`);
+                      handleToolClick(tool.name);
                     }}
                     style={{ color: '#374151', cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}
                   >
-                    <Star style={{ width: '16px', height: '16px', fill: '#fbbf24', color: '#fbbf24' }} />
+                    {StarSingle(0, 1, 16)}
                     <span className="text-sm">
                       {tool.totalRatings}
                       {' '}
@@ -166,7 +181,7 @@ export default function ToolsList() {
 
                 {/* Tags */}
                 <div className="flex flex-wrap gap-2">
-                  {tool.tags.map((tag) => (
+                  {tool.tags.map((tag: string) => (
                     <span
                       key={tag}
                       className="px-2 py-1 rounded-full text-sm"
