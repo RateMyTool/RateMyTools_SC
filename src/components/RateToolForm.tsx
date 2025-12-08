@@ -6,23 +6,11 @@ import StarSingle from '@/components/StarSingleUI';
 
 const availableTags = ['Easy to Use', 'Free', 'Expensive', 'Buggy'];
 
-// Sample schools and tools - in a real app, these would come from the database
-const SCHOOLS = [
-  { id: 1, name: 'University of Texas at Austin' },
-  { id: 2, name: 'Massachusetts Institute of Technology' },
-];
-
-const TOOLS = [
-  { id: 1, name: 'Canvas' },
-  { id: 2, name: 'Brightspace' },
-  { id: 3, name: 'Google Classroom' },
-];
-
 export default function RateToolForm() {
   const { status } = useSession();
 
-  const [schoolId, setSchoolId] = useState('');
-  const [toolId, setToolId] = useState('');
+  const [school, setSchool] = useState('');
+  const [tool, setTool] = useState('');
   const [subject, setSubject] = useState('');
   const [courseNumber, setCourseNumber] = useState('');
   const [rating, setRating] = useState(0);
@@ -47,8 +35,8 @@ export default function RateToolForm() {
   }
 
   function clearForm() {
-    setSchoolId('');
-    setToolId('');
+    setSchool('');
+    setTool('');
     setSubject('');
     setCourseNumber('');
     setRating(0);
@@ -63,9 +51,9 @@ export default function RateToolForm() {
       window.dispatchEvent(new CustomEvent('open-auth-modal', { detail: { mode: 'login' } }));
       return;
     }
-    const payload = { schoolId, toolId, subject, courseNumber, rating, tags, review };
+    const payload = { school, tool, subject, courseNumber, rating, tags, review };
     // basic client validation
-    if (!schoolId || !toolId || !rating || review.trim().length < 10) {
+    if (!school || !tool || !rating || review.trim().length < 10) {
       alert('Please provide a school, tool, rating and a longer review (min 10 chars).');
       return;
     }
@@ -114,40 +102,25 @@ export default function RateToolForm() {
             </div>
           )}
           <div className="mb-3">
-            <label className="form-label">Select Your School <span style={{ color: 'red' }}>*</span></label>
-            <select
+            <label className="form-label">School <span style={{ color: 'red' }}>*</span></label>
+            <input
+              type="text"
               className="form-control"
-              style={{ backgroundColor: schoolId ? 'white' : '#f0f0f0' }}
-              value={schoolId}
-              onChange={(e) => setSchoolId(e.target.value)}
-            >
-              <option disabled value="">-- Choose a School --</option>
-              {SCHOOLS.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
+              placeholder="Type a school..."
+              value={school}
+              onChange={(e) => setSchool(e.target.value)}
+            />
           </div>
 
           <div className="mb-3">
-            <label className="form-label">Select Your Tool <span style={{ color: 'red' }}>*</span></label>
-            <select
+            <label className="form-label">Tool <span style={{ color: 'red' }}>*</span></label>
+            <input
+              type="text"
               className="form-control"
-              style={{ backgroundColor: toolId ? 'white' : '#f0f0f0' }}
-              value={toolId}
-              onChange={(e) => setToolId(e.target.value)}
-            >
-              <option disabled value="">-- Select a tool --</option>
-              {TOOLS.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name}
-                </option>
-              ))}
-            </select>
-            <div style={{ marginTop: '0.25rem', fontSize: '0.875rem', color: '#6c757d' }}>
-              Don&apos;t see your tool? We&apos;ll add it after you submit.
-              </div>
+              placeholder="Type a tool..."
+              value={tool}
+              onChange={(e) => setTool(e.target.value)}
+            />
           </div>
 
           <div className="row">

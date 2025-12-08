@@ -16,10 +16,10 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const {
-      schoolId, toolId, subject, courseNumber, rating, tags, review, comment,
+      school, tool, subject, courseNumber, rating, tags, review, comment,
     } = body;
 
-    if (!schoolId || !toolId || typeof rating !== 'number' || (!review && !comment)) {
+    if (!school || !tool || typeof rating !== 'number' || (!review && !comment)) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
@@ -32,12 +32,32 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
+    // Find or create school
+    let schoolRecord = await prisma.school.findFirst({
+      where: { name: school.trim() },
+    });
+    if (!schoolRecord) {
+      schoolRecord = await prisma.school.create({
+        data: { name: school.trim() },
+      });
+    }
+
+    // Find or create tool
+    let toolRecord = await prisma.tool.findFirst({
+      where: { name: tool.trim() },
+    });
+    if (!toolRecord) {
+      toolRecord = await prisma.tool.create({
+        data: { name: tool.trim() },
+      });
+    }
+
     // Create review with proper foreign keys
     const created = await prisma.review.create({
       data: {
         userId: user.id,
-        schoolId: parseInt(schoolId),
-        toolId: parseInt(toolId),
+        schoolId: schoolRecord.id,
+        toolId: toolRecord.id,
         subject: subject || null,
         courseNumber: courseNumber || null,
         rating: parseInt(rating),
