@@ -101,7 +101,7 @@ const MiddleMenu: React.FC<MiddleMenuProps> = ({ setTitle, title }) => {
   };
 
   return (
-    <div className="pt-16">
+    <div>
       <div
         className="relative h-screen bg-cover bg-center flex items-center justify-center"
         style={{
