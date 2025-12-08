@@ -1,6 +1,4 @@
-
-
-import { Image } from "react-bootstrap";
+import Image from 'next/image';
 
 
 // Just in case for future expansions

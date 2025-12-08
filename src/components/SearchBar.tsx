@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Form, Dropdown } from 'react-bootstrap';
+import { Form } from 'react-bootstrap';
 
 interface SearchBarProps {
   searchType: 'school' | 'tool';

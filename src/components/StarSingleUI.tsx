@@ -1,4 +1,4 @@
-import { Image } from "react-bootstrap";
+import Image from 'next/image';
 import { Star } from 'react-bootstrap-icons';
 
 const StarType: number = 0;// Note 1 is currently BROKEN due to texture clipping

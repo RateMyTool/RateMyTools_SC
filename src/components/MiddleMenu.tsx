@@ -263,7 +263,7 @@ const MiddleMenu: React.FC<MiddleMenuProps> = ({ setTitle, title }) => {
             }}
             className="pt-3 text-white text-lg hover:text-gray-200 hover:underline transition no-underline"
           >
-            {isCollege ? 'Find Tool by name' : 'Find Tool by school'}
+            {isCollege ? 'Find Tool by Name' : 'Find Tool by School'}
           </Link>
         </div>
       </div>

@@ -4,7 +4,7 @@
 /* eslint-disable react/jsx-closing-bracket-location, react/jsx-indent-props, react/jsx-closing-tag-location */
 
 import { useState } from 'react';
-import { Card, Button, Badge } from 'react-bootstrap';
+import { Card, Button } from 'react-bootstrap';
 import { HandThumbsUp, HandThumbsDown } from 'react-bootstrap-icons';
 import Stars from '@/components/StarsUI';
 
@@ -133,7 +133,7 @@ export default function ToolPage() {
                 </p>
               </div>
 
-              <Button className="w-100 mt-3">Rate This Tool</Button>
+              <Button className="w-100 mt-3 bg-black">Rate This Tool</Button>
             </Card>
           </div>
 
@@ -159,7 +159,7 @@ export default function ToolPage() {
                         style={{
                           width: 64,
                           height: 64,
-                          background: '#16a34a',
+                          background: '#2563eb',
                           color: '#fff',
                           borderRadius: 8,
                           display: 'flex',
@@ -183,17 +183,21 @@ export default function ToolPage() {
                         <span style={{ color: '#9ca3af' }}>{review.date}</span>
                       </div>
 
+                      <p style={{ color: '#374151', fontSize: '0.9rem', marginBottom: '0.75rem' }}>{review.comment}</p>
+
                       <div className="d-flex flex-wrap" style={{ gap: '0.5rem', marginBottom: '0.5rem' }}>
                         {review.tags.map((tag) => (
-                          <Badge bg="secondary" key={tag}>
+                          <span
+                            key={tag}
+                            className="px-2 py-1 rounded-full text-sm"
+                            style={{ backgroundColor: '#f3f4f6', color: '#374151' }}
+                          >
                             {tag}
-                          </Badge>
+                          </span>
                         ))}
                       </div>
 
-                      <p style={{ color: '#374151', fontSize: '0.9rem', marginBottom: '0.75rem' }}>{review.comment}</p>
-
-                      <div className="d-flex align-items-center" style={{ gap: '1rem', fontSize: '0.8rem' }}>
+                      <div className="d-flex align-items-center mt-4" style={{ gap: '1rem', fontSize: '0.8rem' }}>
                         <Button
                           variant="outline-secondary"
                           size="sm"

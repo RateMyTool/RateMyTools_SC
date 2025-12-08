@@ -6,7 +6,7 @@ import TopMenu from '@/components/TopMenu';
 import AuthModalHost from '@/components/AuthModalHost';
 import Providers from './providers';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ['latin'], display: 'swap' });
 
 export const metadata: Metadata = {
   title: 'Rate My Tools',
@@ -21,11 +21,19 @@ export default function RootLayout({
   const classString = `${inter.className} wrapper`;
   return (
     <html lang="en">
+      <head>
+        {/* Preload critical resources */}
+        <link rel="preload" as="image" href="/RATEMY.png" />
+        {/* DNS prefetch for external services */}
+        <link rel="dns-prefetch" href="//api.github.com" />
+      </head>
       <body className={classString}>
         <Providers>
           <TopMenu title="TOOLS" />
           <AuthModalHost />
-          {children}
+          <main style={{ marginTop: '40px', backgroundColor: '#f9fafb' }}>
+            {children}
+          </main>
         </Providers>
       </body>
     </html>

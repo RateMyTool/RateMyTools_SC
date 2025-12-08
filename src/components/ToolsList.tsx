@@ -1,17 +1,10 @@
 'use client';
 
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import useSWR from 'swr';
 
 import StarSingle from '@/components/StarSingleUI';
-
-interface Tool {
-  name: string;
-  rating: number;
-  totalRatings: number;
-  description: string;
-  tags: string[];
-}
 
 type SortKey = 'relevance' | 'highest' | 'lowest' | 'most' | 'recent';
 
@@ -19,27 +12,26 @@ interface ToolsListProps {
   school: string;
 }
 
+// Fetch function for SWR
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
 export default function ToolsList({ school }: ToolsListProps) {
   const router = useRouter();
   const [sortBy, setSortBy] = useState<SortKey>('relevance');
-  const [tools, setTools] = useState<Tool[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchTools = async () => {
-      try {
-        const response = await fetch(`/api/school/${encodeURIComponent(school)}/tools`);
-        const data = await response.json();
-        setTools(data.tools || []);
-      } catch (error) {
-        console.error('Error fetching tools:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  // Use SWR instead of useState + useEffect
+  const { data, error, isLoading } = useSWR(
+    `/api/school/${encodeURIComponent(school)}/tools`,
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      dedupingInterval: 60000, // 1 minute - deduplicate requests
+      focusThrottleInterval: 300000, // 5 minutes - refetch on window focus
+    }
+  );
 
-    fetchTools();
-  }, [school]);
+  const tools = useMemo(() => data?.tools || [], [data?.tools]);
 
   const sortedTools = useMemo(() => {
     const list = [...tools];
@@ -62,8 +54,39 @@ export default function ToolsList({ school }: ToolsListProps) {
     return list;
   }, [tools, sortBy]);
 
+  const handleToolClick = useCallback((toolName: string) => {
+    router.push(`/tool/${encodeURIComponent(toolName)}`);
+  }, [router]);
+
   if (isLoading) {
-    return <div>Loading tools...</div>;
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        {[...Array(3)].map((_, i) => (
+          <div
+            key={i}
+            className="p-4 animate-pulse"
+            style={{ backgroundColor: 'white', border: '1px solid #e5e7eb', borderRadius: '12px' }}
+          >
+            <div className="flex gap-4">
+              <div style={{ width: 80, height: 80, backgroundColor: '#e5e7eb', borderRadius: '4px' }} />
+              <div style={{ flex: 1 }}>
+                <div style={{ height: 24, backgroundColor: '#e5e7eb', borderRadius: '4px', marginBottom: '8px', width: '60%' }} />
+                <div style={{ height: 16, backgroundColor: '#e5e7eb', borderRadius: '4px', marginBottom: '8px', width: '40%' }} />
+                <div style={{ height: 16, backgroundColor: '#e5e7eb', borderRadius: '4px' }} />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6 text-center" style={{ backgroundColor: 'white', borderRadius: '8px' }}>
+        <p className="text-danger">Failed to load tools. Please try again later.</p>
+      </div>
+    );
   }
 
   if (tools.length === 0) {
@@ -121,7 +144,7 @@ export default function ToolsList({ school }: ToolsListProps) {
                     <button
                       type="button"
                       className="mb-0.5 text-left"
-                      onClick={() => router.push(`/tool/${encodeURIComponent(tool.name)}`)}
+                      onClick={() => handleToolClick(tool.name)}
                       style={{
                         cursor: 'pointer',
                         background: 'none',
@@ -141,7 +164,7 @@ export default function ToolsList({ school }: ToolsListProps) {
                     className="flex items-center gap-1"
                     onClick={(e) => {
                       e.stopPropagation();
-                      router.push(`/tool/${encodeURIComponent(tool.name)}`);
+                      handleToolClick(tool.name);
                     }}
                     style={{ color: '#374151', cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}
                   >
@@ -158,7 +181,7 @@ export default function ToolsList({ school }: ToolsListProps) {
 
                 {/* Tags */}
                 <div className="flex flex-wrap gap-2">
-                  {tool.tags.map((tag) => (
+                  {tool.tags.map((tag: string) => (
                     <span
                       key={tag}
                       className="px-2 py-1 rounded-full text-sm"

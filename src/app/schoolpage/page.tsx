@@ -11,10 +11,10 @@ export default function SchoolPage() {
         <div className="mx-auto px-4 py-4" style={{ maxWidth: '1400px' }}>
           <div className="flex gap-4">
             <div style={{ width: '440px', flexShrink: 0 }}>
-              <SchoolSideBar />
+              <SchoolSideBar school="Your School Name" />
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <ToolsList />
+              <ToolsList school="Your School Name" />
             </div>
           </div>
         </div>

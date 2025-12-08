@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
-import prisma from '@/lib/prisma';
+import { revalidatePath } from 'next/cache';
+import { prisma } from '@/lib/prisma';
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,25 +16,40 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const {
-      school, tool, subject, courseNumber, rating, tags, review,
+      schoolId, toolId, subject, courseNumber, rating, tags, review, comment,
     } = body;
 
-    if (!school || !tool || typeof rating !== 'number' || !review) {
+    if (!schoolId || !toolId || typeof rating !== 'number' || (!review && !comment)) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
+    // Get user ID from email
+    const user = await prisma.user.findUnique({
+      where: { email: token.email },
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    // Create review with proper foreign keys
     const created = await prisma.review.create({
       data: {
-        school,
-        tool,
+        userId: user.id,
+        schoolId: parseInt(schoolId),
+        toolId: parseInt(toolId),
         subject: subject || null,
         courseNumber: courseNumber || null,
-        rating,
+        rating: parseInt(rating),
         tags: (tags && Array.isArray(tags) ? tags : []).map(String),
+        comment: comment || review,
         reviewText: review,
-        userEmail: token.email, // Add this line
       },
     });
+
+    // On-demand revalidation: rebuild pages immediately when review is added
+    revalidatePath('/reviews', 'page');
+    revalidatePath('/reviews/[id]', 'page');
 
     return NextResponse.json({ success: true, review: created }, { status: 201 });
   } catch (err) {

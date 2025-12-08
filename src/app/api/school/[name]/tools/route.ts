@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
+// Cache for 2 minutes; allow stale for 4 minutes
+export const revalidate = 120;
+
 export async function GET(
   request: NextRequest,
   { params }: { params: { name: string } },
@@ -52,7 +55,9 @@ export async function GET(
 
     tools.sort((a, b) => b.rating - a.rating);
 
-    return NextResponse.json({ tools });
+    const response = NextResponse.json({ tools });
+    response.headers.set('Cache-Control', 'public, s-maxage=120, stale-while-revalidate=240');
+    return response;
   } catch (error) {
     console.error('Error fetching tools:', error);
     return NextResponse.json({ error: 'Failed to fetch tools' }, { status: 500 });
