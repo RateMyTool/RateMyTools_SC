@@ -8,41 +8,23 @@ datasource db {
   directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
-model Review {
-  id           Int      @id @default(autoincrement())
-  schoolId     Int
-  toolId       Int
-  rating       Int      @db.SmallInt
-  comment      String?
-  tags         String[]
-  subject      String?
-  courseNumber String?
-  review       String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @default(now())
-  School       School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  Tool         Tool     @relation(fields: [toolId], references: [id], onDelete: Cascade)
+enum Role {
+  USER
+  ADMIN
 }
 
-model School {
-  id         Int          @id @default(autoincrement())
-  name       String
-  domain     String?      @unique
-  location   String?
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime
-  Review     Review[]
-  SchoolTool SchoolTool[]
+model User {
+  id       String  @id @default(cuid())
+  email    String  @unique
+  password String
+  role     Role    @default(USER)
 }
 
-model SchoolTool {
-  schoolId  Int
-  toolId    Int
-  createdAt DateTime @default(now())
-  School    School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  Tool      Tool     @relation(fields: [toolId], references: [id], onDelete: Cascade)
-
-  @@id([schoolId, toolId])
+enum Condition {
+  excellent
+  good
+  fair
+  poor
 }
 
 model Stuff {
@@ -53,32 +35,47 @@ model Stuff {
   owner     String
 }
 
+model School {
+  id          Int            @id @default(autoincrement())
+  name        String
+  domain      String?        @unique
+  location    String?
+  schoolTools SchoolTool[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
 model Tool {
-  id         Int          @id @default(autoincrement())
-  name       String
-  category   String?
-  logo_url   String?
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime
-  Review     Review[]
-  SchoolTool SchoolTool[]
+  id          Int            @id @default(autoincrement())
+  name        String
+  category    String?
+  logoUrl     String?        @map("logo_url")
+  schoolTools SchoolTool[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
 }
 
-model User {
-  id       Int      @id @default(autoincrement())
-  email    String   @unique
-  password String
-  role     Role     @default(USER)
+model SchoolTool {
+  schoolId  Int
+  school    School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  toolId    Int
+  tool      Tool   @relation(fields: [toolId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([schoolId, toolId])
 }
 
-enum Condition {
-  excellent
-  good
-  fair
-  poor
-}
-
-enum Role {
-  USER
-  ADMIN
+model Review {
+  id           Int      @id @default(autoincrement())
+  school       String?
+  tool         String?
+  rating       Int      @db.SmallInt
+  comment      String?  @db.Text
+  tags         String[]
+  subject      String?
+  courseNumber String?
+  userEmail    String?
+  review       String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }

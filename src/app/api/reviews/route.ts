@@ -15,18 +15,14 @@ export async function GET(request: NextRequest) {
         skip,
         take: limit,
         orderBy: { createdAt: 'desc' },
-        include: {
-          School: { select: { name: true } },
-          Tool: { select: { name: true } },
-        },
       }),
       prisma.review.count(),
     ]);
 
     const transformedReviews = reviews.map(r => ({
       id: r.id,
-      tool: r.Tool.name,
-      school: r.School.name,
+      tool: r.tool,
+      school: r.school,
       subject: r.subject,
       courseNumber: r.courseNumber,
       rating: r.rating,
@@ -70,36 +66,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Find or create school
-    let schoolRecord = await prisma.school.findFirst({
-      where: { name: school.trim() },
-    });
-    if (!schoolRecord) {
-      schoolRecord = await prisma.school.create({
-        data: { name: school.trim(), updatedAt: new Date() },
-      });
-    }
-
-    // Find or create tool
-    let toolRecord = await prisma.tool.findFirst({
-      where: { name: tool.trim() },
-    });
-    if (!toolRecord) {
-      toolRecord = await prisma.tool.create({
-        data: { name: tool.trim(), updatedAt: new Date() },
-      });
-    }
-
-    // Create review with proper foreign keys
+    // Create review with text fields
     const created = await prisma.review.create({
       data: {
-        schoolId: schoolRecord.id,
-        toolId: toolRecord.id,
+        school: school.trim(),
+        tool: tool.trim(),
         subject: subject || null,
         courseNumber: courseNumber || null,
         rating: parseInt(rating),
         tags: (tags && Array.isArray(tags) ? tags : []).map(String),
         review: review || comment,
+        userEmail: token.email,
       },
     });
 
