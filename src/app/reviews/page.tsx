@@ -1,129 +1,130 @@
-import Link from 'next/link';
-import { prisma } from '@/lib/prisma';
-import ReviewStars from '@/components/ReviewStars';
+'use client';
 
-export const metadata = {
-  title: 'Reviews',
-};
+import { useState, useEffect, useMemo } from 'react';
+import ReviewCard from '@/components/ReviewCard';
 
-// Revalidate every 5 minutes - balance between fresh data and performance
-export const revalidate = 300;
+interface Review {
+  id: number;
+  tool: string;
+  school: string;
+  subject: string | null;
+  courseNumber: string | null;
+  rating: number;
+  review: string | null;
+  createdAt: string;
+}
 
-type SearchParams = {
-  sort?: string;
-};
+interface ApiResponse {
+  reviews: Review[];
+  total: number;
+  page: number;
+  totalPages: number;
+}
 
-export default async function ReviewsPage({ searchParams }: { searchParams: SearchParams }) {
-  const sortValue = searchParams?.sort ?? 'newest';
+export default function ReviewsPage() {
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<ApiResponse | null>(null);
+  const limit = 10;
 
-  // Database-level sorting for better performance
-  let orderBy: { createdAt?: 'asc' | 'desc'; rating?: 'asc' | 'desc' } = { createdAt: 'desc' };
-  if (sortValue === 'highest') orderBy = { rating: 'desc' };
-  else if (sortValue === 'lowest') orderBy = { rating: 'asc' };
-  else if (sortValue === 'oldest') orderBy = { createdAt: 'asc' };
+  useEffect(() => {
+    setLoading(true);
+    fetch(`/api/reviews?page=${page}&limit=${limit}`)
+      .then(res => res.json())
+      .then(data => {
+        setData(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Error fetching reviews:', err);
+        setLoading(false);
+      });
+  }, [page]);
 
-  const reviews = await prisma.review.findMany({
-    orderBy,
-    include: {
-      school: true,
-      tool: true,
-      user: {
-        select: {
-          email: true,
-        },
-      },
-    },
-  });
+  const reviewCards = useMemo(() => {
+    if (!data?.reviews) return [];
+    return data.reviews.map(review => (
+      <ReviewCard
+        key={review.id}
+        id={review.id}
+        tool={review.tool}
+        school={review.school}
+        subject={review.subject || ''}
+        courseNumber={review.courseNumber || ''}
+        rating={review.rating}
+        reviewText={review.review || ''}
+        createdAt={review.createdAt}
+      />
+    ));
+  }, [data?.reviews]);
 
-  const sortedReviews = reviews;
-
-  const sortOptions = [
-    { value: 'highest', label: 'Highest Rating' },
-    { value: 'lowest', label: 'Lowest Rating' },
-    { value: 'newest', label: 'Newest' },
-    { value: 'oldest', label: 'Oldest' },
-  ];
-
-  const buildHref = (value: string) => `/reviews?sort=${value}`;
+  if (loading) {
+    return (
+      <main>
+        <div style={{ height: '80px' }} />
+        <div className="container py-4">
+          <h1>Student Reviews</h1>
+          <p>Loading reviews...</p>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main>
       <div style={{ height: '80px' }} />
-      <div className="container py-4 ">
-        <div className="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-3">
-          <h1 className="mb-0">Student Reviews</h1>
-          <div className="d-flex align-items-center gap-2 flex-wrap">
-            <span className="text-muted">Sort by:</span>
-            <div className="btn-group" role="group" aria-label="Sort reviews">
-              {sortOptions.map((opt) => (
-                <Link
-                  key={opt.value}
-                  href={buildHref(opt.value)}
-                  className={`btn btn-sm ${sortValue === opt.value ? 'btn-primary' : 'btn-outline-secondary'}`}
-                  style={sortValue === opt.value ? { color: 'white' } : {}}
-                >
-                  {opt.label}
-                </Link>
-              ))}
-            </div>
-          </div>
-        </div>
-        {sortedReviews.length === 0 ? (
+      <div className="container py-4">
+        <h1 className="mb-4">Student Reviews</h1>
+        
+        {!data || !data.reviews || data.reviews.length === 0 ? (
           <p className="text-muted">No reviews yet.</p>
         ) : (
-          <div className="list-group gap-2">
-            {sortedReviews.map((r) => {
-              const classLabel = [r.subject, r.courseNumber].filter(Boolean).join(' ');
-              return (
-                <Link key={r.id} href={`/reviews/${r.id}`} className="list-group-item list-group-item-action rounded">
-                  <div className="d-flex w-100 justify-content-between">
-                    <h3 className="mb-1 mt-2">
-                      {r.tool.name}
-                      {' '}
-                    </h3>
-                    <small className="text-muted">{r.createdAt.toLocaleString()}</small>
-                  </div>
-                  <div>
-                    <h5>{r.school.name}</h5>
-                  </div>
-                  {classLabel && (
-                    <div className="mb-2">
-                      <strong>Class:</strong>
-                      {' '}
-                      {classLabel}
-                    </div>
-                  )}
-                  <p className="mb-2 text-truncate bg-gray-100 p-3 rounded">{r.comment || r.reviewText}</p>
-                  <small className="">
-                    <ReviewStars rating={r.rating} />
-                  </small>
-                  <div>
-                    {r.tags?.map((tag) => (
-                      <span
-                        key={tag}
-                        className="badge me-2 mb-2"
-                        style={{
-                          backgroundColor: '#f0f0f0',
-                          color: 'black',
-                        }}
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="mt-3">
-                    {(r.user?.email || r.userEmail) && (
-                      <>
-                        <strong>Posted by:</strong>
-                        {' '}
-                        {r.user?.email || r.userEmail}
-                      </>
-                    )}
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
+          <>
+            <div className="list-group gap-2 mb-4">
+              {reviewCards}
+            </div>
+
+            {/* Pagination Controls */}
+            <div className="d-flex justify-content-between align-items-center">
+              <div>
+                <button
+                  className="btn btn-outline-secondary btn-sm me-2"
+                  onClick={() => setPage(1)}
+                  disabled={page === 1}
+                >
+                  First
+                </button>
+                <button
+                  className="btn btn-outline-secondary btn-sm"
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                >
+                  Previous
+                </button>
+              </div>
+
+              <span className="text-muted">
+                Page {data.page} of {data.totalPages} ({data.total} total reviews)
+              </span>
+
+              <div>
+                <button
+                  className="btn btn-outline-secondary btn-sm me-2"
+                  onClick={() => setPage(p => Math.min(data.totalPages, p + 1))}
+                  disabled={page >= data.totalPages}
+                >
+                  Next
+                </button>
+                <button
+                  className="btn btn-outline-secondary btn-sm"
+                  onClick={() => setPage(data.totalPages)}
+                  disabled={page >= data.totalPages}
+                >
+                  Last
+                </button>
+              </div>
+            </div>
+          </>
         )}
       </div>
     </main>

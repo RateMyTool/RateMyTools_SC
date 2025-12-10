@@ -49,6 +49,7 @@ async function main() {
       id: 1,
       name: 'University of Texas at Austin',
       location: 'Austin, TX',
+      updatedAt: new Date(),
     },
   });
   await prisma.school.upsert({
@@ -58,6 +59,7 @@ async function main() {
       id: 2,
       name: 'Massachusetts Institute of Technology',
       location: 'Cambridge, MA',
+      updatedAt: new Date(),
     },
   });
 
@@ -71,6 +73,7 @@ async function main() {
       id: 1,
       name: 'Canvas',
       category: 'Learning Management System',
+      updatedAt: new Date(),
     },
   });
   await prisma.tool.upsert({
@@ -80,6 +83,7 @@ async function main() {
       id: 2,
       name: 'Brightspace',
       category: 'Learning Management System',
+      updatedAt: new Date(),
     },
   });
   await prisma.tool.upsert({
@@ -89,6 +93,7 @@ async function main() {
       id: 3,
       name: 'Google Classroom',
       category: 'Learning Management System',
+      updatedAt: new Date(),
     },
   });
 

@@ -3,6 +3,53 @@ import { getToken } from 'next-auth/jwt';
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
+    const skip = (page - 1) * limit;
+
+    const [reviews, total] = await Promise.all([
+      prisma.review.findMany({
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          School: { select: { name: true } },
+          Tool: { select: { name: true } },
+        },
+      }),
+      prisma.review.count(),
+    ]);
+
+    const transformedReviews = reviews.map(r => ({
+      id: r.id,
+      tool: r.Tool.name,
+      school: r.School.name,
+      subject: r.subject,
+      courseNumber: r.courseNumber,
+      rating: r.rating,
+      review: r.review,
+      createdAt: r.createdAt.toISOString(),
+    }));
+
+    return NextResponse.json({
+      reviews: transformedReviews,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+    }, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
+      },
+    });
+  } catch (err) {
+    console.error('Error fetching reviews', err);
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const token = await getToken({
@@ -23,22 +70,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Get user ID from email
-    const user = await prisma.user.findUnique({
-      where: { email: token.email },
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
-
     // Find or create school
     let schoolRecord = await prisma.school.findFirst({
       where: { name: school.trim() },
     });
     if (!schoolRecord) {
       schoolRecord = await prisma.school.create({
-        data: { name: school.trim() },
+        data: { name: school.trim(), updatedAt: new Date() },
       });
     }
 
@@ -48,22 +86,20 @@ export async function POST(request: NextRequest) {
     });
     if (!toolRecord) {
       toolRecord = await prisma.tool.create({
-        data: { name: tool.trim() },
+        data: { name: tool.trim(), updatedAt: new Date() },
       });
     }
 
     // Create review with proper foreign keys
     const created = await prisma.review.create({
       data: {
-        userId: user.id,
         schoolId: schoolRecord.id,
         toolId: toolRecord.id,
         subject: subject || null,
         courseNumber: courseNumber || null,
         rating: parseInt(rating),
         tags: (tags && Array.isArray(tags) ? tags : []).map(String),
-        comment: comment || review,
-        reviewText: review,
+        review: review || comment,
       },
     });
 
@@ -74,6 +110,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, review: created }, { status: 201 });
   } catch (err) {
     console.error('Error creating review', err);
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    return NextResponse.json({ error: `Server error: ${message}` }, { status: 500 });
   }
 }
