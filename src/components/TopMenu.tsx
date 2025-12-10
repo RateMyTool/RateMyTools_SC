@@ -20,7 +20,7 @@ const TopMenu = ({ title }: TopMenuProps) => {
         <div className="flex items-center">
           <Link href="/" className="flex items-center gap-1 no-underline hover:no-underline">
             <LogoMain />
-            <span className="bg-black text-base md:text-xl font-formal text-white px-2 md:px-4 py-1 md:py-2 rounded whitespace-nowrap">
+            <span className="bg-black text-xl font-formal text-white px-4 py-2 rounded whitespace-nowrap">
               {title}
             </span>
           </Link>

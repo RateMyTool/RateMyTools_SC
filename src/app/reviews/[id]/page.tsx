@@ -20,8 +20,32 @@ type Params = {
 
 export default async function ReviewDetailPage({ params }: Params) {
   const id = Number(params.id);
-  const review = await prisma.review.findUnique({ where: { id } });
   const session = await getServerSession(authOptions);
+
+  // Fetch review and check admin status in parallel
+  const [review, currentUser] = await Promise.all([
+    prisma.review.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        tool: true,
+        school: true,
+        subject: true,
+        courseNumber: true,
+        rating: true,
+        tags: true,
+        reviewText: true,
+        userEmail: true,
+        createdAt: true,
+      },
+    }),
+    session?.user?.email
+      ? prisma.user.findUnique({
+        where: { email: session.user.email },
+        select: { role: true },
+      })
+      : null,
+  ]);
 
   if (!review) {
     return (
@@ -40,15 +64,7 @@ export default async function ReviewDetailPage({ params }: Params) {
 
   const classLabel = [review.subject, review.courseNumber].filter(Boolean).join(' ');
 
-  // Check if current user is admin
-  let isAdmin = false;
-  if (session?.user?.email) {
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    });
-    isAdmin = user?.role === 'ADMIN';
-  }
-
+  const isAdmin = currentUser?.role === 'ADMIN';
   const isOwner = session?.user?.email === review.userEmail;
   const canDelete = isOwner || isAdmin;
 
