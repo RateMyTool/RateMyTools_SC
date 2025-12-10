@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import Stars from '@/components/StarsUI';
 
@@ -23,11 +23,11 @@ export default function RateToolForm() {
   const [allTools, setAllTools] = useState<string[]>(['Canvas', 'Brightspace', 'Google Classroom']);
   const [allSubjects, setAllSubjects] = useState<string[]>(['CS', 'MATH', 'ENG']);
 
-  function toggleTag(tag: string) {
+  const toggleTag = useCallback((tag: string) => {
     setTags((t) => (t.includes(tag) ? t.filter((x) => x !== tag) : [...t, tag]));
-  }
+  }, []);
 
-  function addTag(tag?: string) {
+  const addTag = useCallback((tag?: string) => {
     const t = (tag ?? newTag).trim();
     if (!t) return;
     // add to master list if missing
@@ -35,15 +35,15 @@ export default function RateToolForm() {
     // mark as selected if not already
     setTags((existing) => (existing.includes(t) ? existing : [...existing, t]));
     setNewTag('');
-  }
+  }, [newTag]);
 
-  function ensureInList(listSetter: React.Dispatch<React.SetStateAction<string[]>>, value: string) {
+  const ensureInList = useCallback((listSetter: React.Dispatch<React.SetStateAction<string[]>>, value: string) => {
     const v = value.trim();
     if (!v) return;
     listSetter((existing) => (existing.includes(v) ? existing : [...existing, v]));
-  }
+  }, []);
 
-  function clearForm() {
+  const clearForm = useCallback(() => {
     setSchool('');
     setTool('');
     setSubject('');
@@ -51,9 +51,9 @@ export default function RateToolForm() {
     setRating(0);
     setTags([]);
     setReview('');
-  }
+  }, []);
 
-  function submit(e: React.FormEvent) {
+  const submit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     if (status !== 'authenticated') {
       // Open the app's auth modal so users can sign in without leaving the page
@@ -90,7 +90,7 @@ export default function RateToolForm() {
         console.error(err);
         alert('Failed to submit review. Please try again later.');
       });
-  }
+  }, [school, tool, subject, courseNumber, rating, tags, review, status, clearForm]);
 
   return (
     <div className="container py-5 d-flex justify-content-center">

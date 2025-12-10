@@ -16,7 +16,7 @@ const TopMenu = ({ title }: TopMenuProps) => {
         {/* Left side: Logo */}
         <div className="flex items-center flex-1">
           <Link href="/" className="flex items-center gap-1 no-underline hover:no-underline">
-            <LogoMain />
+         #12-remove-review-tool
             <span className="bg-black text-xl font-formal text-white px-4 py-2 rounded whitespace-nowrap">
               {title}
             </span>
