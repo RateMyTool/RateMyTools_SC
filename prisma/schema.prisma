@@ -2,23 +2,27 @@ generator client {
   provider = "prisma-client-js"
 }
 
+
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
+
 enum Role {
   USER
   ADMIN
 }
 
+
 model User {
-  id       String  @id @default(cuid())
-  email    String  @unique
+  id       Int      @id @default(autoincrement())
+  email    String   @unique
   password String
-  role     Role    @default(USER)
+  role     Role     @default(USER)
 }
+
 
 enum Condition {
   excellent
@@ -26,6 +30,7 @@ enum Condition {
   fair
   poor
 }
+
 
 model Stuff {
   id        Int       @id @default(autoincrement())
@@ -35,47 +40,16 @@ model Stuff {
   owner     String
 }
 
-model School {
-  id          Int            @id @default(autoincrement())
-  name        String
-  domain      String?        @unique
-  location    String?
-  schoolTools SchoolTool[]
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-}
-
-model Tool {
-  id          Int            @id @default(autoincrement())
-  name        String
-  category    String?
-  logoUrl     String?        @map("logo_url")
-  schoolTools SchoolTool[]
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-}
-
-model SchoolTool {
-  schoolId  Int
-  school    School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  toolId    Int
-  tool      Tool   @relation(fields: [toolId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-
-  @@id([schoolId, toolId])
-}
 
 model Review {
   id           Int      @id @default(autoincrement())
-  school       String?
-  tool         String?
-  rating       Int      @db.SmallInt
-  comment      String?  @db.Text
-  tags         String[]
+  school       String
+  tool         String
   subject      String?
   courseNumber String?
+  rating       Int
+  tags         String[]
+  reviewText   String   @map("review")
   userEmail    String?
-  review       String?
   createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
 }

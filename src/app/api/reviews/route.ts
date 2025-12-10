@@ -8,13 +8,20 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
+    const sortValue = searchParams.get('sort') || 'newest';
     const skip = (page - 1) * limit;
+
+    // Database-level sorting for better performance
+    let orderBy: { createdAt?: 'asc' | 'desc'; rating?: 'asc' | 'desc' } = { createdAt: 'desc' };
+    if (sortValue === 'highest') orderBy = { rating: 'desc' };
+    else if (sortValue === 'lowest') orderBy = { rating: 'asc' };
+    else if (sortValue === 'oldest') orderBy = { createdAt: 'asc' };
 
     const [reviews, total] = await Promise.all([
       prisma.review.findMany({
         skip,
         take: limit,
-        orderBy: { createdAt: 'desc' },
+        orderBy,
       }),
       prisma.review.count(),
     ]);
@@ -26,7 +33,7 @@ export async function GET(request: NextRequest) {
       subject: r.subject,
       courseNumber: r.courseNumber,
       rating: r.rating,
-      review: r.review,
+      review: r.reviewText,
       createdAt: r.createdAt.toISOString(),
     }));
 
@@ -75,7 +82,7 @@ export async function POST(request: NextRequest) {
         courseNumber: courseNumber || null,
         rating: parseInt(rating),
         tags: (tags && Array.isArray(tags) ? tags : []).map(String),
-        review: review || comment,
+        reviewText: review || comment,
         userEmail: token.email,
       },
     });

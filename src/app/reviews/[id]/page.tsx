@@ -22,15 +22,6 @@ export default async function ReviewDetailPage({ params }: Params) {
   const id = Number(params.id);
   const review = await prisma.review.findUnique({
     where: { id },
-    include: {
-      school: true,
-      tool: true,
-      user: {
-        select: {
-          email: true,
-        },
-      },
-    },
   });
   const session = await getServerSession(authOptions);
 
@@ -60,7 +51,7 @@ export default async function ReviewDetailPage({ params }: Params) {
     isAdmin = user?.role === 'ADMIN';
   }
 
-  const isOwner = session?.user?.email === review.user?.email;
+  const isOwner = session?.user?.email === review.userEmail;
   const canDelete = isOwner || isAdmin;
 
   return (
@@ -72,8 +63,8 @@ export default async function ReviewDetailPage({ params }: Params) {
           <div className="card-body">
             <div className="d-flex w-100 justify-content-between align-items-start mb-2">
               <div>
-                <h3 className="mb-2">{review.tool.name}</h3>
-                <h5 className="mb-2">{review.school.name}</h5>
+                <h3 className="mb-2">{review.tool}</h3>
+                <h5 className="mb-2">{review.school}</h5>
                 {classLabel && (
                   <div className="mb-1">
                     <strong>Class:</strong>
@@ -93,7 +84,7 @@ export default async function ReviewDetailPage({ params }: Params) {
               )}
             </div>
 
-            <div className="mb-3 bg-gray-100 p-3 rounded">{review.comment || review.reviewText}</div>
+            <div className="mb-3 bg-gray-100 p-3 rounded">{review.reviewText}</div>
             <div><ReviewStars rating={review.rating} /></div>
             {review.tags?.length ? (
               <div>
@@ -108,14 +99,6 @@ export default async function ReviewDetailPage({ params }: Params) {
                 ))}
               </div>
             ) : null}
-
-            {review.user?.email && (
-              <p className="mb-2 mt-5">
-                <strong>Posted by:</strong>
-                {' '}
-                {review.user.email}
-              </p>
-            )}
             <div className="d-flex gap-2">
               <Link href="/reviews" className="btn btn-sm btn-outline-secondary">
                 Back to reviews
