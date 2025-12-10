@@ -23,7 +23,8 @@ const NavBar: React.FC = () => {
     <Navbar bg="light" expand="lg">
       <Container>
         <Navbar.Brand href="/">
-          <Image src="/RATEMY.png" alt="Tools" width={128} height={32} priority />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/B_RATEMY.svg" alt="Tools" width={128} height={32} />
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
