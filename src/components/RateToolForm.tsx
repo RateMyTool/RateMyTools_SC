@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
+import Stars from '@/components/StarsUI';
 
 const availableTags = ['Easy to Use', 'Free', 'Expensive', 'Buggy'];
 
@@ -188,19 +189,7 @@ export default function RateToolForm() {
           <div className="mb-3">
             <label className="form-label">Overall Rating *</label>
             <div>
-              {[1, 2, 3, 4, 5].map((n) => (
-                // eslint-disable-next-line react/no-array-index-key
-                <button
-                  type="button"
-                  key={n}
-                  className={`btn btn-link p-0 me-2 ${n <= rating ? 'text-warning' : 'text-secondary'}`}
-                  onClick={() => setRating(n)}
-                >
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill={n <= rating ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12 .587l3.668 7.431L23.4 9.587l-5.7 5.558L19.335 24 12 19.897 4.665 24l1.635-8.855L.6 9.587l7.732-1.569L12 .587z" />
-                  </svg>
-                </button>
-              ))}
+              {Stars(rating, 32, false, setRating)}
             </div>
           </div>
 

@@ -2,14 +2,45 @@
 
 /* eslint-disable jsx-a11y/label-has-associated-control */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MapPin, School } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-export default function SchoolSideBar() {
+import StarSingle from '@/components/StarSingleUI';
+
+interface SchoolSideBarProps {
+  school: string;
+}
+
+interface SchoolStats {
+  totalTools: number;
+  totalReviews: number;
+  avgRating: number;
+}
+
+export default function SchoolSideBar({ school }: SchoolSideBarProps) {
   const router = useRouter();
   const [subject, setSubject] = useState('all');
   const [crn, setCrn] = useState('');
+  const [stats, setStats] = useState<SchoolStats>({
+    totalTools: 0,
+    totalReviews: 0,
+    avgRating: 0,
+  });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch(`/api/school/${encodeURIComponent(school)}/stats`);
+        const data = await response.json();
+        setStats(data);
+      } catch (error) {
+        console.error('Error fetching school stats:', error);
+      }
+    };
+
+    fetchStats();
+  }, [school]);
 
   const handleClear = () => {
     setSubject('all');
@@ -36,11 +67,11 @@ export default function SchoolSideBar() {
             <School style={{ width: '48px', height: '48px', color: 'white' }} />
           </div>
 
-          {/* School Name and Location */}
-          <h3 className="mb-2" style={{ fontWeight: '400' }}>Massachusetts Institute of Technology</h3>
+          {/* School Name */}
+          <h3 className="mb-2" style={{ fontWeight: '400' }}>{school}</h3>
           <div className="flex items-center justify-center gap-1 text-sm" style={{ color: '#4f545eff' }}>
             <MapPin style={{ width: '18px', height: '18px' }} />
-            <span>Cambridge, MA</span>
+            <span>University</span>
           </div>
         </div>
 
@@ -49,17 +80,17 @@ export default function SchoolSideBar() {
           <div style={{ borderTop: '1px solid #f3f6f3ff', paddingTop: '16px' }}>
             <div className="flex justify-between items-center py-2">
               <span className="text-sm" style={{ color: '#2a2c31ff' }}>Total Tools</span>
-              <span className="text-sm font-medium">127</span>
+              <span className="text-sm font-medium">{stats.totalTools}</span>
             </div>
             <div className="flex justify-between items-center py-2">
               <span className="text-sm" style={{ color: '#2a2c31ff' }}>Total Reviews</span>
-              <span className="text-sm font-medium">3,248</span>
+              <span className="text-sm font-medium">{stats.totalReviews}</span>
             </div>
             <div className="flex justify-between items-center py-2">
               <span className="text-sm" style={{ color: '#2a2c31ff' }}>Avg. Rating</span>
               <span className="text-sm font-medium flex items-center gap-1">
-                4.5
-                <span style={{ color: '#eab308' }}>⭐</span>
+                {stats.avgRating > 0 ? stats.avgRating.toFixed(1) : 'N/A'}
+                {stats.avgRating > 0 && StarSingle(0, 1, 16)}
               </span>
             </div>
           </div>
@@ -67,11 +98,10 @@ export default function SchoolSideBar() {
 
         {/* Rate A Tool Button */}
         <div className="flex justify-center px-4">
-          {/* Routing to Rate page to be implemented */}
           <button
             type="button"
             className="mt-5 mb-4 text-sm font-medium"
-            onClick={() => router.push('/')}
+            onClick={() => router.push(`/rate?school=${encodeURIComponent(school)}`)}
             style={{
               backgroundColor: '#000',
               color: 'white',

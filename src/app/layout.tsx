@@ -23,8 +23,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={classString}>
         <Providers>
-          <TopMenu title={metadata.title as string} />
-          {/* TopMenu rendered once using metadata.title */}
+          <TopMenu title="TOOLS" />
           <AuthModalHost />
           {children}
         </Providers>

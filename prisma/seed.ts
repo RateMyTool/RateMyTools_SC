@@ -1,46 +1,83 @@
-import { PrismaClient, Role, Condition } from '@prisma/client';
-import { hash } from 'bcrypt';
-import * as config from '../config/settings.development.json';
+import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('Seeding the database');
-  const password = await hash('changeme', 10);
-  config.defaultAccounts.forEach(async (account) => {
-    const role = account.role as Role || Role.USER;
-    console.log(`  Creating user: ${account.email} with role: ${role}`);
-    await prisma.user.upsert({
-      where: { email: account.email },
-      update: {},
-      create: {
-        email: account.email,
-        password,
-        role,
-      },
-    });
-    // console.log(`  Created user: ${user.email} with role: ${user.role}`);
+  console.log('Seeding database...');
+
+  // Create users
+  const password = await bcrypt.hash('changeme', 10);
+  
+  await prisma.user.upsert({
+    where: { email: 'admin@foo.com' },
+    update: {},
+    create: {
+      email: 'admin@foo.com',
+      password,
+      role: 'ADMIN',
+    },
   });
-  for (const data of config.defaultData) {
-    const condition = data.condition as Condition || Condition.good;
-    console.log(`  Adding stuff: ${JSON.stringify(data)}`);
-    // eslint-disable-next-line no-await-in-loop
-    await prisma.stuff.upsert({
-      where: { id: config.defaultData.indexOf(data) + 1 },
-      update: {},
-      create: {
-        name: data.name,
-        quantity: data.quantity,
-        owner: data.owner,
-        condition,
-      },
-    });
-  }
+
+  await prisma.user.upsert({
+    where: { email: 'john@foo.com' },
+    update: {},
+    create: {
+      email: 'john@foo.com',
+      password,
+      role: 'USER',
+    },
+  });
+
+  // Create sample reviews
+  await prisma.review.create({
+    data: {
+      school: 'UH Manoa',
+      tool: 'VS Code',
+      subject: 'ICS',
+      courseNumber: '314',
+      rating: 5,
+      tags: ['Great Documentation', 'Easy to Use'],
+      reviewText: 'Amazing tool for software development. Very intuitive and powerful.',
+      userEmail: 'john@foo.com',
+    },
+  });
+
+  await prisma.review.create({
+    data: {
+      school: 'UH Manoa',
+      tool: 'GitHub',
+      subject: 'ICS',
+      courseNumber: '314',
+      rating: 5,
+      tags: ['Essential', 'Collaboration'],
+      reviewText: 'Essential for version control and team collaboration.',
+      userEmail: 'john@foo.com',
+    },
+  });
+
+  await prisma.review.create({
+    data: {
+      school: 'UH Hilo',
+      tool: 'Notion',
+      subject: 'MATH',
+      courseNumber: '241',
+      rating: 4,
+      tags: ['Versatile', 'Customizable'],
+      reviewText: 'Great for organizing notes and tasks. Very customizable.',
+      userEmail: 'admin@foo.com',
+    },
+  });
+
+  console.log('Seeding completed successfully!');
 }
+
 main()
-  .then(() => prisma.$disconnect())
-  .catch(async (e) => {
+  .catch((e) => {
     console.error(e);
-    await prisma.$disconnect();
     process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
   });
+  

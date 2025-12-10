@@ -5,7 +5,8 @@
 
 import { useState } from 'react';
 import { Card, Button, Badge } from 'react-bootstrap';
-import { Star, HandThumbsUp, HandThumbsDown } from 'react-bootstrap-icons';
+import { HandThumbsUp, HandThumbsDown } from 'react-bootstrap-icons';
+import Stars from '@/components/StarsUI';
 
 // Static sample reviews (could later be fetched from DB by tool slug)
 interface Review {
@@ -121,14 +122,7 @@ export default function ToolPage() {
               <div className="text-center">
                 <div style={{ fontSize: '3rem', fontWeight: 600, marginBottom: '0.5rem' }}>{overallRating}</div>
                 <div className="d-flex justify-content-center mb-2" style={{ gap: '0.25rem' }}>
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star
-                      key={star}
-                      size={22}
-                      className={star <= Math.round(Number(overallRating)) ? 'text-warning' : 'text-secondary'}
-                      style={star <= Math.round(Number(overallRating)) ? { fill: '#facc15' } : {}}
-                    />
-                  ))}
+                  {Stars(Number(overallRating), 48, true, null!)}
                 </div>
                 <p className="text-muted" style={{ fontSize: '0.8rem' }}>
                   Overall Quality Based on
