@@ -29,6 +29,7 @@ export default function ReviewsPage() {
   const [data, setData] = useState<PaginationData | null>(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
+  const [sortBy, setSortBy] = useState<'newest' | 'highest' | 'lowest'>('newest');
   const limit = 10;
 
   useEffect(() => {
@@ -47,10 +48,25 @@ export default function ReviewsPage() {
     fetchReviews();
   }, [page]);
 
+  // Sort reviews based on selected option
+  const sortedReviews = useMemo(() => {
+    if (!data) return [];
+    const reviews = [...data.reviews];
+    
+    switch (sortBy) {
+      case 'highest':
+        return reviews.sort((a, b) => b.rating - a.rating);
+      case 'lowest':
+        return reviews.sort((a, b) => a.rating - b.rating);
+      case 'newest':
+      default:
+        return reviews.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    }
+  }, [data?.reviews, sortBy]);
+
   // Memoize the review list to prevent re-rendering if data is unchanged
   const reviewCards = useMemo(() => {
-    if (!data) return null;
-    return data.reviews.map((r) => (
+    return sortedReviews.map((r) => (
       <ReviewCard
         key={r.id}
         id={r.id}
@@ -63,7 +79,7 @@ export default function ReviewsPage() {
         createdAt={r.createdAt}
       />
     ));
-  }, [data?.reviews]);
+  }, [sortedReviews]);
 
   if (loading) {
     return (
@@ -94,7 +110,23 @@ export default function ReviewsPage() {
     <main>
       <div style={{ height: '80px' }} />
       <div className="container py-4">
-        <h1 className="mb-3">Reviews</h1>
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          <h1 className="mb-0">Reviews</h1>
+          <div className="d-flex align-items-center gap-2">
+            <label htmlFor="sortSelect" className="mb-0 me-2">Sort by:</label>
+            <select
+              id="sortSelect"
+              className="form-select form-select-sm"
+              style={{ width: 'auto' }}
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as 'newest' | 'highest' | 'lowest')}
+            >
+              <option value="newest">Newest</option>
+              <option value="highest">Highest Rating</option>
+              <option value="lowest">Lowest Rating</option>
+            </select>
+          </div>
+        </div>
         <div className="list-group">
           {reviewCards}
         </div>

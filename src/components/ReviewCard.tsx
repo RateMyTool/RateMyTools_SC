@@ -1,5 +1,8 @@
+'use client';
+
 import Link from 'next/link';
-import { memo } from 'react';
+import { memo, useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 
 interface ReviewCardProps {
   id: number;
@@ -24,6 +27,48 @@ const ReviewCard = memo(function ReviewCard({
   createdAt,
 }: ReviewCardProps) {
   const classLabel = [subject, courseNumber].filter(Boolean).join(' ');
+  const { data: session } = useSession();
+  const [upvotes, setUpvotes] = useState(0);
+  const [downvotes, setDownvotes] = useState(0);
+  const [userVote, setUserVote] = useState<'up' | 'down' | null>(null);
+  const [isVoting, setIsVoting] = useState(false);
+
+  // Fetch vote counts on mount
+  useEffect(() => {
+    fetch(`/api/reviews/${id}/vote`)
+      .then(res => res.json())
+      .then(data => {
+        setUpvotes(data.upvotes || 0);
+        setDownvotes(data.downvotes || 0);
+      })
+      .catch(console.error);
+  }, [id]);
+
+  const handleVote = async (voteType: 'up' | 'down', e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent Link navigation
+    if (!session || isVoting) return;
+
+    setIsVoting(true);
+    try {
+      const response = await fetch(`/api/reviews/${id}/vote`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ voteType }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUpvotes(data.upvotes);
+        setDownvotes(data.downvotes);
+        // Toggle off if same vote, otherwise set new vote
+        setUserVote(userVote === voteType ? null : voteType);
+      }
+    } catch (error) {
+      console.error('Error voting:', error);
+    } finally {
+      setIsVoting(false);
+    }
+  };
 
   return (
     <Link href={`/reviews/${id}`} className="list-group-item list-group-item-action">
@@ -48,13 +93,39 @@ const ReviewCard = memo(function ReviewCard({
         </small>
       </div>
       <p className="mb-1 text-truncate">{reviewText}</p>
-      <small className="text-muted">
-        Rating:
-        {' '}
-        {rating}
-        {' '}
-        / 5
-      </small>
+      <div className="d-flex justify-content-between align-items-center">
+        <small className="text-muted">
+          Rating:
+          {' '}
+          {rating}
+          {' '}
+          / 5
+        </small>
+        {session && (
+          <div className="d-flex gap-3">
+            <button
+              onClick={(e) => handleVote('up', e)}
+              className="btn btn-link p-0 text-decoration-none"
+              style={{ opacity: userVote === 'up' ? 1 : 0.5, fontSize: '1.5rem' }}
+              disabled={isVoting}
+            >
+              👍
+              {' '}
+              <span style={{ fontSize: '1rem' }}>{upvotes}</span>
+            </button>
+            <button
+              onClick={(e) => handleVote('down', e)}
+              className="btn btn-link p-0 text-decoration-none"
+              style={{ opacity: userVote === 'down' ? 1 : 0.5, fontSize: '1.5rem' }}
+              disabled={isVoting}
+            >
+              👎
+              {' '}
+              <span style={{ fontSize: '1rem' }}>{downvotes}</span>
+            </button>
+          </div>
+        )}
+      </div>
     </Link>
   );
 });
