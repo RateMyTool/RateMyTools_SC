@@ -46,4 +46,17 @@ model Review {
   reviewText   String   @map("review")
   userEmail    String?
   createdAt    DateTime @default(now())
+  votes        Vote[]
 }
+
+model Vote {
+  id        Int      @id @default(autoincrement())
+  reviewId  Int
+  review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  userEmail String
+  voteType  String   // "up" or "down"
+  createdAt DateTime @default(now())
+
+  @@unique([reviewId, userEmail])
+}
+
