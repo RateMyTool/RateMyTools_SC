@@ -2,31 +2,16 @@
 
 import React,  { useMemo, useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
-import Stars from '@/components/StarsUI';
-import { Col, Container, Row, Button } from "react-bootstrap";
+import { Col, Container, Row } from "react-bootstrap";
 // import { useSession } from 'next-auth/react';
 
 const mainPage = 'bg-body-tertiary text-black';
 
 const borderPage ='rounded-2 px-1 py-3 my-3 ';
-const borderPanel ='rounded-3 px-3 py-3 ';
 
 const selectorBorder = `${borderPage}border border-black bg-black text-white text-start hover:opacity-90 flex items-left text-lg font-medium gap-4`;
-const countBorder = `${borderPage}border border-primary bg-primary-subtle text-black text-start hover:opacity-90 flex items-left text-lg font-medium gap-4`;
-const compressedText = 'text-black text-start flex items-left text-lg font-medium gap-4';
 
 const selectorText = 'text-black';
-
-const selectedText = 'text-primary';
-const panelClassMain = `${borderPanel} mx-0 bg-white text-black flex items-center text-lg font-medium gap-0`;
-const panelClassSelected = `${panelClassMain} border border-primary`;
-const panelClass = `${panelClassMain} mx-3 border border-dark-subtle`;
-const panelClassEnd = `${panelClassMain} border border-dark-subtle`;
-
-const panelInternalTitle = 'mx-0 mb-2 text-black text-lg font-medium';
-const panelInternal = 'mx-0 my-2 text-black text-lg font-medium';
-const ratingBorderFilled = `${borderPanel}border border-white bg-body-secondary text-black text-start text-lg font-medium gap-4`;
-const tagClass = 'm-0 border border-white-subtle bg-dark-subtle text-black hover:opacity-95 text-center rounded-3 px-2 py-1 text-lg font-small gap-1';
 
 /* This is sent from the server for each tool */
 class RatedToolSummary
@@ -55,11 +40,6 @@ class Rating
 	theReview: string = "";
 }
 
-let getTools: RatedToolSummary[] = [];
-let selectedTool: RatedToolSummary = null!;
-
-
-type SortKey = 'relevance' | 'highest' | 'lowest' | 'most' | 'recent';
 interface ToolsCompareProps {
   school: string;
 }
@@ -91,7 +71,6 @@ export default function ComparePage({ school }: ToolsCompareProps) {
   // Taken from ToolsList page
 
   const router = useRouter();
-  const [sortBy, setSortBy] = useState<SortKey>('relevance');
   const [tools, setTools] = useState<Tool[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
