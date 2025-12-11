@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Card, Button, Badge } from 'react-bootstrap';
-import { HandThumbsUp, HandThumbsDown } from 'react-bootstrap-icons';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import Stars from '@/components/StarsUI';
@@ -23,14 +22,45 @@ interface Review {
   helpfulScore: number;
 }
 
-// Component for individual review with vote counts display
+// Component for individual review with interactive voting
 function ReviewWithVoting({ review }: { review: Review }) {
+  const { data: session } = useSession();
+  const [upvotes, setUpvotes] = useState(review.upvotes);
+  const [downvotes, setDownvotes] = useState(review.downvotes);
+  const [userVote, setUserVote] = useState<'up' | 'down' | null>(null);
+  const [isVoting, setIsVoting] = useState(false);
+
   const courseLabel = [review.subject, review.courseNumber]
     .filter(Boolean)
     .join(' ');
 
+  const handleVote = async (voteType: 'up' | 'down', e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!session || isVoting) return;
+
+    setIsVoting(true);
+    try {
+      const response = await fetch(`/api/reviews/${review.id}/vote`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ voteType }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUpvotes(data.upvotes);
+        setDownvotes(data.downvotes);
+        setUserVote(userVote === voteType ? null : voteType);
+      }
+    } catch (error) {
+      console.error('Error voting:', error);
+    } finally {
+      setIsVoting(false);
+    }
+  };
+
   return (
-    <div onClick={() => window.location.href = '/reviews'} style={{ cursor: 'pointer' }}>
+    <div onClick={() => window.location.href = `/reviews/${review.id}`} style={{ cursor: 'pointer' }}>
       <Card className="p-4" style={{ cursor: 'pointer', transition: 'box-shadow 0.2s', height: '100%' }}>
         <div className="d-flex" style={{ gap: '1rem' }}>
           {/* Rating Box */}
@@ -87,17 +117,36 @@ function ReviewWithVoting({ review }: { review: Review }) {
               {review.reviewText}
             </p>
 
-            {/* Vote Counts Display Only */}
-            <div className="d-flex align-items-center justify-content-end" style={{ gap: '1rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.6 }}>
-                <HandThumbsUp style={{ fontSize: '1.5rem' }} />
-                <span style={{ fontSize: '1rem' }}>{review.upvotes}</span>
+            {/* Yellow Emoji Thumbs (same as ReviewCard) */}
+            {session ? (
+              <div className="d-flex align-items-center justify-content-end gap-3">
+                <button
+                  onClick={(e) => handleVote('up', e)}
+                  className="btn btn-link p-0 text-decoration-none"
+                  style={{ opacity: userVote === 'up' ? 1 : 0.5, fontSize: '1.5rem' }}
+                  disabled={isVoting}
+                >
+                  👍 <span style={{ fontSize: '1rem' }}>{upvotes}</span>
+                </button>
+                <button
+                  onClick={(e) => handleVote('down', e)}
+                  className="btn btn-link p-0 text-decoration-none"
+                  style={{ opacity: userVote === 'down' ? 1 : 0.5, fontSize: '1.5rem' }}
+                  disabled={isVoting}
+                >
+                  👎 <span style={{ fontSize: '1rem' }}>{downvotes}</span>
+                </button>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.6 }}>
-                <HandThumbsDown style={{ fontSize: '1.5rem' }} />
-                <span style={{ fontSize: '1rem' }}>{review.downvotes}</span>
+            ) : (
+              <div className="d-flex align-items-center justify-content-end gap-3">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.5, fontSize: '1.5rem' }}>
+                  👍 <span style={{ fontSize: '1rem' }}>{upvotes}</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.5, fontSize: '1.5rem' }}>
+                  👎 <span style={{ fontSize: '1rem' }}>{downvotes}</span>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </Card>
@@ -107,7 +156,6 @@ function ReviewWithVoting({ review }: { review: Review }) {
 
 export default function DynamicToolPage() {
   const params = useParams();
-  const router = useRouter();
   const toolName = decodeURIComponent(params.name as string);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(true);
