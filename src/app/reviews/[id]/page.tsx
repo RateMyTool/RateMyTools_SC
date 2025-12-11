@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
+import { Badge } from 'react-bootstrap';
 import DeleteReviewButton from '@/components/DeleteReviewButton';
 import ReviewStars from '@/components/ReviewStars';
 
@@ -142,11 +143,15 @@ export default function ReviewDetailPage() {
           </p>
         )}
         <div><ReviewStars rating={review.rating} /></div>
-        <p className="mb-1">
-          <strong>Tags:</strong>
-          {' '}
-          {review.tags?.join(', ')}
-        </p>
+        {review.tags && review.tags.length > 0 && (
+          <div className="d-flex flex-wrap mb-3" style={{ gap: '0.5rem' }}>
+            {review.tags.map((tag) => (
+              <Badge bg="secondary" key={tag}>
+                {tag}
+              </Badge>
+            ))}
+          </div>
+        )}
         {review.userEmail && (
           <p className="mb-1">
             <strong>Posted by:</strong>

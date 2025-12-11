@@ -21,6 +21,7 @@ export async function GET(request: NextRequest) {
           courseNumber: true,
           rating: true,
           reviewText: true,
+          tags: true,
           createdAt: true,
           votes: {
             select: {

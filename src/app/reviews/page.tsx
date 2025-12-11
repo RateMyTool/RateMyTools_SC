@@ -85,6 +85,7 @@ export default function ReviewsPage() {
         createdAt={r.createdAt}
         initialUpvotes={r.upvotes}
         initialDownvotes={r.downvotes}
+        tags={r.tags}
       />
     ));
   }, [sortedReviews]);

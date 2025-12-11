@@ -13,17 +13,17 @@ interface Tool {
   tags: string[];
 }
 
-type SortKey = 'relevance' | 'highest' | 'lowest' | 'most' | 'recent';
-
 interface ToolsListProps {
   school: string;
 }
 
 export default function ToolsList({ school }: ToolsListProps) {
   const router = useRouter();
-  const [sortBy, setSortBy] = useState<SortKey>('relevance');
   const [tools, setTools] = useState<Tool[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [sortBy, setSortBy] = useState('lowest');
+  const itemsPerPage = 5;
 
   useEffect(() => {
     const fetchTools = async () => {
@@ -43,7 +43,7 @@ export default function ToolsList({ school }: ToolsListProps) {
 
   const sortedTools = useMemo(() => {
     const list = [...tools];
-
+    
     switch (sortBy) {
       case 'highest':
         list.sort((a, b) => b.rating - a.rating);
@@ -54,13 +54,20 @@ export default function ToolsList({ school }: ToolsListProps) {
       case 'most':
         list.sort((a, b) => b.totalRatings - a.totalRatings);
         break;
-      case 'relevance':
       default:
-        break;
+        list.sort((a, b) => a.rating - b.rating);
     }
-
+    
     return list;
-  }, [tools, sortBy]);
+  }, [tools]);
+
+  // Paginate the tools
+  const paginatedTools = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return sortedTools.slice(startIndex, startIndex + itemsPerPage);
+  }, [sortedTools, currentPage]);
+
+  const totalPages = Math.ceil(sortedTools.length / itemsPerPage);
 
   if (isLoading) {
     return <div>Loading tools...</div>;
@@ -77,27 +84,30 @@ export default function ToolsList({ school }: ToolsListProps) {
 
   return (
     <div>
-      <div className="flex items-center justify-between pb-3">
+      <div className="pb-3 flex justify-between items-center">
         <h3>
-          Tools at
-          {' '}
-          {school}
+          Tools at {school}
         </h3>
-        <select
-          className="px-3 py-2 border rounded"
-          style={{ borderColor: '#d1d5db', backgroundColor: 'white' }}
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value as SortKey)}
-        >
-          <option value="relevance">Most Relevant</option>
-          <option value="highest">Highest Rated</option>
-          <option value="lowest">Lowest Rated</option>
-          <option value="most">Most Reviewed</option>
-        </select>
+        <div style={{ minWidth: '200px' }}>
+          <select
+            className="w-full px-3 py-2 text-sm"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            style={{
+              border: '1px solid #d1d5db',
+              borderRadius: '6px',
+              backgroundColor: 'white',
+            }}
+          >
+            <option value="lowest">Lowest Rated</option>
+            <option value="highest">Highest Rated</option>
+            <option value="most">Most Reviewed</option>
+          </select>
+        </div>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        {sortedTools.map((tool) => (
+        {paginatedTools.map((tool) => (
           <div
             key={tool.name}
             className="p-4"
@@ -173,6 +183,39 @@ export default function ToolsList({ school }: ToolsListProps) {
           </div>
         ))}
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center gap-2 mt-6">
+          <button
+            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+            disabled={currentPage === 1}
+            className="px-4 py-2 border rounded"
+            style={{
+              backgroundColor: currentPage === 1 ? '#f3f4f6' : 'white',
+              borderColor: '#d1d5db',
+              cursor: currentPage === 1 ? 'not-allowed' : 'pointer'
+            }}
+          >
+            Previous
+          </button>
+          <span className="px-4 py-2">
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+            disabled={currentPage === totalPages}
+            className="px-4 py-2 border rounded"
+            style={{
+              backgroundColor: currentPage === totalPages ? '#f3f4f6' : 'white',
+              borderColor: '#d1d5db',
+              cursor: currentPage === totalPages ? 'not-allowed' : 'pointer'
+            }}
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 }

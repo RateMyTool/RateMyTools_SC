@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { memo, useState } from 'react';
-import { useSession } from 'next-auth/react';
+import { Badge } from 'react-bootstrap';
 import ReviewStars from './ReviewStars';
 
 interface ReviewCardProps {
@@ -16,6 +16,7 @@ interface ReviewCardProps {
   createdAt: string;
   initialUpvotes?: number;
   initialDownvotes?: number;
+  tags?: string[];
 }
 
 // Memoize the card component to prevent unnecessary re-renders
@@ -30,9 +31,9 @@ const ReviewCard = memo(function ReviewCard({
   createdAt,
   initialUpvotes = 0,
   initialDownvotes = 0,
+  tags = [],
 }: ReviewCardProps) {
   const classLabel = [subject, courseNumber].filter(Boolean).join(' ');
-  const { data: session } = useSession();
   const [upvotes, setUpvotes] = useState(initialUpvotes);
   const [downvotes, setDownvotes] = useState(initialDownvotes);
   const [userVote, setUserVote] = useState<'up' | 'down' | null>(null);
@@ -88,40 +89,18 @@ const ReviewCard = memo(function ReviewCard({
       </div>
       <p className="mb-1 text-truncate">{reviewText}</p>
       <div className="d-flex justify-content-between align-items-center">
-<<<<<<< HEAD
-      <div><ReviewStars rating={rating} /></div>
-        {session && (
-          <div className="d-flex gap-3">
-            <button
-              onClick={(e) => handleVote('up', e)}
-              className="btn btn-link p-0 text-decoration-none"
-              style={{ opacity: userVote === 'up' ? 1 : 0.5, fontSize: '1.5rem' }}
-              disabled={isVoting}
-            >
-              👍
-              {' '}
-              <span style={{ fontSize: '1rem' }}>{upvotes}</span>
-            </button>
-            <button
-              onClick={(e) => handleVote('down', e)}
-              className="btn btn-link p-0 text-decoration-none"
-              style={{ opacity: userVote === 'down' ? 1 : 0.5, fontSize: '1.5rem' }}
-              disabled={isVoting}
-            >
-              👎
-              {' '}
-              <span style={{ fontSize: '1rem' }}>{downvotes}</span>
-            </button>
-          </div>
-        )}
-=======
-        <small className="text-muted">
-          Rating:
-          {' '}
-          {rating}
-          {' '}
-          / 5
-        </small>
+        <div className="d-flex align-items-center" style={{ gap: '1rem' }}>
+          <div><ReviewStars rating={rating} /></div>
+          {tags && tags.length > 0 && (
+            <div className="d-flex flex-wrap" style={{ gap: '0.3rem' }}>
+              {tags.map((tag) => (
+                <Badge bg="secondary" key={tag} style={{ fontSize: '0.75rem' }}>
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          )}
+        </div>
         <div className="d-flex gap-3">
           <button
             onClick={(e) => handleVote('up', e)}
@@ -144,7 +123,6 @@ const ReviewCard = memo(function ReviewCard({
             <span style={{ fontSize: '1rem' }}>{downvotes}</span>
           </button>
         </div>
->>>>>>> 94b0ca00261e3669fdfe79b7cc00276a4af97ae1
       </div>
     </Link>
   );
