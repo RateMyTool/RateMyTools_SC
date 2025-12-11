@@ -1,48 +1,13 @@
 'use client';
 
-import React,  { useMemo, useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Col, Container, Row } from "react-bootstrap";
-// import { useSession } from 'next-auth/react';
+import { Container, Row, Col } from 'react-bootstrap';
 
 const mainPage = 'bg-body-tertiary text-black';
+const borderPage = 'rounded-2 px-1 py-3 my-3';
+const selectorBorder = `${borderPage} border border-black bg-black text-white`;
 
-const borderPage ='rounded-2 px-1 py-3 my-3 ';
-
-const selectorBorder = `${borderPage}border border-black bg-black text-white text-start hover:opacity-90 flex items-left text-lg font-medium gap-4`;
-
-const selectorText = 'text-black';
-
-/* This is sent from the server for each tool */
-class RatedToolSummary
-{
-	name: string;
-	desc: string;
-	icon: string;
-	rating: number;
-	numRatings: number;
-	tags: string[];
-	bestReview: Rating = null!;
-    constructor(nameIn: string, ratingIn: number, numRatingsIn: number, tagsIn: string[], descIn: string, iconIn: string = null!)
-    {
-        this.name = nameIn;
-        this.icon = iconIn;
-        this.rating = ratingIn;
-        this.numRatings = numRatingsIn;
-        this.tags = tagsIn;
-        this.desc = descIn;
-    }
-}
-class Rating
-{
-    reviewer: string = "";
-	rating: number = 5 // Expects input from [0 - 5], where 1 equals one star
-	theReview: string = "";
-}
-
-interface ToolsCompareProps {
-  school: string;
-}
 interface Tool {
   name: string;
   rating: number;
@@ -51,44 +16,18 @@ interface Tool {
   tags: string[];
 }
 
-class ToolsCallback {
-  allTools: Tool[];
-  mainTool: RatedToolSummary;
-  toolsSorted: RatedToolSummary[];
-  constructor(allTools: Tool[], mainTool: RatedToolSummary, tools: RatedToolSummary[])
-  {
-    this.allTools = allTools;
-    this.mainTool = mainTool;
-    this.toolsSorted = tools;
-  }
-}
-
-
-export default function ComparePage({ school }: ToolsCompareProps) {
-  // PLACEHOLDER
-  //const layoutList: boolean = false;// List mode is WIP
-
-  // Taken from ToolsList page
-
+export default function ComparePage() {
   const router = useRouter();
   const [tools, setTools] = useState<Tool[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedTool, setSelectedTool] = useState<string>('');
 
   useEffect(() => {
-    const fetchToolsAndFirstReviews = async () => {
+    const fetchTools = async () => {
       try {
-        if (school == null || school.length == 0)
-        {
-          const response = await fetch(`/api/tools`);
-          const data = await response.json();
-          setTools(data.tools || []);
-        }
-        else
-        {
-          const response = await fetch(`/api/school/${encodeURIComponent(school)}/tools`);
-          const data = await response.json();
-          setTools(data.tools || []);
-        }
+        const response = await fetch('/api/tools');
+        const data = await response.json();
+        setTools(data.tools || []);
       } catch (error) {
         console.error('Error fetching tools:', error);
       } finally {
@@ -96,91 +35,70 @@ export default function ComparePage({ school }: ToolsCompareProps) {
       }
     };
 
-    fetchToolsAndFirstReviews();
-  }, [school]);
+    fetchTools();
+  }, []);
 
-  const toolGetData: ToolsCallback = useMemo(() => {
-    return new ToolsCallback([...tools], null!, []);
-  }, [tools]);
+  const handleToolSelect = (toolName: string) => {
+    if (toolName && toolName !== '0') {
+      router.push(`/compare/${encodeURIComponent(toolName)}`);
+    }
+  };
 
   return (
-      /* Display the header */
     <main className={mainPage}>
       <div style={{ height: 112 }} />
-      {/* Top bar with our search term school */}
-      <Container id="compare-page-school">
-        <div className="d-flex flex-row">
-          <div className="me-2">
-            <h2>For College: </h2>
-          </div>
-          <div>
-            <h2 className="text-success">
-              {/* Place the name of the college we are filtering by here */}
-              {school}
-            </h2>
-          </div>
-        </div>
-        <Row className="align-left text-left mt-2">
+      
+      <Container id="compare-page-main">
+        <Row className="align-left text-left mt-2 mb-4">
           <h1><b>Compare Tools</b></h1>
-          <p>Compare a tool against others based on matching tags</p>
+          <p>Select a tool to compare against others with similar tags</p>
         </Row>
+
         <Row className={selectorBorder}>
-          <Col xs={3}>
+          <Col xs={12} md={3} className="mb-2 mb-md-0">
             <b>Select a tool to compare:</b>
           </Col>
-          <Col className="d-flex flex-column">
-            <select
-              value= {(() =>
-                {
-                  return "0";
-                })()}
-              onChange= {(x) => {
-                router.push(`/compare/${encodeURIComponent(x.target.value)}`);
-              }}
-              className={`d-flex flex-column ${selectorText}`}
-            >
-              {(() => {
-                  const rows: React.JSX.Element[] = [];
-                  let num: number = 0;
-                  toolGetData.allTools.forEach(x => {
-                      rows.push((
-                        <option key={num} value={x.name}>{x.name}</option>
-                      ))
-                      num++;
-                  });
-                  return rows;
-              })()}
-            </select>
+          <Col xs={12} md={9}>
+            {isLoading ? (
+              <div className="text-white">Loading tools...</div>
+            ) : tools.length === 0 ? (
+              <div className="text-white">No tools available. Add some reviews first!</div>
+            ) : (
+              <select
+                value={selectedTool}
+                onChange={(e) => {
+                  setSelectedTool(e.target.value);
+                  handleToolSelect(e.target.value);
+                }}
+                className="form-select"
+                style={{ width: '100%' }}
+              >
+                <option value="0">-- Choose a tool --</option>
+                {tools.map((tool, index) => (
+                  <option key={index} value={tool.name}>
+                    {tool.name} ({tool.rating.toFixed(1)}★ - {tool.totalRatings} reviews)
+                  </option>
+                ))}
+              </select>
+            )}
           </Col>
         </Row>
+
+        <Container id="compare-page-panel" className="mt-4">
+          {isLoading ? (
+            <div className="text-center py-5">
+              <div className="spinner-border" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+              <p className="mt-3">Loading tools...</p>
+            </div>
+          ) : (
+            <div className="text-center py-5 text-muted">
+              <p>Select a tool from the dropdown above to see comparisons</p>
+            </div>
+          )}
+        </Container>
       </Container>
-      {(() => {
-          if (isLoading)
-          {
-            return LoadingPagePanel();
-          }
-          else
-          {
-            return LoadedNoToolPanel();
-          }
-      })()}
     </main>
-      /* Display the footer */
   );
-};
-
-const LoadedNoToolPanel = () => {
-  return (
-    <Container id="compare-page-panel">
-      <div>Select a tool</div>
-    </Container>
-  )
-}
-
-const LoadingPagePanel = () => {
-  return (
-    <Container id="compare-page-panel">
-      <div>Loading tools...</div>
-    </Container>
-  )
 }
