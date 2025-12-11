@@ -17,7 +17,6 @@ export default function DynamicSchoolPage({ params }: Params) {
         <TopMenu title="TOOLS" />
         <div style={{ height: '80px' }} />
         <div className="mx-auto px-4 py-4" style={{ maxWidth: '1400px' }}>
-          <h1 className="mb-4">{schoolName}</h1>
           <div className="flex gap-4">
             <div style={{ width: '440px', flexShrink: 0 }}>
               <SchoolSideBar school={schoolName} />

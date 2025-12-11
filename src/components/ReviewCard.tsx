@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { memo, useState, useEffect } from 'react';
+import { memo, useState } from 'react';
 import { useSession } from 'next-auth/react';
+import ReviewStars from './ReviewStars';
 
 interface ReviewCardProps {
   id: number;
@@ -65,7 +66,7 @@ const ReviewCard = memo(function ReviewCard({
 
   return (
     <Link href={`/reviews/${id}`} className="list-group-item list-group-item-action">
-      <div className="d-flex w-100 justify-content-between align-items-start">
+      <div className="d-flex w-100 justify-content-between align-items-start" style={{ marginTop: '4px'}}>
         <div className="flex-grow-1">
           <h3 className="mb-0" style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>
             {tool}
@@ -87,13 +88,7 @@ const ReviewCard = memo(function ReviewCard({
       </div>
       <p className="mb-1 text-truncate">{reviewText}</p>
       <div className="d-flex justify-content-between align-items-center">
-        <small className="text-muted">
-          Rating:
-          {' '}
-          {rating}
-          {' '}
-          / 5
-        </small>
+      <div><ReviewStars rating={rating} /></div>
         {session && (
           <div className="d-flex gap-3">
             <button

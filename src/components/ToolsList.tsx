@@ -77,9 +77,9 @@ export default function ToolsList({ school }: ToolsListProps) {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6 pb-3">
+      <div className="flex items-center justify-between pb-3">
         <h3>
-          Popular Tools at
+          Tools at
           {' '}
           {school}
         </h3>

@@ -101,7 +101,7 @@ const MiddleMenu: React.FC<MiddleMenuProps> = ({ setTitle, title }) => {
   };
 
   return (
-    <div className="pt-16">
+    <div>
       <div
         className="relative h-screen bg-cover bg-center flex items-center justify-center"
         style={{
@@ -144,7 +144,7 @@ const MiddleMenu: React.FC<MiddleMenuProps> = ({ setTitle, title }) => {
               <>
                 Enter your
                 {' '}
-                <strong>school</strong>
+                <strong>School</strong>
                 {' '}
                 to get started
               </>
@@ -161,6 +161,10 @@ const MiddleMenu: React.FC<MiddleMenuProps> = ({ setTitle, title }) => {
           <div className="w-2/5 mt-2" ref={dropdownRef}>
             <form onSubmit={handleSubmit}>
               <div className="relative">
+                <Icons.Search 
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500" 
+                  size={20} 
+                />
                 <input
                   type="text"
                   placeholder={isCollege ? 'Your school' : 'Tool name'}
@@ -171,6 +175,7 @@ const MiddleMenu: React.FC<MiddleMenuProps> = ({ setTitle, title }) => {
                     'rounded-full',
                     'px-5',
                     'py-3',
+                    'pl-12',
                     'text-lg',
                     'bg-white',
                     'shadow',
@@ -263,7 +268,7 @@ const MiddleMenu: React.FC<MiddleMenuProps> = ({ setTitle, title }) => {
             }}
             className="pt-3 text-white text-lg hover:text-gray-200 hover:underline transition no-underline"
           >
-            {isCollege ? 'Find Tool by name' : 'Find Tool by school'}
+            {isCollege ? 'Find Tool by Name' : 'Find Tool by School'}
           </Link>
         </div>
       </div>

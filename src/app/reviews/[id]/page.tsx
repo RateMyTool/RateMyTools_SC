@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { getServerSession } from 'next-auth';
 import authOptions from '@/lib/authOptions';
 import DeleteReviewButton from '@/components/DeleteReviewButton';
+import ReviewStars from '@/components/ReviewStars';
 
 export const metadata = {
   title: 'Review',
@@ -49,7 +50,7 @@ export default async function ReviewDetailPage({ params }: Params) {
 
   if (!review) {
     return (
-      <main>
+      <main style={{ minHeight: '100vh' }}>
         <div style={{ height: '80px' }} />
         <div className="container py-4">
           <h1 className="mb-3">Review Not Found</h1>
@@ -69,7 +70,7 @@ export default async function ReviewDetailPage({ params }: Params) {
   const canDelete = isOwner || isAdmin;
 
   return (
-    <main>
+    <main style={{ minHeight: '100vh' }}>
       <div style={{ height: '80px' }} />
       <div className="container py-4">
         <h1 className="mb-2">
@@ -86,13 +87,7 @@ export default async function ReviewDetailPage({ params }: Params) {
             {classLabel}
           </p>
         )}
-        <p className="mb-1">
-          <strong>Rating:</strong>
-          {' '}
-          {review.rating}
-          {' '}
-          / 5
-        </p>
+        <div><ReviewStars rating={review.rating} /></div>
         <p className="mb-1">
           <strong>Tags:</strong>
           {' '}

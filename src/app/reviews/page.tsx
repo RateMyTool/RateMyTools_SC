@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useEffect, useState, useMemo } from 'react';
 import ReviewCard from '@/components/ReviewCard';
 
@@ -92,7 +91,7 @@ export default function ReviewsPage() {
 
   if (loading) {
     return (
-      <main>
+      <main style={{ minHeight: '100vh' }}>
         <div style={{ height: '80px' }} />
         <div className="container py-4">
           <p>Loading...</p>
@@ -103,7 +102,7 @@ export default function ReviewsPage() {
 
   if (!data || data.reviews.length === 0) {
     return (
-      <main>
+      <main style={{ minHeight: '100vh' }}>
         <div style={{ height: '80px' }} />
         <div className="container py-4">
           <h1 className="mb-3">Reviews</h1>
@@ -116,7 +115,7 @@ export default function ReviewsPage() {
   const { pagination } = data;
 
   return (
-    <main>
+    <main style={{ minHeight: '100vh' }}>
       <div style={{ height: '80px' }} />
       <div className="container py-4">
         <div className="d-flex justify-content-between align-items-center mb-3">

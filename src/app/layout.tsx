@@ -25,7 +25,9 @@ export default function RootLayout({
         <Providers>
           <TopMenu title="TOOLS" />
           <AuthModalHost />
-          {children}
+          <div style={{ paddingTop: '80px', backgroundColor: '#f0f0f0' }}>
+            {children}
+          </div>
         </Providers>
       </body>
     </html>

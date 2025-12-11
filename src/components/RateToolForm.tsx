@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
-import Stars from '@/components/StarsUI';
+import StarSingle from '@/components/StarSingleUI';
 
 const availableTags = ['Easy to Use', 'Free', 'Expensive', 'Buggy'];
 
@@ -14,6 +14,7 @@ export default function RateToolForm() {
   const [subject, setSubject] = useState('');
   const [courseNumber, setCourseNumber] = useState('');
   const [rating, setRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
   const [tags, setTags] = useState<string[]>([]);
   const [allTags, setAllTags] = useState<string[]>(availableTags);
   const [newTag, setNewTag] = useState('');
@@ -93,7 +94,7 @@ export default function RateToolForm() {
   }, [school, tool, subject, courseNumber, rating, tags, review, status, clearForm]);
 
   return (
-    <div className="container py-5 d-flex justify-content-center">
+    <div className="container d-flex justify-content-center" style={{ marginBottom: '2rem', marginTop: '1rem' }}>
       <div className="card w-75 p-4">
         <form onSubmit={submit}>
           {status === 'unauthenticated' && (
@@ -111,12 +112,13 @@ export default function RateToolForm() {
             </div>
           )}
           <div className="mb-3">
-            <label className="form-label">Your School *</label>
+            <label className="form-label">Your School <span style={{ color: 'red' }}>*</span></label>
             <input
               className="form-control"
               list="schools"
               placeholder="Choose or type a school..."
               value={school}
+              style={{ backgroundColor: school ? 'white' : '#f0f0f0' }}
               onChange={(e) => setSchool(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
@@ -134,12 +136,13 @@ export default function RateToolForm() {
           </div>
 
           <div className="mb-3">
-            <label className="form-label">Your Tool *</label>
+            <label className="form-label">Your Tool <span style={{ color: 'red' }}>*</span></label>
             <input
               className="form-control"
               list="tools"
               placeholder="Type a tool..."
               value={tool}
+              style={{ backgroundColor: tool ? 'white' : '#f0f0f0' }}
               onChange={(e) => setTool(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
@@ -187,9 +190,21 @@ export default function RateToolForm() {
           </div>
 
           <div className="mb-3">
-            <label className="form-label">Overall Rating *</label>
-            <div>
-              {Stars(rating, 32, false, setRating)}
+            <label className="form-label">Overall Rating <span style={{ color: 'red' }}>*</span></label>
+            <div className="d-flex gap-2 align-items-center">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  onClick={() => setRating(star)}
+                  onMouseEnter={() => setHoverRating(star)}
+                  onMouseLeave={() => setHoverRating(0)}
+                  className="transition-transform"
+                  style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+                >
+                  {StarSingle(star, star <= (hoverRating || rating) ? 1 : 0, 32)}
+                </button>
+              ))}
             </div>
           </div>
 
@@ -226,8 +241,15 @@ export default function RateToolForm() {
           </div>
 
           <div className="mb-3">
-            <label className="form-label">Your Review *</label>
-            <textarea className="form-control" rows={6} value={review} onChange={(e) => setReview(e.target.value)} placeholder="Share your experience and main strengths or weaknesses." />
+            <label className="form-label">Your Review <span style={{ color: 'red' }}>*</span></label>
+            <textarea 
+              className="form-control" 
+              rows={6} 
+              value={review}
+              style={{ backgroundColor: review ? 'white' : '#f0f0f0' }}
+              onChange={(e) => setReview(e.target.value)}
+              placeholder="Share your experience and main strengths or weaknesses." 
+              />
             <div className="form-text">Minimum 50 characters</div>
           </div>
 
