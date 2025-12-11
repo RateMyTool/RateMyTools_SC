@@ -40,7 +40,7 @@ const ReviewCard = memo(function ReviewCard({
 
   const handleVote = async (voteType: 'up' | 'down', e: React.MouseEvent) => {
     e.preventDefault(); // Prevent Link navigation
-    if (!session || isVoting) return;
+    if (isVoting) return;
 
     setIsVoting(true);
     try {
@@ -88,6 +88,7 @@ const ReviewCard = memo(function ReviewCard({
       </div>
       <p className="mb-1 text-truncate">{reviewText}</p>
       <div className="d-flex justify-content-between align-items-center">
+<<<<<<< HEAD
       <div><ReviewStars rating={rating} /></div>
         {session && (
           <div className="d-flex gap-3">
@@ -113,6 +114,37 @@ const ReviewCard = memo(function ReviewCard({
             </button>
           </div>
         )}
+=======
+        <small className="text-muted">
+          Rating:
+          {' '}
+          {rating}
+          {' '}
+          / 5
+        </small>
+        <div className="d-flex gap-3">
+          <button
+            onClick={(e) => handleVote('up', e)}
+            className="btn btn-link p-0 text-decoration-none"
+            style={{ opacity: userVote === 'up' ? 1 : 0.5, fontSize: '1.5rem' }}
+            disabled={isVoting}
+          >
+            👍
+            {' '}
+            <span style={{ fontSize: '1rem' }}>{upvotes}</span>
+          </button>
+          <button
+            onClick={(e) => handleVote('down', e)}
+            className="btn btn-link p-0 text-decoration-none"
+            style={{ opacity: userVote === 'down' ? 1 : 0.5, fontSize: '1.5rem' }}
+            disabled={isVoting}
+          >
+            👎
+            {' '}
+            <span style={{ fontSize: '1rem' }}>{downvotes}</span>
+          </button>
+        </div>
+>>>>>>> 94b0ca00261e3669fdfe79b7cc00276a4af97ae1
       </div>
     </Link>
   );

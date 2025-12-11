@@ -2,7 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { Card, Button, Badge } from 'react-bootstrap';
+<<<<<<< HEAD
 import { useParams, useRouter } from 'next/navigation';
+=======
+import { useParams } from 'next/navigation';
+>>>>>>> 94b0ca00261e3669fdfe79b7cc00276a4af97ae1
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import Stars from '@/components/StarsUI';
@@ -23,16 +27,51 @@ interface Review {
   helpfulScore: number;
 }
 
+<<<<<<< HEAD
 type SortKey = 'highest' | 'newest';
 
 // Component for individual review with vote counts display
+=======
+// Component for individual review with interactive voting
+>>>>>>> 94b0ca00261e3669fdfe79b7cc00276a4af97ae1
 function ReviewWithVoting({ review }: { review: Review }) {
+  const { data: session } = useSession();
+  const [upvotes, setUpvotes] = useState(review.upvotes);
+  const [downvotes, setDownvotes] = useState(review.downvotes);
+  const [userVote, setUserVote] = useState<'up' | 'down' | null>(null);
+  const [isVoting, setIsVoting] = useState(false);
+
   const courseLabel = [review.subject, review.courseNumber]
     .filter(Boolean)
     .join(' ');
 
+  const handleVote = async (voteType: 'up' | 'down', e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!session || isVoting) return;
+
+    setIsVoting(true);
+    try {
+      const response = await fetch(`/api/reviews/${review.id}/vote`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ voteType }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUpvotes(data.upvotes);
+        setDownvotes(data.downvotes);
+        setUserVote(userVote === voteType ? null : voteType);
+      }
+    } catch (error) {
+      console.error('Error voting:', error);
+    } finally {
+      setIsVoting(false);
+    }
+  };
+
   return (
-    <div onClick={() => window.location.href = '/reviews'} style={{ cursor: 'pointer' }}>
+    <div onClick={() => window.location.href = `/reviews/${review.id}`} style={{ cursor: 'pointer' }}>
       <Card className="p-4" style={{ cursor: 'pointer', transition: 'box-shadow 0.2s', height: '100%' }}>
         <div className="d-flex" style={{ gap: '1rem' }}>
           {/* Rating Box */}
@@ -89,6 +128,7 @@ function ReviewWithVoting({ review }: { review: Review }) {
               {review.reviewText}
             </p>
 
+<<<<<<< HEAD
             {/* Vote Counts Display Only */}
             <div className="d-flex align-items-center justify-content-end" style={{ gap: '1rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.8 }}>
@@ -98,6 +138,26 @@ function ReviewWithVoting({ review }: { review: Review }) {
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.8 }}>
                 <span style={{ fontSize: '1.25rem' }}>👎</span>
                 <span style={{ fontSize: '1rem' }}>{review.downvotes}</span>
+=======
+            {/* Yellow Emoji Thumbs (same as ReviewCard) */}
+            {session ? (
+              <div className="d-flex align-items-center justify-content-end gap-3">
+                <button
+                  onClick={(e) => handleVote('up', e)}
+                  className="btn btn-link p-0 text-decoration-none"
+                  style={{ opacity: userVote === 'up' ? 1 : 0.5, fontSize: '1.5rem' }}
+                  disabled={isVoting}
+                >
+                  👍 <span style={{ fontSize: '1rem' }}>{upvotes}</span>
+                </button>
+                <button
+                  onClick={(e) => handleVote('down', e)}
+                  className="btn btn-link p-0 text-decoration-none"
+                  style={{ opacity: userVote === 'down' ? 1 : 0.5, fontSize: '1.5rem' }}
+                  disabled={isVoting}
+                >
+                  👎 <span style={{ fontSize: '1rem' }}>{downvotes}</span>
+                </button>
               </div>
             </div>
           </div>
