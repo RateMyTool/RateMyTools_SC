@@ -159,7 +159,17 @@ function ReviewWithVoting({ review }: { review: Review }) {
                   👎 <span style={{ fontSize: '1rem' }}>{downvotes}</span>
                 </button>
               </div>
-            </div>
+            ) : (
+              <div className="d-flex align-items-center justify-content-end gap-3">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.5, fontSize: '1.5rem' }}>
+                  👍 <span style={{ fontSize: '1rem' }}>{upvotes}</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.5, fontSize: '1.5rem' }}>
+                  👎 <span style={{ fontSize: '1rem' }}>{downvotes}</span>
+                </div>
+>>>>>>> 94b0ca00261e3669fdfe79b7cc00276a4af97ae1
+              </div>
+            )}
           </div>
         </div>
       </Card>
