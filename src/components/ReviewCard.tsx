@@ -39,7 +39,7 @@ const ReviewCard = memo(function ReviewCard({
 
   const handleVote = async (voteType: 'up' | 'down', e: React.MouseEvent) => {
     e.preventDefault(); // Prevent Link navigation
-    if (!session || isVoting) return;
+    if (isVoting) return;
 
     setIsVoting(true);
     try {
@@ -94,30 +94,28 @@ const ReviewCard = memo(function ReviewCard({
           {' '}
           / 5
         </small>
-        {session && (
-          <div className="d-flex gap-3">
-            <button
-              onClick={(e) => handleVote('up', e)}
-              className="btn btn-link p-0 text-decoration-none"
-              style={{ opacity: userVote === 'up' ? 1 : 0.5, fontSize: '1.5rem' }}
-              disabled={isVoting}
-            >
-              👍
-              {' '}
-              <span style={{ fontSize: '1rem' }}>{upvotes}</span>
-            </button>
-            <button
-              onClick={(e) => handleVote('down', e)}
-              className="btn btn-link p-0 text-decoration-none"
-              style={{ opacity: userVote === 'down' ? 1 : 0.5, fontSize: '1.5rem' }}
-              disabled={isVoting}
-            >
-              👎
-              {' '}
-              <span style={{ fontSize: '1rem' }}>{downvotes}</span>
-            </button>
-          </div>
-        )}
+        <div className="d-flex gap-3">
+          <button
+            onClick={(e) => handleVote('up', e)}
+            className="btn btn-link p-0 text-decoration-none"
+            style={{ opacity: userVote === 'up' ? 1 : 0.5, fontSize: '1.5rem' }}
+            disabled={isVoting}
+          >
+            👍
+            {' '}
+            <span style={{ fontSize: '1rem' }}>{upvotes}</span>
+          </button>
+          <button
+            onClick={(e) => handleVote('down', e)}
+            className="btn btn-link p-0 text-decoration-none"
+            style={{ opacity: userVote === 'down' ? 1 : 0.5, fontSize: '1.5rem' }}
+            disabled={isVoting}
+          >
+            👎
+            {' '}
+            <span style={{ fontSize: '1rem' }}>{downvotes}</span>
+          </button>
+        </div>
       </div>
     </Link>
   );

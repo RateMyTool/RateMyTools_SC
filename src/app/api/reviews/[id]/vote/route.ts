@@ -12,10 +12,6 @@ export async function POST(
       secret: process.env.NEXTAUTH_SECRET,
     });
 
-    if (!token || !token.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const reviewId = parseInt(params.id);
     const { voteType } = await request.json();
 
@@ -23,12 +19,15 @@ export async function POST(
       return NextResponse.json({ error: 'Invalid vote type' }, { status: 400 });
     }
 
+    // Use email if logged in, otherwise use 'anonymous'
+    const userEmail = token?.email || 'anonymous';
+
     // Check if user already voted
     const existingVote = await prisma.vote.findUnique({
       where: {
         reviewId_userEmail: {
           reviewId,
-          userEmail: token.email,
+          userEmail,
         },
       },
     });
@@ -40,7 +39,7 @@ export async function POST(
           where: {
             reviewId_userEmail: {
               reviewId,
-              userEmail: token.email,
+              userEmail,
             },
           },
         });
@@ -50,7 +49,7 @@ export async function POST(
           where: {
             reviewId_userEmail: {
               reviewId,
-              userEmail: token.email,
+              userEmail,
             },
           },
           data: { voteType },
@@ -61,7 +60,7 @@ export async function POST(
       await prisma.vote.create({
         data: {
           reviewId,
-          userEmail: token.email,
+          userEmail,
           voteType,
         },
       });
