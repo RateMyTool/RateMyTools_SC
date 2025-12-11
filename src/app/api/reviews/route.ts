@@ -22,15 +22,33 @@ export async function GET(request: NextRequest) {
           rating: true,
           reviewText: true,
           createdAt: true,
+          votes: {
+            select: {
+              voteType: true,
+            },
+          },
         },
       }),
       prisma.review.count(),
     ]);
 
+    // Calculate vote counts for each review
+    const reviewsWithVotes = reviews.map(review => {
+      const upvotes = review.votes.filter(v => v.voteType === 'up').length;
+      const downvotes = review.votes.filter(v => v.voteType === 'down').length;
+      const { votes, ...reviewData } = review;
+      return {
+        ...reviewData,
+        upvotes,
+        downvotes,
+        helpfulScore: upvotes - downvotes,
+      };
+    });
+
     const totalPages = Math.ceil(total / limit);
     
     const response = NextResponse.json({
-      reviews,
+      reviews: reviewsWithVotes,
       pagination: {
         page,
         limit,

@@ -13,6 +13,9 @@ interface Review {
   rating: number;
   reviewText: string;
   createdAt: string;
+  upvotes: number;
+  downvotes: number;
+  helpfulScore: number;
 }
 
 interface PaginationData {
@@ -29,7 +32,7 @@ export default function ReviewsPage() {
   const [data, setData] = useState<PaginationData | null>(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [sortBy, setSortBy] = useState<'newest' | 'highest' | 'lowest'>('newest');
+  const [sortBy, setSortBy] = useState<'newest' | 'highest' | 'lowest' | 'mostHelpful' | 'leastHelpful'>('newest');
   const limit = 10;
 
   useEffect(() => {
@@ -58,6 +61,10 @@ export default function ReviewsPage() {
         return reviews.sort((a, b) => b.rating - a.rating);
       case 'lowest':
         return reviews.sort((a, b) => a.rating - b.rating);
+      case 'mostHelpful':
+        return reviews.sort((a, b) => b.helpfulScore - a.helpfulScore);
+      case 'leastHelpful':
+        return reviews.sort((a, b) => a.helpfulScore - b.helpfulScore);
       case 'newest':
       default:
         return reviews.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -77,6 +84,8 @@ export default function ReviewsPage() {
         rating={r.rating}
         reviewText={r.reviewText}
         createdAt={r.createdAt}
+        initialUpvotes={r.upvotes}
+        initialDownvotes={r.downvotes}
       />
     ));
   }, [sortedReviews]);
@@ -119,11 +128,13 @@ export default function ReviewsPage() {
               className="form-select form-select-sm"
               style={{ width: 'auto' }}
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as 'newest' | 'highest' | 'lowest')}
+              onChange={(e) => setSortBy(e.target.value as 'newest' | 'highest' | 'lowest' | 'mostHelpful' | 'leastHelpful')}
             >
               <option value="newest">Newest</option>
               <option value="highest">Highest Rating</option>
               <option value="lowest">Lowest Rating</option>
+              <option value="mostHelpful">Most Helpful</option>
+              <option value="leastHelpful">Least Helpful</option>
             </select>
           </div>
         </div>

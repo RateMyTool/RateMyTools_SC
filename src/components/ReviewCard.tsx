@@ -13,6 +13,8 @@ interface ReviewCardProps {
   rating: number;
   reviewText: string;
   createdAt: string;
+  initialUpvotes?: number;
+  initialDownvotes?: number;
 }
 
 // Memoize the card component to prevent unnecessary re-renders
@@ -25,24 +27,15 @@ const ReviewCard = memo(function ReviewCard({
   rating,
   reviewText,
   createdAt,
+  initialUpvotes = 0,
+  initialDownvotes = 0,
 }: ReviewCardProps) {
   const classLabel = [subject, courseNumber].filter(Boolean).join(' ');
   const { data: session } = useSession();
-  const [upvotes, setUpvotes] = useState(0);
-  const [downvotes, setDownvotes] = useState(0);
+  const [upvotes, setUpvotes] = useState(initialUpvotes);
+  const [downvotes, setDownvotes] = useState(initialDownvotes);
   const [userVote, setUserVote] = useState<'up' | 'down' | null>(null);
   const [isVoting, setIsVoting] = useState(false);
-
-  // Fetch vote counts on mount
-  useEffect(() => {
-    fetch(`/api/reviews/${id}/vote`)
-      .then(res => res.json())
-      .then(data => {
-        setUpvotes(data.upvotes || 0);
-        setDownvotes(data.downvotes || 0);
-      })
-      .catch(console.error);
-  }, [id]);
 
   const handleVote = async (voteType: 'up' | 'down', e: React.MouseEvent) => {
     e.preventDefault(); // Prevent Link navigation

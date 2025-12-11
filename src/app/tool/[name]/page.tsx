@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Card, Button, Badge } from 'react-bootstrap';
 import { HandThumbsUp, HandThumbsDown } from 'react-bootstrap-icons';
 import { useParams, useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import Stars from '@/components/StarsUI';
 
@@ -17,6 +18,91 @@ interface Review {
   reviewText: string;
   tags: string[];
   userEmail?: string;
+  upvotes: number;
+  downvotes: number;
+  helpfulScore: number;
+}
+
+// Component for individual review with vote counts display
+function ReviewWithVoting({ review }: { review: Review }) {
+  const courseLabel = [review.subject, review.courseNumber]
+    .filter(Boolean)
+    .join(' ');
+
+  return (
+    <div onClick={() => window.location.href = '/reviews'} style={{ cursor: 'pointer' }}>
+      <Card className="p-4" style={{ cursor: 'pointer', transition: 'box-shadow 0.2s', height: '100%' }}>
+        <div className="d-flex" style={{ gap: '1rem' }}>
+          {/* Rating Box */}
+          <div style={{ flexShrink: 0 }}>
+            <div
+              style={{
+                width: 64,
+                height: 64,
+                background: '#16a34a',
+                color: '#fff',
+                borderRadius: 8,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '1.25rem',
+                fontWeight: 600,
+              }}
+            >
+              {review.rating.toFixed(1)}
+            </div>
+          </div>
+
+          {/* Review Content */}
+          <div style={{ flex: 1 }}>
+            <div style={{ marginBottom: '0.5rem', fontSize: '0.85rem' }}>
+              <span style={{ color: '#4b5563' }}>{review.school}</span>
+              {courseLabel && (
+                <>
+                  <span style={{ color: '#9ca3af', margin: '0 0.4rem' }}>•</span>
+                  <span style={{ color: '#4b5563' }}>{courseLabel}</span>
+                </>
+              )}
+              <span style={{ color: '#9ca3af', margin: '0 0.4rem' }}>•</span>
+              <span style={{ color: '#9ca3af' }}>
+                {new Date(review.createdAt).toLocaleDateString()}
+              </span>
+              {review.userEmail && (
+                <>
+                  <span style={{ color: '#9ca3af', margin: '0 0.4rem' }}>•</span>
+                  <span style={{ color: '#6b7280' }}>{review.userEmail}</span>
+                </>
+              )}
+            </div>
+
+            <div className="d-flex flex-wrap" style={{ gap: '0.5rem', marginBottom: '0.5rem' }}>
+              {review.tags.map((tag) => (
+                <Badge bg="secondary" key={tag}>
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+
+            <p style={{ color: '#374151', fontSize: '0.9rem', marginBottom: '0.75rem' }}>
+              {review.reviewText}
+            </p>
+
+            {/* Vote Counts Display Only */}
+            <div className="d-flex align-items-center justify-content-end" style={{ gap: '1rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.6 }}>
+                <HandThumbsUp style={{ fontSize: '1.5rem' }} />
+                <span style={{ fontSize: '1rem' }}>{review.upvotes}</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.6 }}>
+                <HandThumbsDown style={{ fontSize: '1.5rem' }} />
+                <span style={{ fontSize: '1rem' }}>{review.downvotes}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
 }
 
 export default function DynamicToolPage() {
@@ -123,72 +209,9 @@ export default function DynamicToolPage() {
               </Card>
             ) : (
               <div className="d-flex flex-column" style={{ gap: '1rem' }}>
-                {reviews.map((review) => {
-                  const courseLabel = [review.subject, review.courseNumber]
-                    .filter(Boolean)
-                    .join(' ');
-
-                  return (
-                    <Card key={review.id} className="p-4">
-                      <div className="d-flex" style={{ gap: '1rem' }}>
-                        {/* Rating Box */}
-                        <div style={{ flexShrink: 0 }}>
-                          <div
-                            style={{
-                              width: 64,
-                              height: 64,
-                              background: '#16a34a',
-                              color: '#fff',
-                              borderRadius: 8,
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              fontSize: '1.25rem',
-                              fontWeight: 600,
-                            }}
-                          >
-                            {review.rating.toFixed(1)}
-                          </div>
-                        </div>
-
-                        {/* Review Content */}
-                        <div style={{ flex: 1 }}>
-                          <div style={{ marginBottom: '0.5rem', fontSize: '0.85rem' }}>
-                            <span style={{ color: '#4b5563' }}>{review.school}</span>
-                            {courseLabel && (
-                              <>
-                                <span style={{ color: '#9ca3af', margin: '0 0.4rem' }}>•</span>
-                                <span style={{ color: '#4b5563' }}>{courseLabel}</span>
-                              </>
-                            )}
-                            <span style={{ color: '#9ca3af', margin: '0 0.4rem' }}>•</span>
-                            <span style={{ color: '#9ca3af' }}>
-                              {new Date(review.createdAt).toLocaleDateString()}
-                            </span>
-                            {review.userEmail && (
-                              <>
-                                <span style={{ color: '#9ca3af', margin: '0 0.4rem' }}>•</span>
-                                <span style={{ color: '#6b7280' }}>{review.userEmail}</span>
-                              </>
-                            )}
-                          </div>
-
-                          <div className="d-flex flex-wrap" style={{ gap: '0.5rem', marginBottom: '0.5rem' }}>
-                            {review.tags.map((tag) => (
-                              <Badge bg="secondary" key={tag}>
-                                {tag}
-                              </Badge>
-                            ))}
-                          </div>
-
-                          <p style={{ color: '#374151', fontSize: '0.9rem', marginBottom: '0.75rem' }}>
-                            {review.reviewText}
-                          </p>
-                        </div>
-                      </div>
-                    </Card>
-                  );
-                })}
+                {reviews.map((review) => (
+                  <ReviewWithVoting key={review.id} review={review} />
+                ))}
               </div>
             )}
           </div>
