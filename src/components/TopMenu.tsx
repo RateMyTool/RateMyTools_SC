@@ -17,10 +17,10 @@ const TopMenu = ({ title }: TopMenuProps) => {
     <nav className="fixed top-0 w-full bg-white shadow-sm z-50">
       <div className="flex items-center justify-between py-3 px-4 md:py-4 md:px-8">
         {/* Left side: Logo */}
-        <div className="flex items-center">
+        <div className="flex items-center w-1/4">
           <Link href="/" className="flex items-center gap-1 no-underline hover:no-underline">
             <LogoMain />
-            <span className="bg-black text-xl font-formal text-white px-4 py-2 rounded whitespace-nowrap">
+            <span className="bg-black text-base md:text-xl font-formal text-white px-2 md:px-4 py-1 md:py-2 rounded whitespace-nowrap">
               {title}
             </span>
           </Link>
@@ -50,8 +50,8 @@ const TopMenu = ({ title }: TopMenuProps) => {
           </svg>
         </button>
 
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center justify-center flex-1">
+        {/* Desktop Navigation - Centered */}
+        <div className="hidden md:flex items-center justify-center w-1/2">
           <Link
             href="/rate"
             className="text-black hover:text-gray-600 hover:underline font-semibold text-base lg:text-lg no-underline whitespace-nowrap px-3 lg:px-5"
@@ -72,8 +72,8 @@ const TopMenu = ({ title }: TopMenuProps) => {
           </Link>
         </div>
 
-        {/* Desktop Auth Buttons */}
-        <div className="hidden md:flex items-center justify-end flex-1">
+        {/* Desktop Auth Buttons - Right aligned */}
+        <div className="hidden md:flex items-center justify-end w-1/4">
           {status === 'loading' ? (
             <div className="text-sm text-gray-500">Checking...</div>
           ) : session ? (
@@ -202,4 +202,3 @@ const TopMenu = ({ title }: TopMenuProps) => {
 };
 
 export default TopMenu;
-
