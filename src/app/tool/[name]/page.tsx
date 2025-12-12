@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Card, Button, Badge } from 'react-bootstrap';
 import { useParams } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import Stars from '@/components/StarsUI';
 import StarSingle from '@/components/StarSingleUI';
@@ -22,13 +23,41 @@ interface Review {
   helpfulScore: number;
 }
 
-type SortKey = 'highest' | 'newest' | 'lowest' | 'highestRating';
-
-// Component for individual review with vote counts display
 function ReviewWithVoting({ review }: { review: Review }) {
+  const { data: session } = useSession();
+  const [upvotes, setUpvotes] = useState(review.upvotes);
+  const [downvotes, setDownvotes] = useState(review.downvotes);
+  const [userVote, setUserVote] = useState<'up' | 'down' | null>(null);
+  const [isVoting, setIsVoting] = useState(false);
+
   const courseLabel = [review.subject, review.courseNumber]
     .filter(Boolean)
     .join(' ');
+
+  const handleVote = async (voteType: 'up' | 'down', e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!session || isVoting) return;
+
+    setIsVoting(true);
+    try {
+      const response = await fetch(`/api/reviews/${review.id}/vote`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ voteType }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUpvotes(data.upvotes);
+        setDownvotes(data.downvotes);
+        setUserVote(userVote === voteType ? null : voteType);
+      }
+    } catch (error) {
+      console.error('Error voting:', error);
+    } finally {
+      setIsVoting(false);
+    }
+  };
 
   return (
     <div onClick={() => window.location.href = `/reviews/${review.id}`} style={{ cursor: 'pointer' }}>
@@ -40,7 +69,7 @@ function ReviewWithVoting({ review }: { review: Review }) {
               style={{
                 width: 64,
                 height: 64,
-                background: '#2563eb',
+                background: '#16a34a',
                 color: '#fff',
                 borderRadius: 8,
                 display: 'flex',
@@ -56,24 +85,29 @@ function ReviewWithVoting({ review }: { review: Review }) {
 
           {/* Review Content */}
           <div style={{ flex: 1 }}>
-            <div style={{ marginBottom: '0.5rem', fontSize: '0.85rem' }}>
+            <div style={{ marginBottom: '0.5rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
               <span style={{ color: '#4b5563' }}>{review.school}</span>
               {courseLabel && (
                 <>
-                  <span style={{ color: '#9ca3af', margin: '0 0.4rem' }}>•</span>
+                  <span style={{ color: '#9ca3af' }}>•</span>
                   <span style={{ color: '#4b5563' }}>{courseLabel}</span>
                 </>
               )}
-              <span style={{ color: '#9ca3af', margin: '0 0.4rem' }}>•</span>
+              <span style={{ color: '#9ca3af' }}>•</span>
               <span style={{ color: '#9ca3af' }}>
                 {new Date(review.createdAt).toLocaleDateString()}
               </span>
               {review.userEmail && (
                 <>
-                  <span style={{ color: '#9ca3af', margin: '0 0.4rem' }}>•</span>
+                  <span style={{ color: '#9ca3af' }}>•</span>
                   <span style={{ color: '#6b7280' }}>{review.userEmail}</span>
                 </>
               )}
+              <span style={{ color: '#9ca3af' }}>•</span>
+              <div className="d-flex align-items-center gap-1">
+                {StarSingle(0, 1, 16)}
+                <span style={{ color: '#4b5563', fontSize: '0.85rem' }}>{review.rating}</span>
+              </div>
             </div>
 
             <div className="d-flex flex-wrap" style={{ gap: '0.5rem', marginBottom: '0.5rem' }}>
@@ -88,17 +122,36 @@ function ReviewWithVoting({ review }: { review: Review }) {
               {review.reviewText}
             </p>
 
-            {/* Vote Counts Display Only */}
-            <div className="d-flex align-items-center justify-content-end" style={{ gap: '1rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.6 }}>
-                <span style={{ fontSize: '1.5rem' }}>👍</span>
-                <span style={{ fontSize: '1rem' }}>{review.upvotes}</span>
+            {/* Yellow Emoji Thumbs */}
+            {session ? (
+              <div className="d-flex align-items-center justify-content-end gap-3">
+                <button
+                  onClick={(e) => handleVote('up', e)}
+                  className="btn btn-link p-0 text-decoration-none"
+                  style={{ opacity: userVote === 'up' ? 1 : 0.5, fontSize: '1.5rem' }}
+                  disabled={isVoting}
+                >
+                  👍 <span style={{ fontSize: '1rem' }}>{upvotes}</span>
+                </button>
+                <button
+                  onClick={(e) => handleVote('down', e)}
+                  className="btn btn-link p-0 text-decoration-none"
+                  style={{ opacity: userVote === 'down' ? 1 : 0.5, fontSize: '1.5rem' }}
+                  disabled={isVoting}
+                >
+                  👎 <span style={{ fontSize: '1rem' }}>{downvotes}</span>
+                </button>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.6 }}>
-                <span style={{ fontSize: '1.5rem' }}>👎</span>
-                <span style={{ fontSize: '1rem' }}>{review.downvotes}</span>
+            ) : (
+              <div className="d-flex align-items-center justify-content-end gap-3">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.5, fontSize: '1.5rem' }}>
+                  👍 <span style={{ fontSize: '1rem' }}>{upvotes}</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.5, fontSize: '1.5rem' }}>
+                  👎 <span style={{ fontSize: '1rem' }}>{downvotes}</span>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </Card>
@@ -111,9 +164,6 @@ export default function DynamicToolPage() {
   const toolName = decodeURIComponent(params.name as string);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [sortBy, setSortBy] = useState<SortKey>('highest');
-  const [currentPage, setCurrentPage] = useState(1);
-  const reviewsPerPage = 5;
 
   useEffect(() => {
     const fetchReviews = async () => {
@@ -134,33 +184,6 @@ export default function DynamicToolPage() {
   const overallRating = reviews.length > 0
     ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1)
     : '0.0';
-
-  const sortedReviews = [...reviews].sort((a, b) => {
-    if (sortBy === 'newest') {
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    }
-    if (sortBy === 'highest') {
-      const helpfulDiff = (b.helpfulScore ?? 0) - (a.helpfulScore ?? 0);
-      if (helpfulDiff !== 0) return helpfulDiff;
-      const ratingDiff = (b.rating ?? 0) - (a.rating ?? 0);
-      if (ratingDiff !== 0) return ratingDiff;
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    }
-    if (sortBy === 'lowest') {
-      return (a.rating ?? 0) - (b.rating ?? 0);
-    }
-    if (sortBy === 'highestRating') {
-      return (b.rating ?? 0) - (a.rating ?? 0);
-    }
-    return 0;
-  });
-
-  // Paginate reviews
-  const paginatedReviews = sortedReviews.slice(
-    (currentPage - 1) * reviewsPerPage,
-    currentPage * reviewsPerPage
-  );
-  const totalPages = Math.ceil(sortedReviews.length / reviewsPerPage);
 
   if (isLoading) {
     return (
@@ -184,7 +207,7 @@ export default function DynamicToolPage() {
                   style={{
                     width: 96,
                     height: 96,
-                    background: '#2563eb',
+                    background: '#e5e7eb',
                     borderRadius: '50%',
                     margin: '0 auto 1rem',
                     display: 'flex',
@@ -200,69 +223,32 @@ export default function DynamicToolPage() {
               </div>
 
               <hr />
-              
               <div className="text-center">
-              {/* School Data */}
-              <div className="px-4">
-                <div style={{ borderTop: '1px solid #f3f6f3ff', paddingTop: '16px' }}>
-                  <div className="flex justify-between items-center py-2">
-                    <span className="text-sm" style={{ color: '#2a2c31ff' }}>Total Reviews</span>
-                    <span className="text-sm font-medium">{reviews.length}</span>
-                  </div>
-                 <div className="flex justify-between items-center py-2">
-                    <span className="text-sm" style={{ color: '#2a2c31ff' }}>Avg. Rating</span>
-                    <span className="text-sm font-medium flex items-center gap-1">
-                      {overallRating}
-                      {Number(overallRating) > 0 && StarSingle(0, 1, 16)}
-                    </span>
-                  </div>
+                <div style={{ fontSize: '3rem', fontWeight: 600, marginBottom: '0.5rem' }}>
+                  {overallRating}
                 </div>
-              </div>
+                <div className="d-flex justify-content-center mb-2" style={{ gap: '0.25rem' }}>
+                  {Stars(Number(overallRating), 48, true, null!)}
+                </div>
+                <p className="text-muted" style={{ fontSize: '0.8rem' }}>
+                  Overall Quality Based on
+                  {' '}
+                  {reviews.length}
+                  {' '}
+                  {reviews.length === 1 ? 'rating' : 'ratings'}
+                </p>
               </div>
 
-              {/* Rate This Tool Button */}
-              <div className="flex justify-center">
-                <Link href={`/rate?tool=${encodeURIComponent(toolName)}`}>
-                  <Button
-                    className="mt-5 mb-4 text-sm font-medium"
-                    style={{
-                      backgroundColor: '#000',
-                      color: 'white',
-                      padding: '10px 80px',
-                      borderRadius: '8px',
-                      border: 'none',
-                      cursor: 'pointer',
-                      width: '100%',
-                    }}
-                  >
-                    Rate this Tool
-                  </Button>
-                </Link>
-              </div>
+              <Link href={`/rate?tool=${encodeURIComponent(toolName)}`}>
+                <Button className="w-100 mt-3">Rate This Tool</Button>
+              </Link>
             </Card>
           </div>
 
           {/* Main Content - Reviews */}
           <div className="col-12 col-lg-8">
-
-            <div className="flex items-center justify-between pb-3">
-              <h3>
-                Student Ratings & Reviews
-              </h3>
-              <select
-                className="px-3 py-2 border rounded"
-                style={{ borderColor: '#d1d5db', backgroundColor: 'white' }}
-                value={sortBy}
-                onChange={(e) => {
-                  setSortBy(e.target.value as SortKey);
-                  setCurrentPage(1);
-                }}
-              >
-                <option value="newest">Newest</option>
-                <option value="highestRating">Highest Rated</option>
-                <option value="lowest">Lowest Rated</option>
-                <option value="highest">Most Helpful</option>
-              </select>
+            <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
+              <h2 style={{ fontSize: '1.5rem' }}>Student Ratings & Reviews</h2>
             </div>
 
             {reviews.length === 0 ? (
@@ -275,46 +261,11 @@ export default function DynamicToolPage() {
                 </p>
               </Card>
             ) : (
-              <>
-                <div className="d-flex flex-column" style={{ gap: '1rem' }}>
-                  {paginatedReviews.map((review) => (
-                    <ReviewWithVoting key={review.id} review={review} />
-                  ))}
-                </div>
-
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="d-flex justify-content-center align-items-center gap-2 mt-4">
-                    <button
-                      onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                      disabled={currentPage === 1}
-                      className="px-4 py-2 border rounded"
-                      style={{
-                        backgroundColor: currentPage === 1 ? '#f3f4f6' : 'white',
-                        borderColor: '#d1d5db',
-                        cursor: currentPage === 1 ? 'not-allowed' : 'pointer'
-                      }}
-                    >
-                      Previous
-                    </button>
-                    <span className="px-4 py-2">
-                      Page {currentPage} of {totalPages}
-                    </span>
-                    <button
-                      onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                      disabled={currentPage === totalPages}
-                      className="px-4 py-2 border rounded"
-                      style={{
-                        backgroundColor: currentPage === totalPages ? '#f3f4f6' : 'white',
-                        borderColor: '#d1d5db',
-                        cursor: currentPage === totalPages ? 'not-allowed' : 'pointer'
-                      }}
-                    >
-                      Next
-                    </button>
-                  </div>
-                )}
-              </>
+              <div className="d-flex flex-column" style={{ gap: '1rem' }}>
+                {reviews.map((review) => (
+                  <ReviewWithVoting key={review.id} review={review} />
+                ))}
+              </div>
             )}
           </div>
         </div>

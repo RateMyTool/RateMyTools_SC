@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
+
 import StarSingle from '@/components/StarSingleUI';
 
 interface Tool {
@@ -11,8 +11,6 @@ interface Tool {
   totalRatings: number;
   description: string;
   tags: string[];
-  upvotes?: number;
-  downvotes?: number;
 }
 
 type SortKey = 'relevance' | 'highest' | 'lowest' | 'most' | 'recent';
@@ -23,7 +21,6 @@ interface ToolsListProps {
 
 export default function ToolsList({ school }: ToolsListProps) {
   const router = useRouter();
-  const { data: session } = useSession();
   const [sortBy, setSortBy] = useState<SortKey>('relevance');
   const [tools, setTools] = useState<Tool[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -139,41 +136,37 @@ export default function ToolsList({ school }: ToolsListProps) {
                     </button>
                     <p className="text-sm mb-2" style={{ color: '#6b7280' }}>Educational Tool</p>
                   </div>
-                  <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    className="flex items-center gap-1"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      router.push(`/tool/${encodeURIComponent(tool.name)}`);
+                    }}
+                    style={{ color: '#374151', cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}
+                  >
                     {StarSingle(0, 1, 16)}
                     <span className="text-sm">
                       {tool.totalRatings}
                       {' '}
                     </span>
-                  </div>
+                  </button>
                 </div>
 
                 {/* Description */}
                 <p className="text-sm mb-3" style={{ color: '#374151' }}>{tool.description}</p>
 
-                {/* Tags and Voting */}
-                <div className="flex justify-between items-center">
-                  <div className="flex flex-wrap gap-2">
-                    {tool.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="px-2 py-1 rounded-full text-sm"
-                        style={{ backgroundColor: '#f3f4f6', color: '#374151' }}
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* Yellow Emoji Thumbs */}
-                  <div className="flex items-center gap-3 ml-3">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: session ? 1 : 0.5, fontSize: '1.5rem' }}>
-                      👍 <span style={{ fontSize: '1rem' }}>{tool.upvotes || 0}</span>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: session ? 1 : 0.5, fontSize: '1.5rem' }}>
-                      👎 <span style={{ fontSize: '1rem' }}>{tool.downvotes || 0}</span>
-                    </div>
-                  </div>
+                {/* Tags */}
+                <div className="flex flex-wrap gap-2">
+                  {tool.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="px-2 py-1 rounded-full text-sm"
+                      style={{ backgroundColor: '#f3f4f6', color: '#374151' }}
+                    >
+                      {tag}
+                    </span>
+                  ))}
                 </div>
               </div>
             </div>

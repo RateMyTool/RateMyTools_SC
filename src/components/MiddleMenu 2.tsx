@@ -95,7 +95,7 @@ const MiddleMenu: React.FC<MiddleMenuProps> = ({ setTitle, title }) => {
   };
 
   return (
-    <div style={{ paddingTop: '64px' }}>
+    <div className="pt-14 md:pt-16">
       <div
         className="relative min-h-screen bg-cover bg-center flex items-center justify-center px-4"
         style={{
@@ -115,7 +115,7 @@ const MiddleMenu: React.FC<MiddleMenuProps> = ({ setTitle, title }) => {
               type="button"
             >
               <Icons.Mortarboard size={20} />
-              <span className="whitespace-nowrap">Search by School</span>
+              <span className="whitespace-nowrap">Search by College</span>
             </button>
             <button
               onClick={() => {
@@ -137,7 +137,7 @@ const MiddleMenu: React.FC<MiddleMenuProps> = ({ setTitle, title }) => {
               <>
                 Enter your
                 {' '}
-                <strong>School</strong>
+                <strong>school</strong>
                 {' '}
                 to get started
               </>
@@ -156,7 +156,7 @@ const MiddleMenu: React.FC<MiddleMenuProps> = ({ setTitle, title }) => {
               <div className="relative">
                 <input
                   type="text"
-                  placeholder={isCollege ? 'Your School' : 'Tool Name'}
+                  placeholder={isCollege ? 'Your school' : 'Tool name'}
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   className="w-full rounded-full px-4 md:px-5 py-2 md:py-3 text-base md:text-lg bg-white shadow focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500"
@@ -164,7 +164,9 @@ const MiddleMenu: React.FC<MiddleMenuProps> = ({ setTitle, title }) => {
 
                 {/* Dropdown Results */}
                 {showDropdown && (
-                  <div className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-xl mt-2 shadow-lg z-50 max-h-80 overflow-y-auto">
+                  <div
+                    className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-xl mt-2 shadow-lg z-50 max-h-80 overflow-y-auto"
+                  >
                     {isLoading ? (
                       <div className="p-4 text-center text-gray-500 text-sm md:text-base">Searching...</div>
                     ) : (
@@ -206,7 +208,7 @@ const MiddleMenu: React.FC<MiddleMenuProps> = ({ setTitle, title }) => {
             }}
             className="pt-3 text-white text-base md:text-lg hover:text-gray-200 hover:underline transition no-underline"
           >
-            {isCollege ? 'Find Tool by Name' : 'Find Tool by School'}
+            {isCollege ? 'Find Tool by name' : 'Find Tool by school'}
           </Link>
         </div>
       </div>

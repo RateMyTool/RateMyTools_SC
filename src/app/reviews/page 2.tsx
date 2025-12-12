@@ -47,6 +47,7 @@ export default function ReviewsPage() {
         }
         const json = await res.json();
         
+        // Validate the response structure
         if (!json.reviews || !Array.isArray(json.reviews)) {
           throw new Error('Invalid response format');
         }
@@ -62,6 +63,7 @@ export default function ReviewsPage() {
     fetchReviews();
   }, [page]);
 
+  // Sort reviews based on selected option
   const sortedReviews = useMemo(() => {
     if (!data || !data.reviews) return [];
     const reviews = [...data.reviews];
@@ -81,6 +83,7 @@ export default function ReviewsPage() {
     }
   }, [data, sortBy]);
 
+  // Memoize the review list
   const reviewCards = useMemo(() => {
     return sortedReviews.map((r) => (
       <ReviewCard
@@ -166,6 +169,7 @@ export default function ReviewsPage() {
           {reviewCards}
         </div>
 
+        {/* Pagination Controls */}
         <nav className="mt-4" aria-label="pagination">
           <ul className="pagination justify-content-center">
             <li className={`page-item ${page === 1 ? 'disabled' : ''}`}>
