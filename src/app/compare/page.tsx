@@ -1,374 +1,112 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
-import React from "react";
-import Stars from '@/components/StarsUI';
-import { Col, Container, Row, Button, Image } from "react-bootstrap";
-// import { useSession } from 'next-auth/react';
+
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { Container, Row, Col, Card } from 'react-bootstrap';
+//import StarsUI from '@/components/StarsUI';
 
 const mainPage = 'bg-body-tertiary text-black';
+const borderPage = 'rounded-2 px-1 py-1 my-1 mb-2 mt-2';
+const selectorBorder = `${borderPage} border border-black bg-black text-white`;
 
-const borderPage ='rounded-2 px-1 py-3 my-3 ';
-const borderPanel ='rounded-3 px-3 py-3 ';
+interface Tool {
+  name: string;
+  rating: number;
+  totalRatings: number;
+  description: string;
+  tags: string[];
+}
 
-const selectorBorder = `${borderPage}border border-black bg-black text-white text-start hover:opacity-90 flex items-left text-lg font-medium gap-4`;
-const countBorder = `${borderPage}border border-primary bg-primary-subtle text-black text-start hover:opacity-90 flex items-left text-lg font-medium gap-4`;
-const compressedText = 'text-black text-start flex items-left text-lg font-medium gap-4';
+export default function ComparePage() {
+  const router = useRouter();
+  const [tools, setTools] = useState<Tool[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedTool, setSelectedTool] = useState<string>('');
 
-const selectorText = 'text-black';
+  useEffect(() => {
+    const fetchTools = async () => {
+      try {
+        const response = await fetch('/api/tools');
+        const data = await response.json();
+        setTools(data.tools || []);
+      } catch (error) {
+        console.error('Error fetching tools:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-const selectedText = 'text-primary';
-const panelClassMain = `${borderPanel} mx-0 bg-white text-black flex items-center text-lg font-medium gap-0`;
-const panelClassSelected = `${panelClassMain} border border-primary`;
-const panelClass = `${panelClassMain} mx-3 border border-dark-subtle`;
-const panelClassEnd = `${panelClassMain} border border-dark-subtle`;
+    fetchTools();
+  }, []);
 
-const panelInternalTitle = 'mx-0 mb-2 text-black text-lg font-medium';
-const panelInternal = 'mx-0 my-2 text-black text-lg font-medium';
-const ratingBorderFilled = `${borderPanel}border border-white bg-body-secondary text-black text-start text-lg font-medium gap-4`;
-const tagClass = 'm-0 border border-white-subtle bg-dark-subtle text-black hover:opacity-95 text-center rounded-3 px-2 py-1 text-lg font-small gap-1';
-
-/* This is sent from the server for each tool */
-class RatedToolSummary
-{
-	name: string;
-	desc: string;
-	icon: string;
-	rating: number;
-	numRatings: number;
-	tags: string[];
-	bestReview: Rating = null!;
-    constructor(nameIn: string, ratingIn: number, numRatingsIn: number, tagsIn: string[], descIn: string, iconIn: string = null!)
-    {
-        this.name = nameIn;
-        this.icon = iconIn;
-        this.rating = ratingIn;
-        this.numRatings = numRatingsIn;
-        this.tags = tagsIn;
-        this.desc = descIn;
+  const handleToolSelect = (toolName: string) => {
+    if (toolName && toolName !== '0') {
+      router.push(`/compare/${encodeURIComponent(toolName)}`);
     }
-}
-class Rating
-{
-    reviewer: string = "";
-	rating: number = 10 // Expects input from [0 - 10], where 2 equals one star
-	theReview: string = "";
-}
-
-let getTools: RatedToolSummary[] = [];
-let selectedTool: RatedToolSummary = null!;
-
-
-const ComparePage = () => {
-  // PLACEHOLDER
-    const layoutList: boolean = false;// List mode is WIP
-
-    getTools = [];
-    getTools.push(new RatedToolSummary("SelectedTool", 5, 51, ["Fast"], "a default tool used by all"));
-    getTools.push(new RatedToolSummary("barry", 5, 1367, ["Fast", "Simple", "Free"], "Industry standard"));
-    getTools.push(new RatedToolSummary("loadPls", 3, 473, ["Cloud", "Paid$"], "A slow and laggy tool"));
-    getTools.push(new RatedToolSummary("nullrefWannaBee", 0, 342, ["Fast", "Ads"], "An awful tool"));
-    getTools.push(new RatedToolSummary("theWhuat", 2, 168, ["Fast", "Paid$$$"], "A confusing tool"));
-    getTools.push(new RatedToolSummary("TestRun", 3.5, 21, ["Fast", "Paid$"], "An experimental tool"));
-
-    selectedTool = getTools[0];
-
-    const shownTools: RatedToolSummary[] = getTools.slice(0, getTools.length - 1);
-    shownTools.splice(0, 1);
-
-    shownTools.sort((a, b) => b.rating - a.rating) // Should be done server-side
-    while (shownTools.length > 2) shownTools.pop();
-
-    return (
-        /* Display the header */
-      <main className={mainPage}>
-        <div style={{ height: 112 }} />
-        {/* Top bar with our search term school */}
-        <Container id="compare-page-school">
-          <div className="d-flex flex-row">
-            <div className="me-2">
-              <h2>For College: </h2>
-            </div>
-            <div>
-              <h2 className="text-success">
-                {/* Place the name of the college we are filtering by here */}
-                UH Manoa
-              </h2>
-            </div>
-          </div>
-          <Row className="align-left text-left mt-2">
-            <h1><b>Compare Tools</b></h1>
-            <p>Compare a tool against others based on matching tags</p>
-          </Row>
-          <Row className={selectorBorder}>
-            <Col xs={3}>
-              <b>Select a tool to compare:</b>
-            </Col>
-            <Col className="d-flex flex-column">
-              <select
-                // value= {getTools.indexOf(selectedTool)}
-                // onChange= {x => SetRelated(x.target.value) }
-                className={`d-flex flex-column ${selectorText}`}
-              >
-                {(() => {
-                    const rows: React.JSX.Element[] = [];
-                    let num: number = 0;
-                    getTools.forEach(x => {
-                        rows.push((
-                          <option key={num} value={num.toString()}>{x.name}</option>
-                        ))
-                        num++;
-                    });
-                    return rows;
-                })()}
-              </select>
-            </Col>
-          </Row>
-        </Container>
-        {(() => {
-            if (layoutList)
-                { return ComparePageList(selectedTool, shownTools); }
-            return ComparePagePanels(selectedTool, shownTools);
-        })()}
-      </main>
-        /* Display the footer */
-    );
-};
-
-/* Displays two tools, to compare them side by side */
-const ComparePagePanels = (selected: RatedToolSummary, theList: RatedToolSummary[]) => {
-    // PLACEHOLDER FOR MOCKUP
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const scale: number = 32;
-  const ending: RatedToolSummary = theList[theList.length - 1];
+  };
 
   return (
-    <Container id="compare-page-panel">
-      <Row className={countBorder}>
-        <div className="d-flex flex-row gap-1">
-          <div className={compressedText}>Comparing</div>
-          <div className={compressedText}><b>{selected.name}</b></div>
-          <div className={compressedText}>with</div>
-          <div className={compressedText}>{theList.length}</div>
-          <div className={compressedText}> other closely matching tools</div>
-          <div className="flex" />
-        </div>
-      </Row>
-      <Row className="">
-        <div className="flex flex-row">
-          { ComparePagePanel(selectedTool, scale, selectedText, panelClassSelected)}
-          {/* For each rating, we call ComparePagePanel() to display a row for the tool */}
-          {(() => {
-              const rows: React.JSX.Element[] = [];
-              const end: RatedToolSummary = theList[theList.length - 1];
-              theList.forEach(x =>
-                  {
-                      if (selected != x && end != x) rows.push(ComparePagePanel(x, scale, "", panelClass))
-                  });
-              return rows;
-          })()}
-          { ComparePagePanel(ending, scale, "", panelClassEnd)}
-        </div>
-      </Row>
-    </Container>
-  )
-}
-const ComparePagePanel = (theTool: RatedToolSummary, scale: number, classNameTitle: string, classNameBack: string) =>
-  // PLACEHOLDER FOR MOCKUP
-  (
-    <Col className={`${classNameBack}flex flex-col`}>
-      {ShowToolName(theTool, classNameTitle)}
-      {ShowToolStarRatingBIG(theTool, scale)}
-      {ShowToolTags(theTool, scale)}
-      {ShowDesciption(theTool, scale)}
-      {ShowTopReview(theTool)}
-    </Col>
-  )
+    <main className={mainPage}>
+      <div style={{ height: 80 }} />
+      
+      <Container id="compare-page-main">
+        <Row className="align-left text-left mt-2 mb-4">
+          <h1><b>Compare Tools</b></h1>
+          <p className="text-muted">Select a tool to compare against others with similar tags</p>
+        </Row>
 
-const ShowToolName = (theTool: RatedToolSummary, classNameTitle: string) =>
-  // PLACEHOLDER FOR MOCKUP
-  (
-    <Container id="compare-page-panel" className={panelInternalTitle}>
-      <Row>
-        { (() => {
-          if (theTool.icon != null)
-          {
-              return (
-                <Col>
-                  {theTool.icon}
+        <Row>
+          <Card className={selectorBorder}>
+            <Card.Body>
+              <Row>
+                <Col xs={12} md={3}>
+                  <h5><b>Select a tool to compare:</b></h5>
                 </Col>
-              )
-          }
-      })()}
-        <Col>
-          <b>
-            <h3 className={classNameTitle}>
-              {theTool.name}
-            </h3>
-          </b>
-          Development Tool
-        </Col>
-      </Row>
-    </Container>
-  )
+                <Col xs={12} md={9}>
+                  {isLoading ? (
+                    <div className="text-white">Loading tools...</div>
+                  ) : tools.length === 0 ? (
+                    <div className="text-white">No tools available. Add some reviews first!</div>
+                  ) : (
+                    <select
+                      value={selectedTool}
+                      onChange={(e) => {
+                        setSelectedTool(e.target.value);
+                        handleToolSelect(e.target.value);
+                      }}
+                      className="form-select text-black"
+                      style={{ width: '100%' }}
+                    >
+                      <option value="0">-- Choose a tool --</option>
+                      {tools.map((tool, index) => (
+                        <option key={index} value={tool.name}>
+                          {tool.name} ({tool.rating.toFixed(1)}★ - {tool.totalRatings} reviews)
+                        </option>
+                      ))}
+                    </select>
+                    //{StarsUI(tool.rating, 64, false, null!)}
+                  )}
+                </Col>
+              </Row>
+            </Card.Body>
+          </Card>
+        </Row>
 
-const ShowToolStarRatingBIG = (theTool: RatedToolSummary, scale: number) =>
-  // PLACEHOLDER FOR MOCKUP
-  (
-    <Container id="compare-page-ratingxl" className={ratingBorderFilled}>
-      <Row>
-        <Col xs={3}>
-          <h2 className="align-middle text-center mx-4">
-            {(() => (theTool.rating).toPrecision(2))() }
-          </h2>
-        </Col>
-        <Col>
-          {Stars(theTool.rating, scale, true, null!)}
-        </Col>
-      </Row>
-      <div className="d-flex flex-center flex-row gap-1">
-        <div className={compressedText}>Based on</div>
-        <div className={compressedText}><b>{theTool.numRatings}</b></div>
-        <div className={compressedText}>ratings</div>
-      </div>
-    </Container>
-  )
-
-const ShowToolTags = (theTool: RatedToolSummary, scale: number) =>
-  // PLACEHOLDER FOR MOCKUP
-  (
-    <Container id="compare-page-tags" className={`align-left text-left ${panelInternal}`}>
-      <h5 className="align-left text-left">
-        Tags:
-      </h5>
-      <Row className="align-left items-left">
-        {(() => {
-                const rows: React.JSX.Element[] = [];
-                theTool.tags.forEach(x => rows.push(DisplayTag(x)));
-                return rows;
-            })()}
-        <Col className="align-left text-center ms-5" />
-      </Row>
-    </Container>
-  )
-
-const DisplayTag = (text: string) =>
-  // PLACEHOLDER FOR MOCKUP
-  (
-    <Col className="m-0 align-left">
-      <Button className={tagClass}>
-        {text}
-      </Button>
-    </Col>
-  )
-
-const ShowDesciption = (theTool: RatedToolSummary, scale: number) =>
-  // PLACEHOLDER FOR MOCKUP
-  (
-    <Container id="compare-page-desc" className={`align-left text-left ${panelInternal}`}>
-      <h5 className="align-left text-left">
-        Summary:
-      </h5>
-      <p>
-        {theTool.desc}
-      </p>
-    </Container>
-  )
-
-const ShowTopReview = (theTool: RatedToolSummary) =>
-  // PLACEHOLDER FOR MOCKUP
-  (
-    <Container id="compare-page-PopReview" className={`align-left text-left ${panelInternal}`}>
-      <h5 className="align-left text-left">
-        Popular Review:
-      </h5>
-      {(() => {
-        if (theTool.bestReview == null)
-        {
-            return (
-              <p>
-                No reviews yet.
-              </p>
-            )
-        }
-
-            return ShowTextRating();
-    })()}
-    </Container>
-  )
-
-const ShowTextRating = () => (
-  // INCOMPLETE
-    <p>yes</p>
-  );
-
-/* Displays a list of tools, ordered from top to bottom in order of rating */
-/*  We may need to restrict the number of rows displayed based on database size.
-    Perhaps poll for the best 25 then if the user scrolls down we send more over to the client. */
-const ComparePageList = (selected: RatedToolSummary, theList: RatedToolSummary[]) => {
-  // PLACEHOLDER FOR MOCKUP
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const scale: number = 32;
-
-    return (
-      <Container id="compare-page-list" fluid-className="py-3">
-        <Container id="compare-page-list-element" fluid-className="py-3">
-          <Container className="bg-light" id="ratedTool-bar-top">
-            <Row className="align-middle text-center">
-              <Col>
-                <b>
-                  Name
-                </b>
-              </Col>
-              <Col xs={5} className="d-flex flex-column justify-content-right">
-                <b>
-                  Rating
-                </b>
-              </Col>
-            </Row>
-          </Container>
-          {/* The main tool to compare against */}
-          { displayToolRowIfNeeded(selected, scale, "") }
-          {/* The list of tools we have found */}
-          {/* For each rating, we call displayToolRowIfNeeded() to display a row for the tool */}
-          {(() => {
-              const rows: React.JSX.Element[] = [];
-              theList.forEach(x => rows.push(displayToolRowIfNeeded(x, scale, "bg-light")));
-              return rows;
-          })()}
+        <Container id="compare-page-panel" className="mt-4">
+          {isLoading ? (
+            <div className="text-center py-5">
+              <div className="spinner-border" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+              <p className="mt-3">Loading tools...</p>
+            </div>
+          ) : (
+            <div className="text-center py-5 text-muted">
+              <p>Select a tool from the dropdown above to see comparisons</p>
+            </div>
+          )}
         </Container>
       </Container>
-    )
+    </main>
+  );
 }
-
-/* Display a summary of the tool in a brief row.
-    We may need to restrict the number of rows displayed based on database size.
-    Perhaps poll for the best 25 then if the user scrolls down we send more over to the client.
-    The database should have already pruned those tools that yield no ratings before reaching the client! */
-const displayToolRowIfNeeded = (tool: RatedToolSummary, scale: number, className: string) => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const stringName: string = tool.name;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const starRatingFull: number = tool.rating;
-  return (
-      /* We make sure our given data yields any ratings, otherwise we ignore. */
-    <Container className={className} id="ratedTool-bar">
-      <Row className="align-middle text-center">
-        <Col xs={2}>
-          <b>
-            {/* Place the name of the tool here */}
-            { tool.name }
-          </b>
-        </Col>
-        <Col xs={5} className="d-flex flex-row items-left">
-          {/* Display the rating of the tool here */}
-          { Stars(tool.rating, scale, true, null!) }
-        </Col>
-      </Row>
-    </Container>
-  )
-}
-
-
-export default ComparePage;
-
-// export default comparePageDual;

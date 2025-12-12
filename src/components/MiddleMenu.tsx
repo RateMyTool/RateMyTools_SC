@@ -18,21 +18,19 @@ const MiddleMenu: React.FC<MiddleMenuProps> = ({ setTitle, title }) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
-  // Classes to adjust components from active/inactive status
   const isCollege = title === 'SCHOOLS';
   const searchType = isCollege ? 'school' : 'tool';
 
   const collegeBtnClasses = [
-    'flex items-center rounded px-3 py-2 text-lg font-medium gap-3',
+    'flex items-center rounded px-3 py-2 text-sm md:text-lg font-medium gap-2 md:gap-3',
     isCollege ? 'bg-black text-white hover:opacity-90' : 'bg-white text-black hover:bg-gray-100',
   ].join(' ');
 
   const toolBtnClasses = [
-    'flex items-center rounded px-3 py-2 text-lg font-medium gap-3',
+    'flex items-center rounded px-3 py-2 text-sm md:text-lg font-medium gap-2 md:gap-3',
     !isCollege ? 'bg-black text-white hover:opacity-90' : 'bg-white text-black hover:bg-gray-100',
   ].join(' ');
 
-  // Search functionality
   useEffect(() => {
     const fetchResults = async () => {
       if (query.length < 2) {
@@ -48,11 +46,11 @@ const MiddleMenu: React.FC<MiddleMenuProps> = ({ setTitle, title }) => {
         );
         const data = await response.json();
         setResults(data.results || []);
-        setShowDropdown(true); // Always show dropdown when query is 2+ characters
+        setShowDropdown(true);
       } catch (error) {
         console.error('Search error:', error);
         setResults([]);
-        setShowDropdown(true); // Still show dropdown to display "Not here" message
+        setShowDropdown(true);
       } finally {
         setIsLoading(false);
       }
@@ -62,7 +60,6 @@ const MiddleMenu: React.FC<MiddleMenuProps> = ({ setTitle, title }) => {
     return () => clearTimeout(debounce);
   }, [query, searchType]);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -78,7 +75,6 @@ const MiddleMenu: React.FC<MiddleMenuProps> = ({ setTitle, title }) => {
     setQuery('');
     setShowDropdown(false);
 
-    // Navigate to the appropriate page
     if (isCollege) {
       router.push(`/school/${encodeURIComponent(item)}`);
     } else {
@@ -89,12 +85,10 @@ const MiddleMenu: React.FC<MiddleMenuProps> = ({ setTitle, title }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
-      // If no results, redirect to rate page
       if (results.length === 0) {
         const param = isCollege ? 'school' : 'tool';
         router.push(`/rate?${param}=${encodeURIComponent(query)}`);
       } else {
-        // Use first result
         handleSelect(results[0]);
       }
     }
@@ -102,16 +96,16 @@ const MiddleMenu: React.FC<MiddleMenuProps> = ({ setTitle, title }) => {
 
   return (
     <div>
+    <div className="pt-14 md:pt-16">
       <div
-        className="relative h-screen bg-cover bg-center flex items-center justify-center"
+        className="relative min-h-screen bg-cover bg-center flex items-center justify-center px-4"
         style={{
           backgroundImage: "linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('/ratemytools-background.jpg')",
         }}
       >
-        {/* Overlay Content */}
-        <div className="flex flex-col items-center px-4 w-full">
+        <div className="flex flex-col items-center w-full max-w-3xl">
           {/* Buttons */}
-          <div className="flex gap-3 mb-10">
+          <div className="flex flex-col sm:flex-row gap-3 mb-8 md:mb-10 w-full sm:w-auto">
             <button
               onClick={() => {
                 setTitle('SCHOOLS');
@@ -121,8 +115,8 @@ const MiddleMenu: React.FC<MiddleMenuProps> = ({ setTitle, title }) => {
               className={collegeBtnClasses}
               type="button"
             >
-              <Icons.Mortarboard />
-              Search by College
+              <Icons.Mortarboard size={20} />
+              <span className="whitespace-nowrap">Search by College</span>
             </button>
             <button
               onClick={() => {
@@ -133,13 +127,13 @@ const MiddleMenu: React.FC<MiddleMenuProps> = ({ setTitle, title }) => {
               className={toolBtnClasses}
               type="button"
             >
-              <Icons.Wrench />
-              Search by Tool
+              <Icons.Wrench size={20} />
+              <span className="whitespace-nowrap">Search by Tool</span>
             </button>
           </div>
 
           {/* Text */}
-          <h2 className="text-white text-2xl font-semibold mt-4 mb-4">
+          <h2 className="text-white text-xl md:text-2xl font-semibold mt-2 md:mt-4 mb-3 md:mb-4 text-center px-4">
             {isCollege ? (
               <>
                 Enter your
@@ -158,7 +152,7 @@ const MiddleMenu: React.FC<MiddleMenuProps> = ({ setTitle, title }) => {
           </h2>
 
           {/* Search Bar with Dropdown */}
-          <div className="w-2/5 mt-2" ref={dropdownRef}>
+          <div className="w-full md:w-4/5 lg:w-3/5 mt-2 px-4 sm:px-0" ref={dropdownRef}>
             <form onSubmit={handleSubmit}>
               <div className="relative">
                 <Icons.Search 
@@ -182,28 +176,16 @@ const MiddleMenu: React.FC<MiddleMenuProps> = ({ setTitle, title }) => {
                     'focus:outline-none',
                     'placeholder-gray-500',
                   ].join(' ')}
+                  className="w-full rounded-full px-4 md:px-5 py-2 md:py-3 text-base md:text-lg bg-white shadow focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500"
                 />
 
                 {/* Dropdown Results */}
                 {showDropdown && (
                   <div
-                    style={{
-                      position: 'absolute',
-                      top: '100%',
-                      left: 0,
-                      right: 0,
-                      backgroundColor: 'white',
-                      border: '1px solid #dee2e6',
-                      borderRadius: '0.75rem',
-                      marginTop: '0.5rem',
-                      boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                      zIndex: 1000,
-                      maxHeight: '300px',
-                      overflowY: 'auto',
-                    }}
+                    className="absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-xl mt-2 shadow-lg z-50 max-h-80 overflow-y-auto"
                   >
                     {isLoading ? (
-                      <div className="p-4 text-center text-gray-500">Searching...</div>
+                      <div className="p-4 text-center text-gray-500 text-sm md:text-base">Searching...</div>
                     ) : (
                       <>
                         {results.length > 0 ? (
@@ -211,42 +193,17 @@ const MiddleMenu: React.FC<MiddleMenuProps> = ({ setTitle, title }) => {
                             <div
                               key={item}
                               onClick={() => handleSelect(item)}
-                              style={{
-                                padding: '0.75rem 1.25rem',
-                                cursor: 'pointer',
-                                borderBottom: '1px solid #f0f0f0',
-                                color: '#333',
-                              }}
-                              onMouseEnter={(e) => {
-                                e.currentTarget.style.backgroundColor = '#f8f9fa';
-                              }}
-                              onMouseLeave={(e) => {
-                                e.currentTarget.style.backgroundColor = 'white';
-                              }}
+                              className="px-4 py-3 cursor-pointer border-b border-gray-100 text-gray-800 hover:bg-gray-50 text-sm md:text-base"
                             >
                               {item}
                             </div>
                           ))
                         ) : (
-                          <div
-                            style={{
-                              padding: '0.75rem 1.25rem',
-                              color: '#6c757d',
-                              textAlign: 'center',
-                            }}
-                          >
+                          <div className="px-4 py-3 text-center text-gray-500 text-sm md:text-base">
                             No results found
                           </div>
                         )}
-                        <div
-                          style={{
-                            padding: '0.75rem 1.25rem',
-                            fontSize: '0.875rem',
-                            color: '#6c757d',
-                            fontStyle: 'italic',
-                            borderTop: results.length > 0 ? '1px solid #f0f0f0' : 'none',
-                          }}
-                        >
+                        <div className="px-4 py-3 text-xs md:text-sm text-gray-500 italic border-t border-gray-100">
                           Not here? Rate it to add it!
                         </div>
                       </>
@@ -266,7 +223,7 @@ const MiddleMenu: React.FC<MiddleMenuProps> = ({ setTitle, title }) => {
               setQuery('');
               setShowDropdown(false);
             }}
-            className="pt-3 text-white text-lg hover:text-gray-200 hover:underline transition no-underline"
+            className="pt-3 text-white text-base md:text-lg hover:text-gray-200 hover:underline transition no-underline"
           >
             {isCollege ? 'Find Tool by Name' : 'Find Tool by School'}
           </Link>

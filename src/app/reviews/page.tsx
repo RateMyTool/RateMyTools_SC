@@ -15,6 +15,9 @@ interface Review {
   upvotes: number;
   downvotes: number;
   helpfulScore: number;
+  upvotes?: number;
+  downvotes?: number;
+  helpfulScore?: number;
 }
 
 interface PaginationData {
@@ -30,6 +33,7 @@ interface PaginationData {
 export default function ReviewsPage() {
   const [data, setData] = useState<PaginationData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [sortBy, setSortBy] = useState<'newest' | 'highest' | 'lowest' | 'mostHelpful' | 'leastHelpful'>('newest');
   const limit = 10;
@@ -37,12 +41,23 @@ export default function ReviewsPage() {
   useEffect(() => {
     const fetchReviews = async () => {
       setLoading(true);
+      setError(null);
       try {
         const res = await fetch(`/api/reviews?page=${page}&limit=${limit}`);
+        if (!res.ok) {
+          throw new Error(`Failed to fetch: ${res.status}`);
+        }
         const json = await res.json();
+        
+        // Validate the response structure
+        if (!json.reviews || !Array.isArray(json.reviews)) {
+          throw new Error('Invalid response format');
+        }
+        
         setData(json);
       } catch (err) {
         console.error('Error fetching reviews:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load reviews');
       } finally {
         setLoading(false);
       }
@@ -53,6 +68,7 @@ export default function ReviewsPage() {
   // Sort reviews based on selected option
   const sortedReviews = useMemo(() => {
     if (!data) return [];
+    if (!data || !data.reviews) return [];
     const reviews = [...data.reviews];
     
     switch (sortBy) {
@@ -64,6 +80,9 @@ export default function ReviewsPage() {
         return reviews.sort((a, b) => b.helpfulScore - a.helpfulScore);
       case 'leastHelpful':
         return reviews.sort((a, b) => a.helpfulScore - b.helpfulScore);
+        return reviews.sort((a, b) => (b.helpfulScore || 0) - (a.helpfulScore || 0));
+      case 'leastHelpful':
+        return reviews.sort((a, b) => (a.helpfulScore || 0) - (b.helpfulScore || 0));
       case 'newest':
       default:
         return reviews.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -71,6 +90,9 @@ export default function ReviewsPage() {
   }, [data?.reviews, sortBy]);
 
   // Memoize the review list to prevent re-rendering if data is unchanged
+  }, [data, sortBy]);
+
+  // Memoize the review list
   const reviewCards = useMemo(() => {
     return sortedReviews.map((r) => (
       <ReviewCard
@@ -86,6 +108,8 @@ export default function ReviewsPage() {
         initialUpvotes={r.upvotes}
         initialDownvotes={r.downvotes}
         tags={r.tags}
+        initialUpvotes={r.upvotes || 0}
+        initialDownvotes={r.downvotes || 0}
       />
     ));
   }, [sortedReviews]);
@@ -101,7 +125,22 @@ export default function ReviewsPage() {
     );
   }
 
-  if (!data || data.reviews.length === 0) {
+  if (error) {
+    return (
+      <main>
+        <div style={{ height: '80px' }} />
+        <div className="container py-4">
+          <h1 className="mb-3">Error</h1>
+          <p className="text-danger">{error}</p>
+          <button onClick={() => window.location.reload()} className="btn btn-primary">
+            Retry
+          </button>
+        </div>
+      </main>
+    );
+  }
+
+  if (!data || !data.reviews || data.reviews.length === 0) {
     return (
       <main style={{ minHeight: '100vh' }}>
         <div style={{ height: '80px' }} />
@@ -129,6 +168,7 @@ export default function ReviewsPage() {
               style={{ width: 'auto' }}
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as 'newest' | 'highest' | 'lowest' | 'mostHelpful' | 'leastHelpful')}
+              onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
             >
               <option value="newest">Newest</option>
               <option value="highest">Highest Rating</option>

@@ -2,16 +2,19 @@ generator client {
   provider = "prisma-client-js"
 }
 
+
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
+
 enum Role {
   USER
   ADMIN
 }
+
 
 model User {
   id       Int      @id @default(autoincrement())
@@ -20,12 +23,14 @@ model User {
   role     Role     @default(USER)
 }
 
+
 enum Condition {
   excellent
   good
   fair
   poor
 }
+
 
 model Stuff {
   id        Int       @id @default(autoincrement())
@@ -34,6 +39,7 @@ model Stuff {
   condition Condition @default(good)
   owner     String
 }
+
 
 model Review {
   id           Int      @id @default(autoincrement())
@@ -59,3 +65,4 @@ model Vote {
 
   @@unique([reviewId, userEmail])
 }
+
