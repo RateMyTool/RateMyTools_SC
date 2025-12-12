@@ -24,20 +24,22 @@ interface SchoolReviewsListProps {
 
 export default function SchoolReviewsList({ school }: SchoolReviewsListProps) {
   const router = useRouter();
-  const [allReviews, setAllReviews] = useState<Review[]>([]);
+  const [pageReviews, setPageReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [sortBy, setSortBy] = useState('newest');
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const itemsPerPage = 5;
 
   useEffect(() => {
     const fetchReviews = async () => {
       try {
         const response = await fetch(
-          `/api/school/${encodeURIComponent(school)}/reviews?page=1&limit=1000`
+          `/api/school/${encodeURIComponent(school)}/reviews?page=${currentPage}&limit=${itemsPerPage}`
         );
         const data = await response.json();
-        setAllReviews(data.reviews || []);
+        setPageReviews(data.reviews || []);
+        setTotalPages(data.pagination?.totalPages || 1);
       } catch (error) {
         console.error('Error fetching school reviews:', error);
       } finally {
@@ -46,10 +48,15 @@ export default function SchoolReviewsList({ school }: SchoolReviewsListProps) {
     };
 
     fetchReviews();
-  }, [school]);
+  }, [school, currentPage]);
+
+  // Ensure we clamp current page when data changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [school, sortBy]);
 
   const sortedReviews = useMemo(() => {
-    const list = [...allReviews];
+    const list = [...pageReviews];
 
     switch (sortBy) {
       case 'highest':
@@ -67,20 +74,13 @@ export default function SchoolReviewsList({ school }: SchoolReviewsListProps) {
     }
 
     return list;
-  }, [allReviews, sortBy]);
-
-  const paginatedReviews = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    return sortedReviews.slice(startIndex, startIndex + itemsPerPage);
-  }, [sortedReviews, currentPage]);
-
-  const totalPages = Math.ceil(sortedReviews.length / itemsPerPage);
+  }, [pageReviews, sortBy]);
 
   if (isLoading) {
     return <div>Loading reviews...</div>;
   }
 
-  if (allReviews.length === 0) {
+  if (pageReviews.length === 0) {
     return (
       <div className="p-6 text-center" style={{ backgroundColor: 'white', borderRadius: '8px' }}>
         <p className="text-gray-600">No reviews for {school} yet.</p>
@@ -118,7 +118,7 @@ export default function SchoolReviewsList({ school }: SchoolReviewsListProps) {
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        {paginatedReviews.map((review) => (
+        {sortedReviews.map((review) => (
           <div
             key={review.id}
             className="p-4"

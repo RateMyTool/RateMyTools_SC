@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, Button, Badge } from 'react-bootstrap';
 import { useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
@@ -178,6 +178,8 @@ export default function DynamicToolPage() {
   const toolName = decodeURIComponent(params.name as string);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   useEffect(() => {
     const fetchReviews = async () => {
@@ -198,6 +200,23 @@ export default function DynamicToolPage() {
   const overallRating = reviews.length > 0
     ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1)
     : '0.0';
+
+  const paginatedReviews = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return reviews.slice(startIndex, startIndex + itemsPerPage);
+  }, [reviews, currentPage]);
+
+  const totalPages = Math.ceil(reviews.length / itemsPerPage);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [toolName]);
+
+  useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
 
   if (isLoading) {
     return (
@@ -275,11 +294,45 @@ export default function DynamicToolPage() {
                 </p>
               </Card>
             ) : (
-              <div className="d-flex flex-column" style={{ gap: '1rem' }}>
-                {reviews.map((review) => (
-                  <ReviewWithVoting key={review.id} review={review} />
-                ))}
-              </div>
+              <>
+                <div className="d-flex flex-column" style={{ gap: '1rem' }}>
+                  {paginatedReviews.map((review) => (
+                    <ReviewWithVoting key={review.id} review={review} />
+                  ))}
+                </div>
+
+                {totalPages > 1 && (
+                  <div className="d-flex justify-content-center align-items-center gap-2 mt-4">
+                    <button
+                      onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                      disabled={currentPage === 1}
+                      className="px-4 py-2 border rounded"
+                      style={{
+                        backgroundColor: currentPage === 1 ? '#f3f4f6' : 'white',
+                        borderColor: '#d1d5db',
+                        cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                      }}
+                    >
+                      Previous
+                    </button>
+                    <span className="px-4 py-2">
+                      Page {currentPage} of {totalPages}
+                    </span>
+                    <button
+                      onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                      disabled={currentPage === totalPages}
+                      className="px-4 py-2 border rounded"
+                      style={{
+                        backgroundColor: currentPage === totalPages ? '#f3f4f6' : 'white',
+                        borderColor: '#d1d5db',
+                        cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+                      }}
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
