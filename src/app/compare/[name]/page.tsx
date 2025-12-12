@@ -4,6 +4,10 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Container, Row, Col, Card, Badge } from 'react-bootstrap';
 import Link from 'next/link';
+//import StarsUI from '@/components/StarsUI';
+
+const borderPage = 'rounded-2 px-1 py-1 my-1 mb-2 mt-2';
+const selectorBorder = `${borderPage} border border-black bg-black text-white`;
 
 interface Tool {
   name: string;
@@ -11,6 +15,14 @@ interface Tool {
   totalRatings: number;
   description: string;
   tags: string[];
+}
+interface ToolForUI {
+  name: string;
+  rating: number;
+  totalRatings: number;
+  description: string;
+  tags: string[];
+  matchingTags: number;
 }
 
 export default function CompareToolPage() {
@@ -20,7 +32,7 @@ export default function CompareToolPage() {
   
   const [mainTool, setMainTool] = useState<Tool | null>(null);
   const [allTools, setAllTools] = useState<Tool[]>([]);
-  const [similarTools, setSimilarTools] = useState<Tool[]>([]);
+  const [similarTools, setSimilarTools] = useState<ToolForUI[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -42,10 +54,10 @@ export default function CompareToolPage() {
             .filter((t: Tool) => t.name !== toolName)
             .map((t: Tool) => {
               const matchingTags = t.tags.filter(tag => main.tags.includes(tag)).length;
-              return { ...t, matchingTags };
+              return { ...t, matchingTags };// ToolForUI
             })
-            .filter((t: any) => t.matchingTags > 0)
-            .sort((a: any, b: any) => b.matchingTags - a.matchingTags)
+            .filter((t: ToolForUI) => t.matchingTags > 0)
+            .sort((a: ToolForUI, b: ToolForUI) => b.matchingTags - a.matchingTags)
             .slice(0, 5);
 
           setSimilarTools(similar);
@@ -63,7 +75,33 @@ export default function CompareToolPage() {
   if (isLoading) {
     return (
       <main className="bg-body-tertiary text-black">
-        <div style={{ height: 112 }} />
+        <div style={{ height: 80 }} />
+        <Container id="compare-page-main">  
+          <Row className="mb-4 mt-2">
+            <Col>
+              <div className="d-flex flex-row">
+                <h1>
+                  <b className="me-2">
+                    Comparing:
+                  </b>
+                  <b className="text-primary">
+                    Loading...
+                  </b>
+                </h1>
+              </div>
+              <p className="text-muted">Tools with similar characteristics</p>
+            </Col>
+          </Row>
+          <Row>
+            <Card className={selectorBorder}>
+              <Card.Body>
+                <Link href="/compare" className="mb-2 mb-md-0 text-white">
+                  <b>← Back to Compare</b>
+                </Link>
+              </Card.Body>
+            </Card>
+          </Row>
+        </Container>
         <Container className="py-5 text-center">
           <div className="spinner-border" role="status">
             <span className="visually-hidden">Loading...</span>
@@ -77,10 +115,18 @@ export default function CompareToolPage() {
   if (!mainTool) {
     return (
       <main className="bg-body-tertiary text-black">
-        <div style={{ height: 112 }} />
-        <Container className="py-5">
+      <div style={{ height: 80 }} />
+        <Container className="compare-page-main">
           <h2>Tool not found</h2>
-          <Link href="/compare">Back to Compare</Link>
+          <Row>
+            <Card className={selectorBorder}>
+              <Card.Body>
+                <Link href="/compare" className="mb-2 mb-md-0 text-white">
+                  <b>← Back to Compare</b>
+                </Link>
+              </Card.Body>
+            </Card>
+          </Row>
         </Container>
       </main>
     );
@@ -88,17 +134,32 @@ export default function CompareToolPage() {
 
   return (
     <main className="bg-body-tertiary text-black">
-      <div style={{ height: 112 }} />
+      <div style={{ height: 80 }} />
       
-      <Container>
-        <Row className="mb-4">
+      <Container id="compare-page-main">
+        <Row className="mb-4 mt-2">
           <Col>
-            <Link href="/compare" className="btn btn-outline-secondary mb-3">
-              ← Back to Compare
-            </Link>
-            <h1><b>Comparing: {mainTool.name}</b></h1>
+            <div className="d-flex flex-row">
+              <h1>
+                <b className="me-2">
+                  Comparing:
+                </b>
+                <b className="text-primary">
+                  {mainTool.name}
+                </b>
+              </h1>
+            </div>
             <p className="text-muted">Tools with similar characteristics</p>
           </Col>
+        </Row>
+        <Row>
+          <Card className={selectorBorder}>
+            <Card.Body>
+              <Link href="/compare" className="mb-2 mb-md-0 text-white">
+                <b>← Back to Compare</b>
+              </Link>
+            </Card.Body>
+          </Card>
         </Row>
 
         {/* Main Tool Card */}
@@ -106,8 +167,8 @@ export default function CompareToolPage() {
           <Col>
             <Card className="border-primary" style={{ borderWidth: '3px' }}>
               <Card.Body>
-                <Card.Title className="d-flex justify-content-between align-items-center">
-                  <h3>{mainTool.name}</h3>
+                <Card.Title className="d-flex justify-content-between align-items-start">
+                  <h3 className="text-primary"><b>{mainTool.name}</b></h3>
                   <div className="text-end">
                     <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#16a34a' }}>
                       {mainTool.rating.toFixed(1)}
@@ -120,14 +181,25 @@ export default function CompareToolPage() {
                 <Card.Text className="mb-3">{mainTool.description}</Card.Text>
                 <div className="d-flex flex-wrap gap-2">
                   {mainTool.tags.map((tag, idx) => (
-                    <Badge key={idx} bg="primary">{tag}</Badge>
+                    <Badge 
+                      key={idx} 
+                      //bg="primary"
+                      bg='success'
+                    >
+                      {tag}
+                    </Badge>
+                    
                   ))}
                 </div>
                 <div className="mt-3">
-                  <Link href={`/tool/${encodeURIComponent(mainTool.name)}`} className="btn btn-primary me-2">
+                  <Link 
+                    className="btn btn-outline-dark me-2"
+                    //className="btn btn-outline-primary me-2"
+                    href={`/tool/${encodeURIComponent(mainTool.name)}`}
+                  >
                     View Reviews
                   </Link>
-                  <Link href={`/rate?tool=${encodeURIComponent(mainTool.name)}`} className="btn btn-outline-primary">
+                  <Link href={`/rate?tool=${encodeURIComponent(mainTool.name)}`} className="btn btn-primary">
                     Rate This Tool
                   </Link>
                 </div>
@@ -148,23 +220,23 @@ export default function CompareToolPage() {
               </Card>
             ) : (
               <Row>
-                {similarTools.map((tool: any, idx) => (
+                {similarTools.map((tool: ToolForUI, idx) => (
                   <Col key={idx} xs={12} md={6} lg={4} className="mb-3">
                     <Card className="h-100">
                       <Card.Body className="d-flex flex-column">
                         <Card.Title className="d-flex justify-content-between align-items-start">
-                          <span>{tool.name}</span>
+                          <span><b>{tool.name}</b></span>
                           <div className="text-end">
                             <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#16a34a' }}>
                               {tool.rating.toFixed(1)}
                             </div>
                             <div className="text-muted small">
-                              {tool.totalRatings} reviews
+                              {tool.totalRatings} {tool.totalRatings === 1 ? 'review' : 'reviews'}
                             </div>
                           </div>
                         </Card.Title>
                         
-                        <Card.Text className="flex-grow-1 small text-muted">
+                        <Card.Text className="flex-grow-1 small">
                           {tool.description}
                         </Card.Text>
 
@@ -187,13 +259,13 @@ export default function CompareToolPage() {
                         <div className="d-flex gap-2">
                           <Link 
                             href={`/tool/${encodeURIComponent(tool.name)}`} 
-                            className="btn btn-sm btn-outline-primary flex-grow-1"
+                            className="btn btn-sm btn-outline-dark flex-grow-1"
                           >
                             View
                           </Link>
                           <button
                             onClick={() => router.push(`/compare/${encodeURIComponent(tool.name)}`)}
-                            className="btn btn-sm btn-primary flex-grow-1"
+                            className="btn btn-sm btn-dark flex-grow-1"
                           >
                             Compare
                           </button>
@@ -209,29 +281,34 @@ export default function CompareToolPage() {
 
         {/* All Tools Dropdown */}
         <Row className="mb-5">
-          <Col>
-            <Card>
-              <Card.Body>
-                <h5>Compare with a different tool:</h5>
-                <select
-                  className="form-select mt-2"
-                  value={toolName}
-                  onChange={(e) => {
-                    if (e.target.value && e.target.value !== toolName) {
-                      router.push(`/compare/${encodeURIComponent(e.target.value)}`);
-                    }
-                  }}
-                >
-                  <option value="">-- Choose a tool --</option>
-                  {allTools.map((tool, idx) => (
-                    <option key={idx} value={tool.name}>
-                      {tool.name} ({tool.rating.toFixed(1)}★ - {tool.totalRatings} reviews)
-                    </option>
-                  ))}
-                </select>
-              </Card.Body>
-            </Card>
-          </Col>
+          <Card className={selectorBorder}>
+            <Card.Body>
+              <Row>
+                <Col xs={12} md={3}>
+                  <h5><b>Compare with a different tool:</b></h5>
+                </Col>
+                <Col xs={12} md={9}>
+                  <select
+                    className="form-select"
+                    value={toolName}
+                    onChange={(e) => {
+                      if (e.target.value && e.target.value !== toolName) {
+                        router.push(`/compare/${encodeURIComponent(e.target.value)}`);
+                      }
+                    }}
+                  >
+                    <option value="">-- Choose a tool --</option>
+                    {allTools.map((tool, idx) => (
+                      <option key={idx} value={tool.name}>
+                        {tool.name} ({tool.rating.toFixed(1)}★ - {tool.totalRatings} reviews)
+                      </option>
+                      //{StarsUI(tool.rating, 64, false, null!)}
+                    ))}
+                  </select>
+                </Col>
+              </Row>
+            </Card.Body>
+          </Card>
         </Row>
       </Container>
     </main>

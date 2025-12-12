@@ -2,10 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Container, Row, Col } from 'react-bootstrap';
+import { Container, Row, Col, Card } from 'react-bootstrap';
+//import StarsUI from '@/components/StarsUI';
 
 const mainPage = 'bg-body-tertiary text-black';
-const borderPage = 'rounded-2 px-1 py-3 my-3';
+const borderPage = 'rounded-2 px-1 py-1 my-1 mb-2 mt-2';
 const selectorBorder = `${borderPage} border border-black bg-black text-white`;
 
 interface Tool {
@@ -46,42 +47,49 @@ export default function ComparePage() {
 
   return (
     <main className={mainPage}>
-      <div style={{ height: 112 }} />
+      <div style={{ height: 80 }} />
       
       <Container id="compare-page-main">
         <Row className="align-left text-left mt-2 mb-4">
           <h1><b>Compare Tools</b></h1>
-          <p>Select a tool to compare against others with similar tags</p>
+          <p className="text-muted">Select a tool to compare against others with similar tags</p>
         </Row>
 
-        <Row className={selectorBorder}>
-          <Col xs={12} md={3} className="mb-2 mb-md-0">
-            <b>Select a tool to compare:</b>
-          </Col>
-          <Col xs={12} md={9}>
-            {isLoading ? (
-              <div className="text-white">Loading tools...</div>
-            ) : tools.length === 0 ? (
-              <div className="text-white">No tools available. Add some reviews first!</div>
-            ) : (
-              <select
-                value={selectedTool}
-                onChange={(e) => {
-                  setSelectedTool(e.target.value);
-                  handleToolSelect(e.target.value);
-                }}
-                className="form-select"
-                style={{ width: '100%' }}
-              >
-                <option value="0">-- Choose a tool --</option>
-                {tools.map((tool, index) => (
-                  <option key={index} value={tool.name}>
-                    {tool.name} ({tool.rating.toFixed(1)}★ - {tool.totalRatings} reviews)
-                  </option>
-                ))}
-              </select>
-            )}
-          </Col>
+        <Row>
+          <Card className={selectorBorder}>
+            <Card.Body>
+              <Row>
+                <Col xs={12} md={3}>
+                  <h5><b>Select a tool to compare:</b></h5>
+                </Col>
+                <Col xs={12} md={9}>
+                  {isLoading ? (
+                    <div className="text-white">Loading tools...</div>
+                  ) : tools.length === 0 ? (
+                    <div className="text-white">No tools available. Add some reviews first!</div>
+                  ) : (
+                    <select
+                      value={selectedTool}
+                      onChange={(e) => {
+                        setSelectedTool(e.target.value);
+                        handleToolSelect(e.target.value);
+                      }}
+                      className="form-select text-black"
+                      style={{ width: '100%' }}
+                    >
+                      <option value="0">-- Choose a tool --</option>
+                      {tools.map((tool, index) => (
+                        <option key={index} value={tool.name}>
+                          {tool.name} ({tool.rating.toFixed(1)}★ - {tool.totalRatings} reviews)
+                        </option>
+                      ))}
+                    </select>
+                    //{StarsUI(tool.rating, 64, false, null!)}
+                  )}
+                </Col>
+              </Row>
+            </Card.Body>
+          </Card>
         </Row>
 
         <Container id="compare-page-panel" className="mt-4">
