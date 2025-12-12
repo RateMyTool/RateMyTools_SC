@@ -15,7 +15,10 @@ export default function DynamicSchoolPage({ params }: Params) {
 
   return (
     <main>
-      <div className="min-h-screen" style={{ backgroundColor: '#f9fafb' }}>
+      <div
+        className="min-h-screen"
+        style={{ backgroundColor: '#f9fafb', paddingBottom: '64px' }}
+      >
         <div className="mx-auto px-4 py-4" style={{ maxWidth: '1400px' }}>
           <h1 className="mb-4" style={{ fontSize: '2rem', fontWeight: 'bold' }}>
             {schoolName}

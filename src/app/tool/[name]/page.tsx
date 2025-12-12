@@ -229,8 +229,8 @@ export default function DynamicToolPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb', paddingTop: '80px' }}>
-      <div className="container py-4">
+    <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb', paddingTop: '80px', paddingBottom: '96px' }}>
+      <div className="container" style={{ paddingTop: '16px', paddingBottom: '96px' }}>
         <div className="row g-4">
           {/* Left Sidebar - Tool Info */}
           <div className="col-12 col-lg-4">
