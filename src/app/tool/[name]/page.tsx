@@ -6,7 +6,6 @@ import { useParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import Stars from '@/components/StarsUI';
-import StarSingle from '@/components/StarSingleUI';
 
 interface Review {
   id: number;
@@ -61,22 +60,31 @@ function ReviewWithVoting({ review }: { review: Review }) {
 
   return (
     <div onClick={() => window.location.href = `/reviews/${review.id}`} style={{ cursor: 'pointer' }}>
-      <Card className="p-4" style={{ cursor: 'pointer', transition: 'box-shadow 0.2s', height: '100%' }}>
+      <div 
+        className="p-4" 
+        style={{ 
+          backgroundColor: 'white', 
+          border: '1px solid #e5e7eb', 
+          borderRadius: '12px',
+          cursor: 'pointer', 
+          transition: 'box-shadow 0.2s'
+        }}
+      >
         <div className="d-flex" style={{ gap: '1rem' }}>
-          {/* Rating Box */}
+          {/* Rating Box - Changed to Blue to match school page */}
           <div style={{ flexShrink: 0 }}>
             <div
               style={{
                 width: 64,
                 height: 64,
-                background: '#16a34a',
+                background: '#2563eb',
                 color: '#fff',
-                borderRadius: 8,
+                borderRadius: 4,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontSize: '1.25rem',
-                fontWeight: 600,
+                fontWeight: 300,
               }}
             >
               {review.rating.toFixed(1)}
@@ -105,16 +113,20 @@ function ReviewWithVoting({ review }: { review: Review }) {
               )}
               <span style={{ color: '#9ca3af' }}>•</span>
               <div className="d-flex align-items-center gap-1">
-                {StarSingle(0, 1, 16)}
+                <span style={{ fontSize: '1rem' }}>⭐</span>
                 <span style={{ color: '#4b5563', fontSize: '0.85rem' }}>{review.rating}</span>
               </div>
             </div>
 
-            <div className="d-flex flex-wrap" style={{ gap: '0.5rem', marginBottom: '0.5rem' }}>
+            <div className="d-flex flex-wrap" style={{ gap: '0.5rem', marginBottom: '0.75rem' }}>
               {review.tags.map((tag) => (
-                <Badge bg="secondary" key={tag}>
+                <span
+                  key={tag}
+                  className="px-2 py-1 rounded-full text-sm"
+                  style={{ backgroundColor: '#6c757d', color: 'white', fontSize: '0.875rem', borderRadius: '9999px' }}
+                >
                   {tag}
-                </Badge>
+                </span>
               ))}
             </div>
 
@@ -123,38 +135,40 @@ function ReviewWithVoting({ review }: { review: Review }) {
             </p>
 
             {/* Yellow Emoji Thumbs */}
-            {session ? (
-              <div className="d-flex align-items-center justify-content-end gap-3">
-                <button
-                  onClick={(e) => handleVote('up', e)}
-                  className="btn btn-link p-0 text-decoration-none"
-                  style={{ opacity: userVote === 'up' ? 1 : 0.5, fontSize: '1.5rem' }}
-                  disabled={isVoting}
-                >
-                  👍 <span style={{ fontSize: '1rem' }}>{upvotes}</span>
-                </button>
-                <button
-                  onClick={(e) => handleVote('down', e)}
-                  className="btn btn-link p-0 text-decoration-none"
-                  style={{ opacity: userVote === 'down' ? 1 : 0.5, fontSize: '1.5rem' }}
-                  disabled={isVoting}
-                >
-                  👎 <span style={{ fontSize: '1rem' }}>{downvotes}</span>
-                </button>
-              </div>
-            ) : (
-              <div className="d-flex align-items-center justify-content-end gap-3">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.5, fontSize: '1.5rem' }}>
-                  👍 <span style={{ fontSize: '1rem' }}>{upvotes}</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.5, fontSize: '1.5rem' }}>
-                  👎 <span style={{ fontSize: '1rem' }}>{downvotes}</span>
-                </div>
-              </div>
-            )}
+            <div className="d-flex align-items-center justify-content-end gap-3">
+              {session ? (
+                <>
+                  <button
+                    onClick={(e) => handleVote('up', e)}
+                    className="btn btn-link p-0 text-decoration-none"
+                    style={{ opacity: userVote === 'up' ? 1 : 0.5, fontSize: '1.5rem' }}
+                    disabled={isVoting}
+                  >
+                    👍 <span style={{ fontSize: '1rem' }}>{upvotes}</span>
+                  </button>
+                  <button
+                    onClick={(e) => handleVote('down', e)}
+                    className="btn btn-link p-0 text-decoration-none"
+                    style={{ opacity: userVote === 'down' ? 1 : 0.5, fontSize: '1.5rem' }}
+                    disabled={isVoting}
+                  >
+                    👎 <span style={{ fontSize: '1rem' }}>{downvotes}</span>
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.5, fontSize: '1.5rem' }}>
+                    👍 <span style={{ fontSize: '1rem' }}>{upvotes}</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.5, fontSize: '1.5rem' }}>
+                    👎 <span style={{ fontSize: '1rem' }}>{downvotes}</span>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
-      </Card>
+      </div>
     </div>
   );
 }
