@@ -13,6 +13,9 @@ interface Review {
   rating: number;
   reviewText: string;
   createdAt: string;
+  upvotes?: number;
+  downvotes?: number;
+  helpfulScore?: number;
 }
 
 interface PaginationData {
@@ -28,18 +31,31 @@ interface PaginationData {
 export default function ReviewsPage() {
   const [data, setData] = useState<PaginationData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+  const [sortBy, setSortBy] = useState<'newest' | 'highest' | 'lowest' | 'mostHelpful' | 'leastHelpful'>('newest');
   const limit = 10;
 
   useEffect(() => {
     const fetchReviews = async () => {
       setLoading(true);
+      setError(null);
       try {
         const res = await fetch(`/api/reviews?page=${page}&limit=${limit}`);
+        if (!res.ok) {
+          throw new Error(`Failed to fetch: ${res.status}`);
+        }
         const json = await res.json();
+        
+        // Validate the response structure
+        if (!json.reviews || !Array.isArray(json.reviews)) {
+          throw new Error('Invalid response format');
+        }
+        
         setData(json);
       } catch (err) {
         console.error('Error fetching reviews:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load reviews');
       } finally {
         setLoading(false);
       }
@@ -47,10 +63,29 @@ export default function ReviewsPage() {
     fetchReviews();
   }, [page]);
 
-  // Memoize the review list to prevent re-rendering if data is unchanged
+  // Sort reviews based on selected option
+  const sortedReviews = useMemo(() => {
+    if (!data || !data.reviews) return [];
+    const reviews = [...data.reviews];
+    
+    switch (sortBy) {
+      case 'highest':
+        return reviews.sort((a, b) => b.rating - a.rating);
+      case 'lowest':
+        return reviews.sort((a, b) => a.rating - b.rating);
+      case 'mostHelpful':
+        return reviews.sort((a, b) => (b.helpfulScore || 0) - (a.helpfulScore || 0));
+      case 'leastHelpful':
+        return reviews.sort((a, b) => (a.helpfulScore || 0) - (b.helpfulScore || 0));
+      case 'newest':
+      default:
+        return reviews.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    }
+  }, [data, sortBy]);
+
+  // Memoize the review list
   const reviewCards = useMemo(() => {
-    if (!data) return null;
-    return data.reviews.map((r) => (
+    return sortedReviews.map((r) => (
       <ReviewCard
         key={r.id}
         id={r.id}
@@ -61,9 +96,11 @@ export default function ReviewsPage() {
         rating={r.rating}
         reviewText={r.reviewText}
         createdAt={r.createdAt}
+        initialUpvotes={r.upvotes || 0}
+        initialDownvotes={r.downvotes || 0}
       />
     ));
-  }, [data?.reviews]);
+  }, [sortedReviews]);
 
   if (loading) {
     return (
@@ -76,7 +113,22 @@ export default function ReviewsPage() {
     );
   }
 
-  if (!data || data.reviews.length === 0) {
+  if (error) {
+    return (
+      <main>
+        <div style={{ height: '80px' }} />
+        <div className="container py-4">
+          <h1 className="mb-3">Error</h1>
+          <p className="text-danger">{error}</p>
+          <button onClick={() => window.location.reload()} className="btn btn-primary">
+            Retry
+          </button>
+        </div>
+      </main>
+    );
+  }
+
+  if (!data || !data.reviews || data.reviews.length === 0) {
     return (
       <main>
         <div style={{ height: '80px' }} />
@@ -94,7 +146,25 @@ export default function ReviewsPage() {
     <main>
       <div style={{ height: '80px' }} />
       <div className="container py-4">
-        <h1 className="mb-3">Reviews</h1>
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          <h1 className="mb-0">Reviews</h1>
+          <div className="d-flex align-items-center gap-2">
+            <label htmlFor="sortSelect" className="mb-0 me-2">Sort by:</label>
+            <select
+              id="sortSelect"
+              className="form-select form-select-sm"
+              style={{ width: 'auto' }}
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+            >
+              <option value="newest">Newest</option>
+              <option value="highest">Highest Rating</option>
+              <option value="lowest">Lowest Rating</option>
+              <option value="mostHelpful">Most Helpful</option>
+              <option value="leastHelpful">Least Helpful</option>
+            </select>
+          </div>
+        </div>
         <div className="list-group">
           {reviewCards}
         </div>
