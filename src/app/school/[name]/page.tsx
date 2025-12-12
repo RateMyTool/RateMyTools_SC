@@ -1,6 +1,6 @@
 import TopMenu from '@/components/TopMenu';
 import SchoolSideBar from '@/components/SchoolSideBar';
-import ToolsList from '@/components/ToolsList';
+import SchoolReviewsList from '@/components/SchoolReviewsList';
 
 type Params = {
   params: {
@@ -22,7 +22,7 @@ export default function DynamicSchoolPage({ params }: Params) {
               <SchoolSideBar school={schoolName} />
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <ToolsList school={schoolName} />
+              <SchoolReviewsList school={schoolName} />
             </div>
           </div>
         </div>

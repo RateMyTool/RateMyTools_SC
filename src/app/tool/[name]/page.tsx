@@ -22,7 +22,7 @@ interface Review {
   helpfulScore: number;
 }
 
-type SortKey = 'highest' | 'newest';
+type SortKey = 'highest' | 'newest' | 'lowest' | 'highestRating';
 
 // Component for individual review with vote counts display
 function ReviewWithVoting({ review }: { review: Review }) {
@@ -139,12 +139,20 @@ export default function DynamicToolPage() {
     if (sortBy === 'newest') {
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     }
-    // 'highest' by helpfulScore desc, then rating desc, then newest
-    const helpfulDiff = (b.helpfulScore ?? 0) - (a.helpfulScore ?? 0);
-    if (helpfulDiff !== 0) return helpfulDiff;
-    const ratingDiff = (b.rating ?? 0) - (a.rating ?? 0);
-    if (ratingDiff !== 0) return ratingDiff;
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    if (sortBy === 'highest') {
+      const helpfulDiff = (b.helpfulScore ?? 0) - (a.helpfulScore ?? 0);
+      if (helpfulDiff !== 0) return helpfulDiff;
+      const ratingDiff = (b.rating ?? 0) - (a.rating ?? 0);
+      if (ratingDiff !== 0) return ratingDiff;
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    }
+    if (sortBy === 'lowest') {
+      return (a.rating ?? 0) - (b.rating ?? 0);
+    }
+    if (sortBy === 'highestRating') {
+      return (b.rating ?? 0) - (a.rating ?? 0);
+    }
+    return 0;
   });
 
   // Paginate reviews
@@ -245,10 +253,15 @@ export default function DynamicToolPage() {
                 className="px-3 py-2 border rounded"
                 style={{ borderColor: '#d1d5db', backgroundColor: 'white' }}
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as SortKey)}
+                onChange={(e) => {
+                  setSortBy(e.target.value as SortKey);
+                  setCurrentPage(1);
+                }}
               >
-                <option value="highest">Most Helpful</option>
                 <option value="newest">Newest</option>
+                <option value="highestRating">Highest Rated</option>
+                <option value="lowest">Lowest Rated</option>
+                <option value="highest">Most Helpful</option>
               </select>
             </div>
 
