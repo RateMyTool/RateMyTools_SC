@@ -95,6 +95,7 @@ const MiddleMenu: React.FC<MiddleMenuProps> = ({ setTitle, title }) => {
   };
 
   return (
+    <div>
     <div className="pt-14 md:pt-16">
       <div
         className="relative min-h-screen bg-cover bg-center flex items-center justify-center px-4"
@@ -137,7 +138,7 @@ const MiddleMenu: React.FC<MiddleMenuProps> = ({ setTitle, title }) => {
               <>
                 Enter your
                 {' '}
-                <strong>school</strong>
+                <strong>School</strong>
                 {' '}
                 to get started
               </>
@@ -154,11 +155,27 @@ const MiddleMenu: React.FC<MiddleMenuProps> = ({ setTitle, title }) => {
           <div className="w-full md:w-4/5 lg:w-3/5 mt-2 px-4 sm:px-0" ref={dropdownRef}>
             <form onSubmit={handleSubmit}>
               <div className="relative">
+                <Icons.Search 
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500" 
+                  size={20} 
+                />
                 <input
                   type="text"
                   placeholder={isCollege ? 'Your school' : 'Tool name'}
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
+                  className={[
+                    'w-full',
+                    'rounded-full',
+                    'px-5',
+                    'py-3',
+                    'pl-12',
+                    'text-lg',
+                    'bg-white',
+                    'shadow',
+                    'focus:outline-none',
+                    'placeholder-gray-500',
+                  ].join(' ')}
                   className="w-full rounded-full px-4 md:px-5 py-2 md:py-3 text-base md:text-lg bg-white shadow focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500"
                 />
 
@@ -208,7 +225,7 @@ const MiddleMenu: React.FC<MiddleMenuProps> = ({ setTitle, title }) => {
             }}
             className="pt-3 text-white text-base md:text-lg hover:text-gray-200 hover:underline transition no-underline"
           >
-            {isCollege ? 'Find Tool by name' : 'Find Tool by school'}
+            {isCollege ? 'Find Tool by Name' : 'Find Tool by School'}
           </Link>
         </div>
       </div>

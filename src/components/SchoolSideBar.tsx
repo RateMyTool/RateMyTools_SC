@@ -20,8 +20,6 @@ interface SchoolStats {
 
 export default function SchoolSideBar({ school }: SchoolSideBarProps) {
   const router = useRouter();
-  const [subject, setSubject] = useState('all');
-  const [crn, setCrn] = useState('');
   const [stats, setStats] = useState<SchoolStats>({
     totalTools: 0,
     totalReviews: 0,
@@ -41,15 +39,6 @@ export default function SchoolSideBar({ school }: SchoolSideBarProps) {
 
     fetchStats();
   }, [school]);
-
-  const handleClear = () => {
-    setSubject('all');
-    setCrn('');
-  };
-
-  const handleApply = () => {
-    console.log('Applying filters:', { subject, crn });
-  };
 
   return (
     <aside style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -114,93 +103,6 @@ export default function SchoolSideBar({ school }: SchoolSideBarProps) {
           >
             Rate a Tool
           </button>
-        </div>
-      </div>
-
-      {/* Filters Card */}
-      <div style={{ backgroundColor: 'white', borderRadius: '8px', border: '1px solid #e5e7eb', padding: '24px' }}>
-
-        {/* Filters Header */}
-        <div className="flex items-center gap-2 mb-4">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ color: '#6b7280' }}>
-            <path d="M2 4H14M4 8H12M6 12H10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-          </svg>
-          <span className="font-medium text-sm">Filters</span>
-        </div>
-
-        {/* Filter Options: General Subject */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div>
-            <label htmlFor="subject" className="block text-sm mb-2 mt-2" style={{ color: '#374151' }}>
-              General Subject
-            </label>
-            <select
-              id="subject"
-              className="w-full px-3 py-2 text-sm"
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-              style={{
-                border: '1px solid #d1d5db',
-                borderRadius: '6px',
-                backgroundColor: 'white',
-              }}
-            >
-              <option value="all">All Subjects</option>
-              <option value="math">Math</option>
-              <option value="language">Language</option>
-              <option value="cs">Computer Science</option>
-            </select>
-          </div>
-
-          {/* Filter Options: Course Reference Number (CRN) */}
-          <div className="mt-2">
-            <label htmlFor="crn" className="block text-sm mb-2" style={{ color: '#374151' }}>
-              Course Reference Number (CRN)
-            </label>
-            <input
-              id="crn"
-              type="text"
-              placeholder="e.g., 12345"
-              className="w-full px-3 py-2 text-sm"
-              value={crn}
-              onChange={(e) => setCrn(e.target.value)}
-              style={{
-                border: '1px solid #d1d5db',
-                borderRadius: '6px',
-              }}
-            />
-          </div>
-
-          {/* Filter Buttons */}
-          <div className="flex gap-2 pt-2">
-            <button
-              type="button"
-              className="flex-1 py-2 text-sm font-medium"
-              onClick={handleClear}
-              style={{
-                border: '1px solid #d1d5db',
-                borderRadius: '6px',
-                backgroundColor: 'white',
-                cursor: 'pointer',
-              }}
-            >
-              Clear
-            </button>
-            <button
-              type="button"
-              className="flex-1 py-2 text-sm font-medium"
-              onClick={handleApply}
-              style={{
-                backgroundColor: '#000',
-                color: 'white',
-                borderRadius: '6px',
-                border: 'none',
-                cursor: 'pointer',
-              }}
-            >
-              Apply
-            </button>
-          </div>
         </div>
       </div>
     </aside>

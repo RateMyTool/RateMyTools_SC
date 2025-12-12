@@ -1,5 +1,4 @@
 import RateToolForm from '@/components/RateToolForm';
-import Link from 'next/link';
 
 export const metadata = {
   title: 'Rate a Tool',

@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useEffect, useState, useMemo } from 'react';
 import ReviewCard from '@/components/ReviewCard';
 
@@ -13,6 +12,9 @@ interface Review {
   rating: number;
   reviewText: string;
   createdAt: string;
+  upvotes: number;
+  downvotes: number;
+  helpfulScore: number;
   upvotes?: number;
   downvotes?: number;
   helpfulScore?: number;
@@ -65,6 +67,7 @@ export default function ReviewsPage() {
 
   // Sort reviews based on selected option
   const sortedReviews = useMemo(() => {
+    if (!data) return [];
     if (!data || !data.reviews) return [];
     const reviews = [...data.reviews];
     
@@ -74,6 +77,9 @@ export default function ReviewsPage() {
       case 'lowest':
         return reviews.sort((a, b) => a.rating - b.rating);
       case 'mostHelpful':
+        return reviews.sort((a, b) => b.helpfulScore - a.helpfulScore);
+      case 'leastHelpful':
+        return reviews.sort((a, b) => a.helpfulScore - b.helpfulScore);
         return reviews.sort((a, b) => (b.helpfulScore || 0) - (a.helpfulScore || 0));
       case 'leastHelpful':
         return reviews.sort((a, b) => (a.helpfulScore || 0) - (b.helpfulScore || 0));
@@ -81,6 +87,9 @@ export default function ReviewsPage() {
       default:
         return reviews.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     }
+  }, [data?.reviews, sortBy]);
+
+  // Memoize the review list to prevent re-rendering if data is unchanged
   }, [data, sortBy]);
 
   // Memoize the review list
@@ -96,6 +105,9 @@ export default function ReviewsPage() {
         rating={r.rating}
         reviewText={r.reviewText}
         createdAt={r.createdAt}
+        initialUpvotes={r.upvotes}
+        initialDownvotes={r.downvotes}
+        tags={r.tags}
         initialUpvotes={r.upvotes || 0}
         initialDownvotes={r.downvotes || 0}
       />
@@ -104,7 +116,7 @@ export default function ReviewsPage() {
 
   if (loading) {
     return (
-      <main>
+      <main style={{ minHeight: '100vh' }}>
         <div style={{ height: '80px' }} />
         <div className="container py-4">
           <p>Loading...</p>
@@ -130,7 +142,7 @@ export default function ReviewsPage() {
 
   if (!data || !data.reviews || data.reviews.length === 0) {
     return (
-      <main>
+      <main style={{ minHeight: '100vh' }}>
         <div style={{ height: '80px' }} />
         <div className="container py-4">
           <h1 className="mb-3">Reviews</h1>
@@ -143,7 +155,7 @@ export default function ReviewsPage() {
   const { pagination } = data;
 
   return (
-    <main>
+    <main style={{ minHeight: '100vh' }}>
       <div style={{ height: '80px' }} />
       <div className="container py-4">
         <div className="d-flex justify-content-between align-items-center mb-3">
@@ -155,6 +167,7 @@ export default function ReviewsPage() {
               className="form-select form-select-sm"
               style={{ width: 'auto' }}
               value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as 'newest' | 'highest' | 'lowest' | 'mostHelpful' | 'leastHelpful')}
               onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
             >
               <option value="newest">Newest</option>
