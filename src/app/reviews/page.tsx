@@ -1,7 +1,7 @@
 'use client';
 
-import Link from 'next/link';
 import { useEffect, useState, useMemo } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import ReviewCard from '@/components/ReviewCard';
 
 interface Review {
@@ -29,12 +29,20 @@ interface PaginationData {
 }
 
 export default function ReviewsPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pageFromUrl = Number(searchParams.get('page')) || 1;
+  
   const [data, setData] = useState<PaginationData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(pageFromUrl);
   const [sortBy, setSortBy] = useState<'newest' | 'highest' | 'lowest' | 'mostHelpful' | 'leastHelpful'>('newest');
   const limit = 10;
+
+  useEffect(() => {
+    setPage(pageFromUrl);
+  }, [pageFromUrl]);
 
   useEffect(() => {
     const fetchReviews = async () => {
@@ -99,9 +107,13 @@ export default function ReviewsPage() {
     ));
   }, [sortedReviews]);
 
+  const handlePageChange = (newPage: number) => {
+    router.push(`/reviews?page=${newPage}`);
+  };
+
   if (loading) {
     return (
-      <main>
+      <main style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
         <div style={{ height: '80px' }} />
         <div className="container py-4">
           <p>Loading...</p>
@@ -112,7 +124,7 @@ export default function ReviewsPage() {
 
   if (error) {
     return (
-      <main>
+      <main style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
         <div style={{ height: '80px' }} />
         <div className="container py-4">
           <h1 className="mb-3">Error</h1>
@@ -127,7 +139,7 @@ export default function ReviewsPage() {
 
   if (!data || !data.reviews || data.reviews.length === 0) {
     return (
-      <main>
+      <main style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
         <div style={{ height: '80px' }} />
         <div className="container py-4">
           <h1 className="mb-3">Reviews</h1>
@@ -140,16 +152,16 @@ export default function ReviewsPage() {
   const { pagination } = data;
 
   return (
-    <main>
+    <main style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
       <div style={{ height: '80px' }} />
       <div className="container py-4">
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          <h1 className="mb-0">Reviews</h1>
+        <div className="d-flex justify-content-between align-items-center mb-4">
+          <h1 className="mb-0" style={{ fontSize: '2rem', fontWeight: 'bold' }}>Reviews</h1>
           <div className="d-flex align-items-center gap-2">
             <label htmlFor="sortSelect" className="mb-0 me-2">Sort by:</label>
             <select
               id="sortSelect"
-              className="form-select form-select-sm"
+              className="form-select form-select-sm shadow-sm"
               style={{ width: 'auto' }}
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
@@ -162,7 +174,7 @@ export default function ReviewsPage() {
             </select>
           </div>
         </div>
-        <div className="list-group">
+        <div className="list-group shadow-sm">
           {reviewCards}
         </div>
 
@@ -171,7 +183,7 @@ export default function ReviewsPage() {
             <li className={`page-item ${page === 1 ? 'disabled' : ''}`}>
               <button
                 className="page-link"
-                onClick={() => setPage(1)}
+                onClick={() => handlePageChange(1)}
                 disabled={page === 1}
               >
                 First
@@ -180,7 +192,7 @@ export default function ReviewsPage() {
             <li className={`page-item ${page === 1 ? 'disabled' : ''}`}>
               <button
                 className="page-link"
-                onClick={() => setPage(page - 1)}
+                onClick={() => handlePageChange(page - 1)}
                 disabled={page === 1}
               >
                 Previous
@@ -193,7 +205,7 @@ export default function ReviewsPage() {
                 <li key={pageNum} className={`page-item ${page === pageNum ? 'active' : ''}`}>
                   <button
                     className="page-link"
-                    onClick={() => setPage(pageNum)}
+                    onClick={() => handlePageChange(pageNum)}
                   >
                     {pageNum}
                   </button>
@@ -203,7 +215,7 @@ export default function ReviewsPage() {
             <li className={`page-item ${page === pagination.totalPages ? 'disabled' : ''}`}>
               <button
                 className="page-link"
-                onClick={() => setPage(page + 1)}
+                onClick={() => handlePageChange(page + 1)}
                 disabled={page === pagination.totalPages}
               >
                 Next
@@ -212,7 +224,7 @@ export default function ReviewsPage() {
             <li className={`page-item ${page === pagination.totalPages ? 'disabled' : ''}`}>
               <button
                 className="page-link"
-                onClick={() => setPage(pagination.totalPages)}
+                onClick={() => handlePageChange(pagination.totalPages)}
                 disabled={page === pagination.totalPages}
               >
                 Last
@@ -220,18 +232,7 @@ export default function ReviewsPage() {
             </li>
           </ul>
           <p className="text-center text-muted">
-            Page
-            {' '}
-            {pagination.page}
-            {' '}
-            of
-            {' '}
-            {pagination.totalPages}
-            {' '}
-            (
-            {pagination.total}
-            {' '}
-            total reviews)
+            Page {pagination.page} of {pagination.totalPages} ({pagination.total} total reviews)
           </p>
         </nav>
       </div>

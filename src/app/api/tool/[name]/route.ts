@@ -1,58 +1,64 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
+type Params = {
+  params: {
+    name: string;
+  };
+};
+
 export async function GET(
   request: NextRequest,
-  { params }: { params: { name: string } },
+  { params }: Params,
 ) {
   try {
     const toolName = decodeURIComponent(params.name);
+    const includeAll = request.nextUrl.searchParams.get('includeAll') === 'true';
+
+    // By default, only show approved reviews
+    const whereClause = includeAll
+      ? { tool: toolName }
+      : { tool: toolName, moderationStatus: 'APPROVED' as const };
 
     const reviews = await prisma.review.findMany({
-      where: {
-        tool: {
-          equals: toolName,
-          mode: 'insensitive',
-        },
-      },
-      include: {
+      where: whereClause,
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        rating: true,
+        school: true,
+        subject: true,
+        courseNumber: true,
+        reviewText: true,
+        tags: true,
+        createdAt: true,
+        userEmail: true,
+        moderationStatus: true,
         votes: {
           select: {
             voteType: true,
           },
         },
       },
-      orderBy: {
-        createdAt: 'desc',
-      },
     });
 
-    // Calculate vote counts for each review
-    const reviewsWithVotes = reviews.map((review) => {
-      const upvotes = review.votes.filter((v) => v.voteType === 'up').length;
-      const downvotes = review.votes.filter((v) => v.voteType === 'down').length;
-      const helpfulScore = upvotes - downvotes;
+    // Calculate vote counts
+    const reviewsWithVotes = reviews.map(review => {
+      const upvotes = review.votes.filter(v => v.voteType === 'up').length;
+      const downvotes = review.votes.filter(v => v.voteType === 'down').length;
+      const { votes, ...reviewData } = review;
       
       return {
-        id: review.id,
-        rating: review.rating,
-        school: review.school,
-        subject: review.subject,
-        courseNumber: review.courseNumber,
-        createdAt: review.createdAt,
-        reviewText: review.reviewText,
-        tags: review.tags,
-        userEmail: review.userEmail,
-        tool: review.tool,
+        ...reviewData,
         upvotes,
         downvotes,
-        helpfulScore,
+        helpfulScore: upvotes - downvotes,
       };
     });
 
     return NextResponse.json({ reviews: reviewsWithVotes });
-  } catch (error) {
-    console.error('Error fetching tool reviews:', error);
-    return NextResponse.json({ error: 'Failed to fetch reviews' }, { status: 500 });
+  } catch (err) {
+    console.error('Error fetching tool reviews:', err);
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }

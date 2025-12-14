@@ -69,20 +69,38 @@ export default function RateToolForm() {
       body: JSON.stringify(payload),
     })
       .then(async (res) => {
+        const body = await res.json();
+        
         if (!res.ok) {
-          const body = await res.json().catch(() => ({}));
-          throw new Error(body?.error || 'Failed to submit review');
+          // Check if it was rejected by moderation
+          if (body.moderationStatus === 'REJECTED') {
+            const categories = body.flaggedCategories?.join(', ') || 'inappropriate content';
+            alert(`❌ Review Rejected\n\nYour review was not accepted because it contains ${categories}.\n\nReason: ${body.reason}\n\nPlease revise your review and try again.`);
+          } else {
+            throw new Error(body?.error || 'Failed to submit review');
+          }
+          return null;
         }
-        return res.json();
+        
+        return body;
       })
-      .then(() => {
-        alert('Review submitted — thank you!');
+      .then((data) => {
+        if (!data) return; // Rejected, already showed alert
+        
+        if (data.moderationStatus === 'FLAGGED') {
+          alert('⚠️ Review Submitted for Review\n\nYour review has been submitted and is pending manual approval. It will appear once reviewed by our team.');
+        } else if (data.moderationStatus === 'APPROVED') {
+          alert('✅ Review Submitted Successfully!\n\nThank you for your review!');
+        } else {
+          alert('✅ Review Submitted!\n\nYour review has been posted.');
+        }
+        
         clearForm();
         window.location.href = '/reviews';
       })
       .catch((err) => {
         console.error(err);
-        alert('Failed to submit review. Please try again later.');
+        alert('❌ Failed to submit review. Please try again later.');
       });
   }
 

@@ -1,5 +1,6 @@
 'use client';
 
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { memo, useState } from 'react';
 import { Badge } from 'react-bootstrap';
@@ -19,7 +20,6 @@ interface ReviewCardProps {
   tags?: string[];
 }
 
-// Memoize the card component to prevent unnecessary re-renders
 const ReviewCard = memo(function ReviewCard({
   id,
   tool,
@@ -33,6 +33,9 @@ const ReviewCard = memo(function ReviewCard({
   initialDownvotes = 0,
   tags = [],
 }: ReviewCardProps) {
+  const searchParams = useSearchParams();
+  const currentPage = searchParams.get('page') || '1';
+  
   const classLabel = [subject, courseNumber].filter(Boolean).join(' ');
   const [upvotes, setUpvotes] = useState(initialUpvotes);
   const [downvotes, setDownvotes] = useState(initialDownvotes);
@@ -40,7 +43,7 @@ const ReviewCard = memo(function ReviewCard({
   const [isVoting, setIsVoting] = useState(false);
 
   const handleVote = async (voteType: 'up' | 'down', e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent Link navigation
+    e.preventDefault();
     if (isVoting) return;
 
     setIsVoting(true);
@@ -55,7 +58,6 @@ const ReviewCard = memo(function ReviewCard({
         const data = await response.json();
         setUpvotes(data.upvotes);
         setDownvotes(data.downvotes);
-        // Toggle off if same vote, otherwise set new vote
         setUserVote(userVote === voteType ? null : voteType);
       }
     } catch (error) {
@@ -66,7 +68,10 @@ const ReviewCard = memo(function ReviewCard({
   };
 
   return (
-    <Link href={`/reviews/${id}`} className="list-group-item list-group-item-action">
+    <Link 
+      href={`/reviews/${id}?from=${currentPage}`} 
+      className="list-group-item list-group-item-action"
+    >
       <div className="d-flex w-100 justify-content-between align-items-start" style={{ marginTop: '4px'}}>
         <div className="flex-grow-1">
           <h3 className="mb-0" style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { Badge } from 'react-bootstrap';
@@ -26,8 +26,10 @@ interface Review {
 export default function ReviewDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: session } = useSession();
   const id = Number(params.id);
+  const fromPage = searchParams.get('from') || '1';
 
   const [review, setReview] = useState<Review | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -40,19 +42,15 @@ export default function ReviewDetailPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch all reviews to get the one we need with vote counts
-        const reviewsResponse = await fetch('/api/reviews');
-        const reviewsData = await reviewsResponse.json();
+        const reviewResponse = await fetch(`/api/reviews/${id}`);
         
-        const foundReview = reviewsData.reviews.find((r: Review) => r.id === id);
-        
-        if (foundReview) {
-          setReview(foundReview);
-          setUpvotes(foundReview.upvotes || 0);
-          setDownvotes(foundReview.downvotes || 0);
+        if (reviewResponse.ok) {
+          const reviewData = await reviewResponse.json();
+          setReview(reviewData);
+          setUpvotes(reviewData.upvotes || 0);
+          setDownvotes(reviewData.downvotes || 0);
         }
 
-        // Check if user is admin
         if (session?.user?.email) {
           const userResponse = await fetch(`/api/user?email=${encodeURIComponent(session.user.email)}`);
           if (userResponse.ok) {
@@ -96,7 +94,7 @@ export default function ReviewDetailPage() {
 
   if (isLoading) {
     return (
-      <main>
+      <main style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
         <div style={{ height: '80px' }} />
         <div className="container py-4">
           <p>Loading...</p>
@@ -107,13 +105,13 @@ export default function ReviewDetailPage() {
 
   if (!review) {
     return (
-      <main style={{ minHeight: '100vh' }}>
+      <main style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
         <div style={{ height: '80px' }} />
         <div className="container py-4">
           <h1 className="mb-3">Review Not Found</h1>
           <p className="text-muted">This review does not exist.</p>
-          <Link href="/reviews" className="btn btn-sm btn-outline-primary">
-            Back to reviews
+          <Link href={`/reviews?page=${fromPage}`} className="btn btn-sm btn-outline-primary">
+            Back to Reviews
           </Link>
         </div>
       </main>
@@ -125,77 +123,69 @@ export default function ReviewDetailPage() {
   const canDelete = isOwner || isAdmin;
 
   return (
-    <main style={{ minHeight: '100vh' }}>
+    <main style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
       <div style={{ height: '80px' }} />
       <div className="container py-4">
-        <h1 className="mb-2">
-          {review.tool}
-          {' '}
-          —
-          {' '}
-          {review.school}
-        </h1>
-        {classLabel && (
-          <p className="mb-1">
-            <strong>Class:</strong>
-            {' '}
-            {classLabel}
-          </p>
-        )}
-        <div><ReviewStars rating={review.rating} /></div>
-        {review.tags && review.tags.length > 0 && (
-          <div className="d-flex flex-wrap mb-3" style={{ gap: '0.5rem' }}>
-            {review.tags.map((tag) => (
-              <Badge bg="secondary" key={tag}>
-                {tag}
-              </Badge>
-            ))}
-          </div>
-        )}
-        {review.userEmail && (
-          <p className="mb-1">
-            <strong>Posted by:</strong>
-            {' '}
-            {review.userEmail}
-          </p>
-        )}
-        <hr />
-        <div className="mb-3">{review.reviewText}</div>
-        <small className="text-muted">
-          Posted:
-          {' '}
-          {new Date(review.createdAt).toLocaleString()}
-        </small>
+        <div className="card p-4 shadow-sm" style={{ backgroundColor: 'white', borderRadius: '12px' }}>
+          <h1 className="mb-2">
+            {review.tool} — {review.school}
+          </h1>
+          {classLabel && (
+            <p className="mb-1">
+              <strong>Class:</strong> {classLabel}
+            </p>
+          )}
+          <div className="mb-2"><ReviewStars rating={review.rating} /></div>
+          {review.tags && review.tags.length > 0 && (
+            <div className="d-flex flex-wrap mb-3" style={{ gap: '0.5rem' }}>
+              {review.tags.map((tag) => (
+                <Badge bg="secondary" key={tag}>
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          )}
+          {review.userEmail && (
+            <p className="mb-1">
+              <strong>Posted by:</strong> {review.userEmail}
+            </p>
+          )}
+          <hr />
+          <div className="mb-3">{review.reviewText}</div>
+          <small className="text-muted">
+            Posted: {new Date(review.createdAt).toLocaleString()}
+          </small>
 
-        <hr className="mt-4 mb-3" />
-        
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          <h5 className="mb-0">Was this review helpful?</h5>
-          <div className="d-flex gap-3">
-            <button
-              onClick={() => handleVote('up')}
-              className="btn btn-link p-0 text-decoration-none"
-              style={{ opacity: userVote === 'up' ? 1 : 0.5, fontSize: '1.5rem' }}
-              disabled={isVoting}
-            >
-              👍 <span style={{ fontSize: '1rem' }}>{upvotes}</span>
-            </button>
-            <button
-              onClick={() => handleVote('down')}
-              className="btn btn-link p-0 text-decoration-none"
-              style={{ opacity: userVote === 'down' ? 1 : 0.5, fontSize: '1.5rem' }}
-              disabled={isVoting}
-            >
-              👎 <span style={{ fontSize: '1rem' }}>{downvotes}</span>
-            </button>
+          <hr className="mt-4 mb-3" />
+          
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <h5 className="mb-0">Was this review helpful?</h5>
+            <div className="d-flex gap-3">
+              <button
+                onClick={() => handleVote('up')}
+                className="btn btn-link p-0 text-decoration-none"
+                style={{ opacity: userVote === 'up' ? 1 : 0.5, fontSize: '1.5rem' }}
+                disabled={isVoting}
+              >
+                👍 <span style={{ fontSize: '1rem' }}>{upvotes}</span>
+              </button>
+              <button
+                onClick={() => handleVote('down')}
+                className="btn btn-link p-0 text-decoration-none"
+                style={{ opacity: userVote === 'down' ? 1 : 0.5, fontSize: '1.5rem' }}
+                disabled={isVoting}
+              >
+                👎 <span style={{ fontSize: '1rem' }}>{downvotes}</span>
+              </button>
+            </div>
           </div>
-        </div>
 
-        <div className="mt-3 d-flex gap-2">
-          <Link href="/reviews" className="btn btn-sm btn-outline-secondary">
-            Back to reviews
-          </Link>
-          {canDelete && <DeleteReviewButton reviewId={id} />}
+          <div className="mt-3 d-flex gap-2">
+            <Link href={`/reviews?page=${fromPage}`} className="btn btn-sm btn-outline-secondary">
+              ← Back to Reviews (Page {fromPage})
+            </Link>
+            {canDelete && <DeleteReviewButton reviewId={id} />}
+          </div>
         </div>
       </div>
     </main>

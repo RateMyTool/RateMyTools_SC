@@ -112,20 +112,66 @@ export async function POST(request: NextRequest) {
     });
 
     // Auto-moderate the review using OpenAI
-    // Using await to ensure moderation runs before response
     console.log('🚀 Starting moderation for review ID:', created.id);
     try {
       const moderationResult = await moderateReview(created.id, review);
       console.log('✅ Moderation complete:', moderationResult);
+
+      // Fetch the updated review to get moderation status
+      const updatedReview = await prisma.review.findUnique({
+        where: { id: created.id },
+        select: {
+          id: true,
+          moderationStatus: true,
+          moderationReason: true,
+          flaggedCategories: true,
+        },
+      });
+
+      if (updatedReview?.moderationStatus === 'REJECTED') {
+        return NextResponse.json({ 
+          success: false,
+          error: 'Review rejected by moderation',
+          moderationStatus: 'REJECTED',
+          reason: updatedReview.moderationReason || 'Content violated community guidelines',
+          flaggedCategories: updatedReview.flaggedCategories || [],
+        }, { status: 400 });
+      }
+
+      if (updatedReview?.moderationStatus === 'FLAGGED') {
+        return NextResponse.json({ 
+          success: true,
+          review: created,
+          moderationStatus: 'FLAGGED',
+          message: 'Review submitted and flagged for manual review. It will be visible once approved.',
+        }, { status: 201 });
+      }
+
+      return NextResponse.json({ 
+        success: true, 
+        review: created,
+        moderationStatus: updatedReview?.moderationStatus || 'APPROVED',
+        message: 'Review submitted successfully!',
+      }, { status: 201 });
+
     } catch (err) {
       console.error('❌ Moderation failed:', err);
+      // If moderation fails, still create the review but flag it
+      await prisma.review.update({
+        where: { id: created.id },
+        data: { 
+          moderationStatus: 'FLAGGED',
+          moderationReason: 'Moderation system error',
+        },
+      });
+      
+      return NextResponse.json({ 
+        success: true, 
+        review: created,
+        moderationStatus: 'FLAGGED',
+        message: 'Review submitted and pending manual review.',
+      }, { status: 201 });
     }
-
-    return NextResponse.json({ 
-      success: true, 
-      review: created,
-      message: 'Review submitted and moderated',
-    }, { status: 201 });
   } catch (err) {
     console.error('Error creating review', err);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
