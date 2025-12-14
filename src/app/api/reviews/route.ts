@@ -1,15 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import prisma from '@/lib/prisma';
+import { moderateReview } from '@/lib/moderation';
 
 export async function GET(request: NextRequest) {
   try {
     const page = Math.max(1, Number(request.nextUrl.searchParams.get('page') || '1'));
     const limit = Math.min(50, Math.max(1, Number(request.nextUrl.searchParams.get('limit') || '10')));
     const skip = (page - 1) * limit;
+    const includeAll = request.nextUrl.searchParams.get('includeAll') === 'true';
+
+    // By default, only show approved reviews (unless includeAll is true for admin)
+    const whereClause = includeAll ? {} : { moderationStatus: 'APPROVED' as const };
 
     const [reviews, total] = await Promise.all([
       prisma.review.findMany({
+        where: whereClause,
         skip,
         take: limit,
         orderBy: { createdAt: 'desc' },
@@ -23,6 +29,7 @@ export async function GET(request: NextRequest) {
           reviewText: true,
           tags: true,
           createdAt: true,
+          moderationStatus: true,
           votes: {
             select: {
               voteType: true,
@@ -30,7 +37,7 @@ export async function GET(request: NextRequest) {
           },
         },
       }),
-      prisma.review.count(),
+      prisma.review.count({ where: whereClause }),
     ]);
 
     // Calculate vote counts for each review
@@ -89,6 +96,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
+    // Create the review with PENDING moderation status
     const created = await prisma.review.create({
       data: {
         school,
@@ -98,11 +106,26 @@ export async function POST(request: NextRequest) {
         rating,
         tags: (tags && Array.isArray(tags) ? tags : []).map(String),
         reviewText: review,
-        userEmail: token.email, // Add this line
+        userEmail: token.email,
+        moderationStatus: 'PENDING',
       },
     });
 
-    return NextResponse.json({ success: true, review: created }, { status: 201 });
+    // Auto-moderate the review using OpenAI
+    // Using await to ensure moderation runs before response
+    console.log('🚀 Starting moderation for review ID:', created.id);
+    try {
+      const moderationResult = await moderateReview(created.id, review);
+      console.log('✅ Moderation complete:', moderationResult);
+    } catch (err) {
+      console.error('❌ Moderation failed:', err);
+    }
+
+    return NextResponse.json({ 
+      success: true, 
+      review: created,
+      message: 'Review submitted and moderated',
+    }, { status: 201 });
   } catch (err) {
     console.error('Error creating review', err);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });

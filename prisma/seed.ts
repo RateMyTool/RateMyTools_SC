@@ -33,8 +33,8 @@ async function main() {
  });
 
 
- // Create sample reviews
- await prisma.review.create({
+ // Create sample reviews with moderation status
+ const review1 = await prisma.review.create({
    data: {
      school: 'UH Manoa',
      tool: 'VS Code',
@@ -44,11 +44,26 @@ async function main() {
      tags: ['Great Documentation', 'Easy to Use'],
      reviewText: 'Amazing tool for software development. Very intuitive and powerful.',
      userEmail: 'john@foo.com',
+     moderationStatus: 'APPROVED',
+     moderationReason: null,
+     moderatedAt: new Date(),
+     flaggedCategories: [],
+   },
+ });
+
+ // Log the moderation for review1
+ await prisma.moderationLog.create({
+   data: {
+     reviewId: review1.id,
+     action: 'auto_approved',
+     reason: null,
+     flaggedCategories: [],
+     moderatorEmail: null,
    },
  });
 
 
- await prisma.review.create({
+ const review2 = await prisma.review.create({
    data: {
      school: 'UH Manoa',
      tool: 'GitHub',
@@ -58,11 +73,25 @@ async function main() {
      tags: ['Essential', 'Collaboration'],
      reviewText: 'Essential for version control and team collaboration.',
      userEmail: 'john@foo.com',
+     moderationStatus: 'APPROVED',
+     moderationReason: null,
+     moderatedAt: new Date(),
+     flaggedCategories: [],
+   },
+ });
+
+ await prisma.moderationLog.create({
+   data: {
+     reviewId: review2.id,
+     action: 'auto_approved',
+     reason: null,
+     flaggedCategories: [],
+     moderatorEmail: null,
    },
  });
 
 
- await prisma.review.create({
+ const review3 = await prisma.review.create({
    data: {
      school: 'UH Hilo',
      tool: 'Notion',
@@ -72,11 +101,46 @@ async function main() {
      tags: ['Versatile', 'Customizable'],
      reviewText: 'Great for organizing notes and tasks. Very customizable.',
      userEmail: 'admin@foo.com',
+     moderationStatus: 'APPROVED',
+     moderationReason: null,
+     moderatedAt: new Date(),
+     flaggedCategories: [],
+   },
+ });
+
+ await prisma.moderationLog.create({
+   data: {
+     reviewId: review3.id,
+     action: 'manual_approved',
+     reason: 'Manually verified by admin',
+     flaggedCategories: [],
+     moderatorEmail: 'admin@foo.com',
+   },
+ });
+
+ // Create a sample pending review for testing moderation
+ await prisma.review.create({
+   data: {
+     school: 'UH West Oahu',
+     tool: 'Slack',
+     subject: 'ICS',
+     courseNumber: '211',
+     rating: 4,
+     tags: ['Communication', 'Team Work'],
+     reviewText: 'Great for team communication during group projects.',
+     userEmail: 'john@foo.com',
+     moderationStatus: 'PENDING',
+     moderationReason: null,
+     moderatedAt: null,
+     flaggedCategories: [],
    },
  });
 
 
  console.log('Seeding completed successfully!');
+ console.log('- 2 users created (admin@foo.com, john@foo.com)');
+ console.log('- 4 reviews created (3 approved, 1 pending moderation)');
+ console.log('- 3 moderation logs created');
 }
 
 

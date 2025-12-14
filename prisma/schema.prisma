@@ -31,6 +31,12 @@ enum Condition {
   poor
 }
 
+enum ModerationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  FLAGGED
+}
 
 model Stuff {
   id        Int       @id @default(autoincrement())
@@ -42,17 +48,32 @@ model Stuff {
 
 
 model Review {
-  id           Int      @id @default(autoincrement())
-  school       String
-  tool         String
-  subject      String?
-  courseNumber String?
-  rating       Int
-  tags         String[]
-  reviewText   String   @map("review")
-  userEmail    String?
-  createdAt    DateTime @default(now())
-  votes        Vote[]
+  id               Int              @id @default(autoincrement())
+  school           String
+  tool             String
+  subject          String?
+  courseNumber     String?
+  rating           Int
+  tags             String[]
+  reviewText       String           @map("review")
+  userEmail        String?
+  createdAt        DateTime         @default(now())
+  votes            Vote[]
+  // Moderation fields
+  moderationStatus ModerationStatus @default(PENDING)
+  moderationReason String?
+  moderatedAt      DateTime?
+  flaggedCategories String[]        // Categories flagged by OpenAI (hate, violence, etc.)
+}
+
+model ModerationLog {
+  id              Int      @id @default(autoincrement())
+  reviewId        Int
+  action          String   // "auto_approved", "auto_rejected", "manual_approved", "manual_rejected"
+  reason          String?
+  flaggedCategories String[]
+  moderatorEmail  String?  // null for auto-moderation
+  createdAt       DateTime @default(now())
 }
 
 model Vote {
