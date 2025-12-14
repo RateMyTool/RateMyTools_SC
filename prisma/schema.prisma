@@ -1,37 +1,41 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
+
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
-  directUrl = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_UNPOOLED")
 }
+
 
 enum Role {
   USER
   ADMIN
 }
 
+
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  password      String
-  role          Role      @default(USER)
-  emailVerified DateTime?
-  image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id       Int      @id @default(autoincrement())
+  email    String   @unique
+  password String
+  role     Role     @default(USER)
 }
+
 
 enum Condition {
   excellent
   good
   fair
   poor
+}
+
+enum ModerationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  FLAGGED
 }
 
 model Stuff {
@@ -42,14 +46,44 @@ model Stuff {
   owner     String
 }
 
+
 model Review {
-  id           Int      @id @default(autoincrement())
-  school       String
-  tool         String
-  subject      String?
-  courseNumber String?
-  rating       Int
-  tags         String[]
-  reviewText   String   @map("review")
-  createdAt    DateTime @default(now())
+  id               Int              @id @default(autoincrement())
+  school           String
+  tool             String
+  subject          String?
+  courseNumber     String?
+  rating           Int
+  tags             String[]
+  reviewText       String           @map("review")
+  userEmail        String?
+  createdAt        DateTime         @default(now())
+  votes            Vote[]
+  // Moderation fields
+  moderationStatus ModerationStatus @default(PENDING)
+  moderationReason String?
+  moderatedAt      DateTime?
+  flaggedCategories String[]        // Categories flagged by OpenAI (hate, violence, etc.)
 }
+
+model ModerationLog {
+  id              Int      @id @default(autoincrement())
+  reviewId        Int
+  action          String   // "auto_approved", "auto_rejected", "manual_approved", "manual_rejected"
+  reason          String?
+  flaggedCategories String[]
+  moderatorEmail  String?  // null for auto-moderation
+  createdAt       DateTime @default(now())
+}
+
+model Vote {
+  id        Int      @id @default(autoincrement())
+  reviewId  Int
+  review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  userEmail String
+  voteType  String   // "up" or "down"
+  createdAt DateTime @default(now())
+
+  @@unique([reviewId, userEmail])
+}
+
