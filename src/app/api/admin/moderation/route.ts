@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import prisma from '@/lib/prisma';
-import { manualModerateReview, getModerationHistory } from '@/lib/moderation';
+import { manualModeration, getModerationHistory } from '@/lib/moderation';
 
 // GET - Get pending reviews or moderation history
 export async function GET(request: NextRequest) {
@@ -11,49 +11,55 @@ export async function GET(request: NextRequest) {
       secret: process.env.NEXTAUTH_SECRET,
     });
 
-    // Role is stored in randomKey in this app's auth setup
-    if (!token || token.randomKey !== 'ADMIN') {
+    if (!token || !token.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const reviewId = request.nextUrl.searchParams.get('reviewId');
-    const status = request.nextUrl.searchParams.get('status') || 'PENDING';
+    // Check if user is admin
+    const user = await prisma.user.findUnique({
+      where: { email: token.email },
+    });
 
-    // If reviewId is provided, get moderation history for that review
+    if (user?.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Forbidden - Admin only' }, { status: 403 });
+    }
+
+    const reviewId = request.nextUrl.searchParams.get('reviewId');
+
+    // If reviewId provided, get moderation history for that review
     if (reviewId) {
-      const history = await getModerationHistory(parseInt(reviewId, 10));
+      const history = await getModerationHistory(Number(reviewId));
       return NextResponse.json({ history });
     }
 
-    // Otherwise, get reviews by status
-    const reviews = await prisma.review.findMany({
-      where: { moderationStatus: status as any },
-      orderBy: { createdAt: 'asc' },
+    // Otherwise get all flagged reviews
+    const flaggedReviews = await prisma.review.findMany({
+      where: {
+        moderationStatus: 'FLAGGED',
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
       select: {
         id: true,
         tool: true,
         school: true,
-        subject: true,
-        courseNumber: true,
-        rating: true,
         reviewText: true,
-        tags: true,
-        userEmail: true,
-        createdAt: true,
-        moderationStatus: true,
         moderationReason: true,
         flaggedCategories: true,
+        createdAt: true,
+        userEmail: true,
       },
     });
 
-    return NextResponse.json({ reviews });
+    return NextResponse.json({ flaggedReviews });
   } catch (err) {
     console.error('Error fetching moderation data:', err);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }
 
-// POST - Manually moderate a review
+// POST - Manually approve or reject a review
 export async function POST(request: NextRequest) {
   try {
     const token = await getToken({
@@ -61,31 +67,36 @@ export async function POST(request: NextRequest) {
       secret: process.env.NEXTAUTH_SECRET,
     });
 
-    // Role is stored in randomKey in this app's auth setup
-    if (!token || token.randomKey !== 'ADMIN') {
+    if (!token || !token.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await request.json();
-    const { reviewId, approved, reason } = body;
+    // Check if user is admin
+    const user = await prisma.user.findUnique({
+      where: { email: token.email },
+    });
 
-    if (typeof reviewId !== 'number' || typeof approved !== 'boolean') {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    if (user?.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Forbidden - Admin only' }, { status: 403 });
     }
 
-    await manualModerateReview(
-      reviewId,
-      approved,
-      reason || null,
-      token.email as string,
+    const body = await request.json();
+    const { reviewId, action, reason } = body;
+
+    if (!reviewId || !action || !['approve', 'reject'].includes(action)) {
+      return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
+    }
+
+    const result = await manualModeration(
+      Number(reviewId),
+      action as 'approve' | 'reject',
+      token.email,
+      reason,
     );
 
-    return NextResponse.json({ 
-      success: true, 
-      message: `Review ${approved ? 'approved' : 'rejected'} successfully`,
-    });
+    return NextResponse.json({ success: true, ...result });
   } catch (err) {
-    console.error('Error moderating review:', err);
+    console.error('Error in manual moderation:', err);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }
