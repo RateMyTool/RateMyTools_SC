@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const includeAll = request.nextUrl.searchParams.get('includeAll') === 'true';
     
-    // By default, only show approved reviews (unless includeAll is true for admin)
     const whereClause = includeAll ? {} : { moderationStatus: 'APPROVED' as const };
 
     const reviews = await prisma.review.findMany({
@@ -18,7 +19,6 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // Group by tool name
     const toolsMap = new Map<string, {
       name: string;
       ratings: number[];
@@ -44,7 +44,6 @@ export async function GET(request: NextRequest) {
       review.tags.forEach(tag => tool.tags.add(tag));
     });
 
-    // Convert to array with calculated values
     const tools = Array.from(toolsMap.values()).map(tool => {
       const avgRating = tool.ratings.reduce((sum, r) => sum + r, 0) / tool.ratings.length;
       const uniqueTags = Array.from(tool.tags).slice(0, 5);
@@ -59,7 +58,6 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    // Sort by rating descending
     tools.sort((a, b) => b.rating - a.rating);
 
     return NextResponse.json({

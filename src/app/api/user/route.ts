@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import prisma from '@/lib/prisma';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const token = await getToken({
@@ -13,11 +15,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get email from query params (for checking other users as admin)
     const email = request.nextUrl.searchParams.get('email');
     const targetEmail = email || token.email;
 
-    // Only allow checking other users if requester is admin
     if (email && email !== token.email) {
       const requester = await prisma.user.findUnique({
         where: { email: token.email },

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import ReviewCard from '@/components/ReviewCard';
 
@@ -28,7 +28,7 @@ interface PaginationData {
   };
 }
 
-export default function ReviewsPage() {
+function ReviewsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pageFromUrl = Number(searchParams.get('page')) || 1;
@@ -237,5 +237,13 @@ export default function ReviewsPage() {
         </nav>
       </div>
     </main>
+  );
+}
+
+export default function ReviewsPage() {
+  return (
+    <Suspense fallback={<div style={{ minHeight: '100vh', backgroundColor: '#f9fafb', paddingTop: '80px' }}><div className="container py-4">Loading...</div></div>}>
+      <ReviewsContent />
+    </Suspense>
   );
 }
