@@ -38,7 +38,7 @@ export async function GET(
     // Calculate vote counts
     const upvotes = review.votes.filter(v => v.voteType === 'up').length;
     const downvotes = review.votes.filter(v => v.voteType === 'down').length;
-    const { votes: _votes, ...reviewData } = review;
+    const { votes, ...reviewData } = review; // eslint-disable-line @typescript-eslint/no-unused-vars
 
     return NextResponse.json({
       ...reviewData,
