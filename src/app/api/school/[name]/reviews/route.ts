@@ -53,7 +53,7 @@ export async function GET(
     const reviewsWithVotes = reviews.map(review => {
       const upvotes = review.votes.filter(v => v.voteType === 'up').length;
       const downvotes = review.votes.filter(v => v.voteType === 'down').length;
-      const { votes, ...reviewData } = review;
+      const { votes: _votes, ...reviewData } = review;
       return {
         ...reviewData,
         upvotes,
